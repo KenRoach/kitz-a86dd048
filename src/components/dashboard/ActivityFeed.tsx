@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { DollarSign, MessageCircle, ShoppingBag, User, Store } from "lucide-react";
 
 interface Activity {
   id: string;
@@ -11,32 +12,45 @@ interface ActivityFeedProps {
   activities: Activity[];
 }
 
-const dotColors: Record<Activity["type"], string> = {
-  payment: "bg-success",
-  message: "bg-primary",
-  order: "bg-attention",
-  customer: "bg-muted-foreground",
-  storefront: "bg-primary",
+const iconMap: Record<Activity["type"], typeof DollarSign> = {
+  payment: DollarSign,
+  message: MessageCircle,
+  order: ShoppingBag,
+  customer: User,
+  storefront: Store,
+};
+
+const colorMap: Record<Activity["type"], string> = {
+  payment: "bg-success/10 text-success",
+  message: "bg-primary/10 text-primary",
+  order: "bg-attention/10 text-attention",
+  customer: "bg-muted text-muted-foreground",
+  storefront: "bg-primary/10 text-primary",
 };
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
-    <div className="bg-card rounded-2xl border border-border p-6 animate-fade-in">
-      <h3 className="text-lg font-medium text-foreground mb-4">Today</h3>
-      <div className="space-y-4">
-        {activities.map((activity, index) => (
-          <div
-            key={activity.id}
-            className="flex items-start gap-3 animate-slide-in"
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <div className={cn("w-2 h-2 rounded-full mt-2", dotColors[activity.type])} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground">{activity.message}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{activity.time}</p>
+    <div className="neu-card-flat p-6 animate-fade-in">
+      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Recent Activity</h3>
+      <div className="space-y-3">
+        {activities.map((activity, index) => {
+          const Icon = iconMap[activity.type];
+          return (
+            <div
+              key={activity.id}
+              className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 animate-slide-in"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", colorMap[activity.type])}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground font-medium truncate">{activity.message}</p>
+                <p className="text-xs text-muted-foreground">{activity.time}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
