@@ -115,32 +115,32 @@ export function StorefrontCard({
   return (
     <>
       <div
-        className="bg-card rounded-2xl border border-border overflow-hidden card-hover animate-fade-in"
+        className="bg-card rounded-xl md:rounded-2xl border border-border overflow-hidden card-hover animate-fade-in"
         style={{ animationDelay: `${delay}ms` }}
       >
         <div className="flex">
           {/* Image or placeholder */}
-          <div className="w-20 h-20 flex-shrink-0 bg-muted flex items-center justify-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-muted flex items-center justify-center">
             {imageUrl ? (
               <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
             ) : (
-              <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
+              <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30" />
             )}
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-3 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h4 className="font-semibold text-foreground truncate">{title}</h4>
+          <div className="flex-1 p-2.5 sm:p-3 min-w-0">
+            <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+              <div className="min-w-0 flex-1">
+                <h4 className="font-semibold text-foreground truncate text-sm sm:text-base">{title}</h4>
                 {customerName && (
-                  <p className="text-xs text-muted-foreground truncate">For: {customerName}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">For: {customerName}</p>
                 )}
                 {buyerName && status === "sent" && (
-                  <p className="text-xs text-primary truncate">Ordered by: {buyerName}</p>
+                  <p className="text-[10px] sm:text-xs text-primary truncate">Ordered: {buyerName}</p>
                 )}
                 {quantity > 1 && (
-                  <p className="text-xs text-muted-foreground">Qty: {quantity}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Qty: {quantity}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
@@ -197,41 +197,42 @@ export function StorefrontCard({
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-lg font-bold text-foreground">{price}</span>
+            <div className="flex items-center justify-between mt-1.5 sm:mt-2">
+              <span className="text-base sm:text-lg font-bold text-foreground">{price}</span>
               {status === "draft" && (
-                <button onClick={onSend} className="suggestion-pill text-xs py-1.5 px-3">
+                <button onClick={onSend} className="suggestion-pill text-[10px] sm:text-xs py-1 px-2 sm:py-1.5 sm:px-3">
                   <Send className="w-3 h-3" />
-                  Send now
+                  <span className="hidden sm:inline">Send now</span>
+                  <span className="sm:hidden">Send</span>
                 </button>
               )}
               {status === "sent" && link && (
                 <div className="flex gap-1">
                   <button 
                     onClick={handleWhatsAppShare} 
-                    className="p-2 rounded-lg bg-success/10 hover:bg-success/20 transition-colors" 
+                    className="p-1.5 sm:p-2 rounded-lg bg-success/10 hover:bg-success/20 transition-colors" 
                     title="WhatsApp"
                   >
-                    <MessageCircle className="w-4 h-4 text-success" />
+                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
                   </button>
                   <button 
                     onClick={handleInstagramShare} 
-                    className="p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 transition-colors" 
+                    className="p-1.5 sm:p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 transition-colors" 
                     title="Instagram"
                   >
-                    <Instagram className="w-4 h-4 text-pink-500" />
+                    <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-500" />
                   </button>
                   <button 
                     onClick={handleCopyLink} 
-                    className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" 
+                    className="p-1.5 sm:p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors" 
                     title="Copy link"
                   >
-                    <Copy className="w-4 h-4 text-muted-foreground" />
+                    <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   </button>
                 </div>
               )}
               {status === "paid" && (
-                <span className="text-xs text-success font-semibold bg-success/10 px-2 py-1 rounded-full">Completed</span>
+                <span className="text-[10px] sm:text-xs text-success font-semibold bg-success/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full">Completed</span>
               )}
             </div>
           </div>

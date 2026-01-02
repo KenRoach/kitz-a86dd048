@@ -64,11 +64,11 @@ export default function OrderHistory() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-semibold text-foreground">Order History</h1>
-          <p className="text-muted-foreground mt-1">Your business memory — auto-updated from orders.</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">Order History</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1">Your business memory — auto-updated from orders.</p>
         </div>
 
         {/* Search */}
