@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { TrendingUp, TrendingDown, Plus, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Storefront {
   id: string;
@@ -39,7 +41,6 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchData = async () => {
-    // Fetch storefronts
     const { data: sfData } = await supabase
       .from("storefronts")
       .select("*")
@@ -49,7 +50,6 @@ export default function Dashboard() {
       setStorefronts(sfData);
     }
 
-    // Fetch activities
     const { data: actData } = await supabase
       .from("activity_log")
       .select("*")
@@ -73,12 +73,10 @@ export default function Dashboard() {
     return "Good evening";
   };
 
-  // Calculate metrics from real data
   const paidStorefronts = storefronts.filter(s => s.status === "paid");
   const draftStorefronts = storefronts.filter(s => s.status === "draft");
   const sentStorefronts = storefronts.filter(s => s.status === "sent");
 
-  // Today's earnings from paid storefronts
   const today = new Date().toDateString();
   const todaysPaid = paidStorefronts.filter(
     s => new Date(s.created_at).toDateString() === today
@@ -91,18 +89,28 @@ export default function Dashboard() {
   }));
   const totalToday = todaysEarnings.reduce((sum, e) => sum + e.amount, 0);
 
-  // Calculate momentum (0-100)
+  // Total balance (all time paid)
+  const totalBalance = paidStorefronts.reduce((sum, s) => sum + s.price, 0);
+  
+  // Calculate change from yesterday
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+  const yesterdaysPaid = paidStorefronts.filter(
+    s => new Date(s.created_at).toDateString() === yesterdayStr
+  );
+  const yesterdaysTotal = yesterdaysPaid.reduce((sum, s) => sum + s.price, 0);
+  const changePercent = yesterdaysTotal > 0 
+    ? ((totalToday - yesterdaysTotal) / yesterdaysTotal * 100).toFixed(1)
+    : totalToday > 0 ? "+100" : "0";
+
   const calculateMomentum = () => {
-    let score = 50; // Base score
+    let score = 50;
     if (storefronts.length === 0) return 50;
     
-    // Bonus for paid storefronts
     score += Math.min(paidStorefronts.length * 5, 20);
-    // Bonus for sent storefronts (active links)
     score += Math.min(sentStorefronts.length * 3, 15);
-    // Penalty for drafts (unfinished work)
     score -= Math.min(draftStorefronts.length * 5, 15);
-    // Bonus for activity today
     const todayActivities = activities.filter(
       a => new Date(a.created_at).toDateString() === today
     ).length;
@@ -111,7 +119,6 @@ export default function Dashboard() {
     return Math.max(0, Math.min(100, score));
   };
 
-  // Generate attention items from real data
   const getAttentionItems = () => {
     const items: Array<{
       id: string;
@@ -122,7 +129,6 @@ export default function Dashboard() {
       onAction: () => void;
     }> = [];
 
-    // Draft storefronts need to be sent
     draftStorefronts.slice(0, 1).forEach(sf => {
       items.push({
         id: `draft-${sf.id}`,
@@ -138,7 +144,6 @@ export default function Dashboard() {
       });
     });
 
-    // Sent storefronts waiting for payment
     sentStorefronts.slice(0, 2 - items.length).forEach(sf => {
       items.push({
         id: `sent-${sf.id}`,
@@ -152,9 +157,8 @@ export default function Dashboard() {
       });
     });
 
-    // If nothing needs attention
     if (items.length === 0 && storefronts.length > 0) {
-      return null; // Show calm state
+      return null;
     }
 
     return items.slice(0, 3);
@@ -162,7 +166,6 @@ export default function Dashboard() {
 
   const attentionItems = getAttentionItems();
 
-  // Format activities for display
   const formattedActivities = activities.slice(0, 5).map(a => ({
     id: a.id,
     message: a.message,
@@ -176,34 +179,91 @@ export default function Dashboard() {
     const diff = now.getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins} min ago`;
+    if (mins < 60) return `${mins}m ago`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return `${Math.floor(hours / 24)} day${hours >= 48 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   }
+
+  const isPositiveChange = parseFloat(changePercent) >= 0;
 
   return (
     <AppLayout>
       <div className="space-y-8">
-        {/* 1. Greeting and Context */}
+        {/* Hero Balance Section */}
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-semibold text-foreground">
-            {getGreeting()}{profile?.business_name ? `, ${profile.business_name.split(" ")[0]}` : ""}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {attentionItems === null 
-              ? "All caught up. Business is calm."
-              : "Here's what needs your attention today."}
-          </p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">
+                {getGreeting()}
+              </p>
+              <h1 className="text-xl font-semibold text-foreground mt-1">
+                {profile?.business_name || "Dashboard"}
+              </h1>
+            </div>
+            <Button onClick={() => navigate("/storefronts")} className="gap-2">
+              <Plus className="w-4 h-4" />
+              New
+            </Button>
+          </div>
+
+          {/* Main Balance Card */}
+          <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-3xl p-8 text-primary-foreground shadow-glow animate-glow-pulse">
+            <p className="text-primary-foreground/70 text-sm font-medium mb-2">Total Balance</p>
+            <div className="flex items-end gap-4 mb-4">
+              <span className="text-5xl font-bold tracking-tight">
+                ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {isPositiveChange ? (
+                <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="text-sm font-medium">+{changePercent}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
+                  <TrendingDown className="w-4 h-4" />
+                  <span className="text-sm font-medium">{changePercent}%</span>
+                </div>
+              )}
+              <span className="text-primary-foreground/70 text-sm">vs yesterday</span>
+            </div>
+          </div>
         </div>
 
-        {/* 2. Needs Attention — max 3 items */}
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="neu-card-flat p-5">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">Today</p>
+            <p className="text-2xl font-bold text-foreground">${totalToday.toFixed(2)}</p>
+            <p className="text-xs text-success mt-1">{todaysPaid.length} orders</p>
+          </div>
+          <div className="neu-card-flat p-5">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">Pending</p>
+            <p className="text-2xl font-bold text-foreground">{sentStorefronts.length}</p>
+            <p className="text-xs text-attention mt-1">awaiting payment</p>
+          </div>
+          <div className="neu-card-flat p-5">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">Drafts</p>
+            <p className="text-2xl font-bold text-foreground">{draftStorefronts.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">to complete</p>
+          </div>
+          <div className="neu-card-flat p-5">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">Completed</p>
+            <p className="text-2xl font-bold text-foreground">{paidStorefronts.length}</p>
+            <p className="text-xs text-success mt-1">all time</p>
+          </div>
+        </div>
+
+        {/* Needs Attention */}
         {attentionItems && attentionItems.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Needs attention
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">Needs Attention</h2>
+              <span className="text-xs text-muted-foreground">{attentionItems.length} items</span>
+            </div>
+            <div className="space-y-3">
               {attentionItems.map((item, index) => (
                 <AttentionCard
                   key={item.id}
@@ -216,32 +276,26 @@ export default function Dashboard() {
           </section>
         )}
 
-        {/* Calm state when nothing needs attention */}
+        {/* Calm state */}
         {attentionItems === null && (
-          <div className="bg-success/5 border border-success/20 rounded-2xl p-8 text-center animate-fade-in">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+          <div className="neu-card-flat p-8 text-center animate-fade-in">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-success/10 flex items-center justify-center">
               <span className="text-2xl">✓</span>
             </div>
-            <p className="text-foreground font-medium">Everything is on track</p>
+            <p className="text-foreground font-semibold">All caught up</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Create a new storefront when you are ready
+              Business is running smoothly
             </p>
-            <button
-              onClick={() => navigate("/storefronts")}
-              className="suggestion-pill mt-4"
-            >
-              New storefront
-            </button>
           </div>
         )}
 
-        {/* 3. Momentum + 4. Earnings (Today) — side by side */}
+        {/* Momentum + Earnings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MomentumScore score={calculateMomentum()} />
           <EarningsToday earnings={todaysEarnings} total={totalToday} />
         </div>
 
-        {/* 5. Activity Feed */}
+        {/* Activity Feed */}
         {formattedActivities.length > 0 && (
           <section>
             <ActivityFeed activities={formattedActivities} />
@@ -250,17 +304,18 @@ export default function Dashboard() {
 
         {/* Empty state for new users */}
         {!loading && storefronts.length === 0 && (
-          <div className="bg-accent/30 rounded-2xl p-8 text-center animate-fade-in">
-            <h3 className="text-lg font-medium text-foreground mb-2">Get started</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first storefront to start selling
+          <div className="neu-card-flat p-10 text-center animate-fade-in">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <ArrowUpRight className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">Start selling</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              Create your first storefront and share it with customers to get paid
             </p>
-            <button
-              onClick={() => navigate("/storefronts")}
-              className="suggestion-pill"
-            >
+            <Button onClick={() => navigate("/storefronts")} size="lg">
+              <Plus className="w-4 h-4 mr-2" />
               Create storefront
-            </button>
+            </Button>
           </div>
         )}
       </div>

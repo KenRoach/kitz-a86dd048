@@ -6,48 +6,63 @@ interface MomentumScoreProps {
 
 export function MomentumScore({ score }: MomentumScoreProps) {
   const getColor = () => {
-    if (score >= 70) return "text-momentum-high";
-    if (score >= 40) return "text-momentum-mid";
-    return "text-momentum-low";
+    if (score >= 70) return "text-success";
+    if (score >= 40) return "text-attention";
+    return "text-destructive";
   };
 
   const getStrokeColor = () => {
-    if (score >= 70) return "stroke-momentum-high";
-    if (score >= 40) return "stroke-momentum-mid";
-    return "stroke-momentum-low";
+    if (score >= 70) return "stroke-success";
+    if (score >= 40) return "stroke-attention";
+    return "stroke-destructive";
+  };
+
+  const getBgColor = () => {
+    if (score >= 70) return "bg-success/10";
+    if (score >= 40) return "bg-attention/10";
+    return "bg-destructive/10";
   };
 
   const getMessage = () => {
-    if (score >= 80) return "Excellent momentum";
+    if (score >= 80) return "Excellent";
     if (score >= 60) return "Good progress";
-    if (score >= 40) return "Building momentum";
-    return "Needs attention";
+    if (score >= 40) return "Building up";
+    return "Needs focus";
   };
 
-  const circumference = 2 * Math.PI * 45;
+  const circumference = 2 * Math.PI * 42;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-6 animate-fade-in">
+    <div className="neu-card-flat p-6 animate-fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Momentum</h3>
+        <span className={cn("text-xs font-medium px-3 py-1 rounded-full", getBgColor(), getColor())}>
+          {getMessage()}
+        </span>
+      </div>
+      
       <div className="flex items-center gap-6">
-        <div className="relative w-28 h-28">
-          <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+        <div className="relative w-24 h-24">
+          <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+            {/* Background circle */}
             <circle
               cx="50"
               cy="50"
-              r="45"
+              r="42"
               fill="none"
-              strokeWidth="6"
+              strokeWidth="8"
               className="stroke-muted"
             />
+            {/* Progress circle */}
             <circle
               cx="50"
               cy="50"
-              r="45"
+              r="42"
               fill="none"
-              strokeWidth="6"
+              strokeWidth="8"
               strokeLinecap="round"
-              className={cn("transition-all duration-700", getStrokeColor())}
+              className={cn("transition-all duration-1000 ease-out", getStrokeColor())}
               style={{
                 strokeDasharray: circumference,
                 strokeDashoffset: strokeDashoffset,
@@ -55,14 +70,28 @@ export function MomentumScore({ score }: MomentumScoreProps) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={cn("text-3xl font-semibold", getColor())}>
+            <span className={cn("text-3xl font-bold", getColor())}>
               {score}
             </span>
           </div>
         </div>
-        <div>
-          <h3 className="text-lg font-medium text-foreground">Momentum</h3>
-          <p className="text-sm text-muted-foreground mt-1">{getMessage()}</p>
+        
+        <div className="flex-1 space-y-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Low</span>
+            <span className="text-muted-foreground">High</span>
+          </div>
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div 
+              className={cn("h-full rounded-full transition-all duration-1000", 
+                score >= 70 ? "bg-success" : score >= 40 ? "bg-attention" : "bg-destructive"
+              )}
+              style={{ width: `${score}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Based on activity, conversions & engagement
+          </p>
         </div>
       </div>
     </div>
