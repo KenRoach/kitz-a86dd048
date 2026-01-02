@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Store, label: "Storefronts", path: "/storefronts" },
-  { icon: Users, label: "CRM", path: "/crm" },
+  { icon: History, label: "Order History", path: "/order-history" },
   { icon: Settings, label: "Admin", path: "/admin" },
 ];
 

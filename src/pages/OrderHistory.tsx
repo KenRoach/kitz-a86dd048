@@ -19,7 +19,7 @@ interface Customer {
   created_at: string;
 }
 
-export default function CRM() {
+export default function OrderHistory() {
   const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function CRM() {
       <div className="space-y-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-semibold text-foreground">Customers</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Order History</h1>
           <p className="text-muted-foreground mt-1">Your business memory — auto-updated from orders.</p>
         </div>
 
