@@ -9,6 +9,7 @@ import Storefronts from "./pages/Storefronts";
 import OrderHistory from "./pages/OrderHistory";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import PublicStorefront from "./pages/PublicStorefront";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ function AppRoutes() {
       <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
       <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+      <Route path="/s/:slug" element={<PublicStorefront />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

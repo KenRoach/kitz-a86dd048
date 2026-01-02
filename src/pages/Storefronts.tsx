@@ -62,7 +62,7 @@ export default function Storefronts() {
     fetchStorefronts();
   }, [user]);
 
-  const getShareableLink = (slug: string) => `https://kitz.io/${slug}`;
+  const getShareableLink = (slug: string) => `https://kitz.io/s/${slug}`;
 
   const handleDelete = async (id: string) => {
     await supabase.from("storefronts").delete().eq("id", id);
