@@ -22,17 +22,10 @@ export function Sidebar() {
     <aside className="w-64 bg-card p-5 flex flex-col shadow-lg">
       {/* Logo area */}
       <div className="mb-8 px-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-glow">
-            <span className="text-primary-foreground font-bold text-lg">K</span>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">
-              kitz
-            </h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Business OS</p>
-          </div>
-        </div>
+        <h1 className="text-xl font-bold text-foreground tracking-tight">
+          kitz
+        </h1>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Business OS</p>
       </div>
 
       <nav className="flex-1 space-y-2">
