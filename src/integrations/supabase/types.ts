@@ -131,6 +131,7 @@ export type Database = {
           image_url: string | null
           price: number
           quantity: number | null
+          seller_phone: string | null
           slug: string
           status: string
           title: string
@@ -148,6 +149,7 @@ export type Database = {
           image_url?: string | null
           price: number
           quantity?: number | null
+          seller_phone?: string | null
           slug: string
           status?: string
           title: string
@@ -165,6 +167,7 @@ export type Database = {
           image_url?: string | null
           price?: number
           quantity?: number | null
+          seller_phone?: string | null
           slug?: string
           status?: string
           title?: string

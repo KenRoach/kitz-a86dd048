@@ -15,6 +15,7 @@ interface Storefront {
   image_url: string | null;
   customer_name: string | null;
   fulfillment_note: string | null;
+  seller_phone: string | null;
 }
 
 export default function PublicStorefront() {
@@ -33,7 +34,7 @@ export default function PublicStorefront() {
 
       const { data, error } = await supabase
         .from("storefronts")
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -50,7 +51,8 @@ export default function PublicStorefront() {
 
   const handleWhatsAppContact = () => {
     const message = `Hi! I'd like to pay for: ${storefront?.title} ($${storefront?.price.toFixed(2)})`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+    const phone = storefront?.seller_phone?.replace(/[^0-9+]/g, "") || "";
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   if (loading) {
