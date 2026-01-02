@@ -49,9 +49,11 @@ export type Database = {
       }
       storefronts: {
         Row: {
+          comment: string | null
           created_at: string
           description: string | null
           id: string
+          image_url: string | null
           price: number
           slug: string
           status: string
@@ -60,9 +62,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          comment?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           price: number
           slug: string
           status?: string
@@ -71,9 +75,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          comment?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           price?: number
           slug?: string
           status?: string
