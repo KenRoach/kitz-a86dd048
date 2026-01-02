@@ -91,9 +91,14 @@ export type Database = {
           address: string | null
           business_name: string
           business_type: string | null
+          city: string | null
+          country: string | null
           created_at: string
           id: string
+          logo_url: string | null
           phone: string | null
+          photo_url: string | null
+          ruc: string | null
           updated_at: string
           user_id: string
         }
@@ -101,9 +106,14 @@ export type Database = {
           address?: string | null
           business_name: string
           business_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
+          logo_url?: string | null
           phone?: string | null
+          photo_url?: string | null
+          ruc?: string | null
           updated_at?: string
           user_id: string
         }
@@ -111,9 +121,14 @@ export type Database = {
           address?: string | null
           business_name?: string
           business_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
+          logo_url?: string | null
           phone?: string | null
+          photo_url?: string | null
+          ruc?: string | null
           updated_at?: string
           user_id?: string
         }
