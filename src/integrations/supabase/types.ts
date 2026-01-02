@@ -95,12 +95,20 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
+          payment_cards: boolean | null
+          payment_cash: boolean | null
+          payment_pluxee: boolean | null
+          payment_yappy: boolean | null
           phone: string | null
           photo_url: string | null
           ruc: string | null
+          storefront_image_url: string | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           address?: string | null
@@ -110,12 +118,20 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
           phone?: string | null
           photo_url?: string | null
           ruc?: string | null
+          storefront_image_url?: string | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
           address?: string | null
@@ -125,12 +141,20 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
           phone?: string | null
           photo_url?: string | null
           ruc?: string | null
+          storefront_image_url?: string | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: []
       }
