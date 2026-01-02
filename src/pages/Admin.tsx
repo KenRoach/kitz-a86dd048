@@ -4,15 +4,60 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, Upload, User, MapPin, CreditCard, Banknote, Smartphone, Globe, Image } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+const BUSINESS_TYPES = [
+  "Restaurant",
+  "Cafe",
+  "Bakery",
+  "Food Truck",
+  "Retail Store",
+  "Online Store",
+  "Services",
+  "Beauty & Wellness",
+  "Health & Fitness",
+  "Education",
+  "Consulting",
+  "Creative Agency",
+  "Photography",
+  "Events",
+  "Other",
+];
+
+const COUNTRIES = [
+  { code: "PA", name: "Panama", phoneCode: "+507" },
+  { code: "US", name: "United States", phoneCode: "+1" },
+  { code: "MX", name: "Mexico", phoneCode: "+52" },
+  { code: "CO", name: "Colombia", phoneCode: "+57" },
+  { code: "CR", name: "Costa Rica", phoneCode: "+506" },
+  { code: "GT", name: "Guatemala", phoneCode: "+502" },
+  { code: "HN", name: "Honduras", phoneCode: "+504" },
+  { code: "NI", name: "Nicaragua", phoneCode: "+505" },
+  { code: "SV", name: "El Salvador", phoneCode: "+503" },
+  { code: "DO", name: "Dominican Republic", phoneCode: "+1" },
+  { code: "PE", name: "Peru", phoneCode: "+51" },
+  { code: "EC", name: "Ecuador", phoneCode: "+593" },
+  { code: "CL", name: "Chile", phoneCode: "+56" },
+  { code: "AR", name: "Argentina", phoneCode: "+54" },
+  { code: "BR", name: "Brazil", phoneCode: "+55" },
+  { code: "ES", name: "Spain", phoneCode: "+34" },
+];
 
 interface ProfileData {
   business_name: string;
   business_type: string | null;
   phone: string | null;
+  phone_country: string | null;
   address: string | null;
   ruc: string | null;
   city: string | null;
@@ -20,6 +65,7 @@ interface ProfileData {
   logo_url: string | null;
   photo_url: string | null;
   website: string | null;
+  instagram: string | null;
   storefront_image_url: string | null;
   payment_cards: boolean;
   payment_yappy: boolean;
@@ -38,13 +84,15 @@ export default function Admin() {
     business_name: "",
     business_type: "",
     phone: "",
+    phone_country: "PA",
     address: "",
     ruc: "",
     city: "",
-    country: "",
+    country: "PA",
     logo_url: null,
     photo_url: null,
     website: "",
+    instagram: "",
     storefront_image_url: null,
     payment_cards: false,
     payment_yappy: false,
@@ -54,7 +102,6 @@ export default function Admin() {
     longitude: null,
   });
   
-  // Image uploads
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [storefrontFile, setStorefrontFile] = useState<File | null>(null);
@@ -78,13 +125,15 @@ export default function Admin() {
           business_name: data.business_name || "",
           business_type: (data as any).business_type || "",
           phone: data.phone || "",
+          phone_country: "PA",
           address: data.address || "",
           ruc: (data as any).ruc || "",
           city: (data as any).city || "",
-          country: (data as any).country || "",
+          country: (data as any).country || "PA",
           logo_url: (data as any).logo_url || null,
           photo_url: (data as any).photo_url || null,
           website: (data as any).website || "",
+          instagram: (data as any).instagram || "",
           storefront_image_url: (data as any).storefront_image_url || null,
           payment_cards: (data as any).payment_cards ?? false,
           payment_yappy: (data as any).payment_yappy ?? false,
@@ -166,18 +215,23 @@ export default function Admin() {
         newStorefrontUrl = await uploadImage(storefrontFile, "storefront");
       }
 
+      // Build full phone with country code
+      const phoneCountry = COUNTRIES.find(c => c.code === profile.phone_country);
+      const fullPhone = profile.phone ? `${phoneCountry?.phoneCode || ""} ${profile.phone}`.trim() : null;
+
       const { error } = await supabase
         .from("profiles")
         .update({
           business_name: profile.business_name.trim(),
           business_type: profile.business_type?.trim() || null,
-          phone: profile.phone?.trim() || null,
+          phone: fullPhone,
           address: profile.address?.trim() || null,
           ruc: profile.ruc?.trim() || null,
           city: profile.city?.trim() || null,
-          country: profile.country?.trim() || null,
+          country: profile.country || null,
           logo_url: newLogoUrl,
           website: profile.website?.trim() || null,
+          instagram: profile.instagram?.trim() || null,
           storefront_image_url: newStorefrontUrl,
           payment_cards: profile.payment_cards,
           payment_yappy: profile.payment_yappy,
@@ -217,6 +271,8 @@ export default function Admin() {
       </AppLayout>
     );
   }
+
+  const selectedCountry = COUNTRIES.find(c => c.code === profile.phone_country);
 
   return (
     <AppLayout>
@@ -294,14 +350,22 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Label htmlFor="businessType" className="text-muted-foreground">Business type</Label>
-              <Input
-                id="businessType"
+              <Label className="text-muted-foreground">Business type</Label>
+              <Select
                 value={profile.business_type || ""}
-                onChange={(e) => updateProfile("business_type", e.target.value)}
-                placeholder="Restaurant, Retail..."
-                className="mt-1.5"
-              />
+                onValueChange={(value) => updateProfile("business_type", value)}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {BUSINESS_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="ruc" className="text-muted-foreground">Tax ID (RUC)</Label>
@@ -314,14 +378,22 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Label htmlFor="country" className="text-muted-foreground">Country</Label>
-              <Input
-                id="country"
-                value={profile.country || ""}
-                onChange={(e) => updateProfile("country", e.target.value)}
-                placeholder="Panama"
-                className="mt-1.5"
-              />
+              <Label className="text-muted-foreground">Country</Label>
+              <Select
+                value={profile.country || "PA"}
+                onValueChange={(value) => updateProfile("country", value)}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select country..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </section>
@@ -330,26 +402,59 @@ export default function Admin() {
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "100ms" }}>
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Contact & Presence</h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            {/* Phone with country */}
             <div>
-              <Label htmlFor="phone" className="text-muted-foreground">WhatsApp / Phone</Label>
-              <Input
-                id="phone"
-                value={profile.phone || ""}
-                onChange={(e) => updateProfile("phone", e.target.value)}
-                placeholder="+507 6000-0000"
-                className="mt-1.5"
-              />
+              <Label className="text-muted-foreground">WhatsApp / Phone</Label>
+              <div className="flex gap-2 mt-1.5">
+                <Select
+                  value={profile.phone_country || "PA"}
+                  onValueChange={(value) => updateProfile("phone_country", value)}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.phoneCode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  value={profile.phone || ""}
+                  onChange={(e) => updateProfile("phone", e.target.value)}
+                  placeholder="6000-0000"
+                  className="flex-1"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="website" className="text-muted-foreground">Website</Label>
-              <Input
-                id="website"
-                value={profile.website || ""}
-                onChange={(e) => updateProfile("website", e.target.value)}
-                placeholder="https://mybusiness.com"
-                className="mt-1.5"
-              />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="website" className="text-muted-foreground">Website</Label>
+                <Input
+                  id="website"
+                  value={profile.website || ""}
+                  onChange={(e) => updateProfile("website", e.target.value)}
+                  placeholder="https://mybusiness.com"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label htmlFor="instagram" className="text-muted-foreground">Instagram</Label>
+                <div className="relative mt-1.5">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                  <Input
+                    id="instagram"
+                    value={profile.instagram || ""}
+                    onChange={(e) => updateProfile("instagram", e.target.value)}
+                    placeholder="mybusiness"
+                    className="pl-8"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>
