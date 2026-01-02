@@ -111,10 +111,70 @@ serve(async (req) => {
         console.log("WhatsApp notification sent to seller");
       } catch (waError) {
         console.error("Failed to send WhatsApp notification:", waError);
-        // Don't fail the order if WhatsApp fails
       }
     } else {
       console.log("WhatsApp notification skipped - credentials not configured or no seller phone");
+    }
+
+    // Send email notification to seller (if configured)
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    
+    // Get seller email from profile
+    const { data: sellerProfile } = await supabase
+      .from("profiles")
+      .select("business_name")
+      .eq("user_id", storefront.user_id)
+      .maybeSingle();
+
+    // Get seller's auth email
+    const { data: { user: sellerUser } } = await supabase.auth.admin.getUserById(storefront.user_id);
+    const sellerEmail = sellerUser?.email;
+
+    if (resendApiKey && sellerEmail) {
+      try {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "Orders <onboarding@resend.dev>",
+            to: [sellerEmail],
+            subject: `🛒 New Order: ${storefront.title}`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #333;">New Order Received!</h1>
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h2 style="margin: 0 0 10px 0;">${storefront.title}</h2>
+                  <p style="font-size: 24px; color: #16a34a; margin: 0;">$${storefront.price.toFixed(2)}</p>
+                </div>
+                <h3>Customer Details</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li><strong>Name:</strong> ${buyerName}</li>
+                  <li><strong>Phone:</strong> ${buyerPhone}</li>
+                  ${buyerEmail ? `<li><strong>Email:</strong> ${buyerEmail}</li>` : ""}
+                  ${buyerNote ? `<li><strong>Note:</strong> ${buyerNote}</li>` : ""}
+                </ul>
+                <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                  — ${sellerProfile?.business_name || "Your Store"}
+                </p>
+              </div>
+            `,
+          }),
+        });
+        
+        if (emailResponse.ok) {
+          console.log("Email notification sent to seller");
+        } else {
+          const errorData = await emailResponse.json();
+          console.error("Failed to send email:", errorData);
+        }
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+      }
+    } else {
+      console.log("Email notification skipped - RESEND_API_KEY not configured or no seller email");
     }
 
     // Add/update customer in CRM
