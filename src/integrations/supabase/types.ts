@@ -168,6 +168,10 @@ export type Database = {
           fulfillment_note: string | null
           id: string
           image_url: string | null
+          payment_cards: boolean | null
+          payment_cash: boolean | null
+          payment_pluxee: boolean | null
+          payment_yappy: boolean | null
           price: number
           quantity: number | null
           seller_phone: string | null
@@ -186,6 +190,10 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
           price: number
           quantity?: number | null
           seller_phone?: string | null
@@ -204,6 +212,10 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
           price?: number
           quantity?: number | null
           seller_phone?: string | null

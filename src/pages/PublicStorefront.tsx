@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Storefront {
@@ -16,6 +16,10 @@ interface Storefront {
   customer_name: string | null;
   fulfillment_note: string | null;
   seller_phone: string | null;
+  payment_cards: boolean;
+  payment_yappy: boolean;
+  payment_cash: boolean;
+  payment_pluxee: boolean;
 }
 
 export default function PublicStorefront() {
@@ -34,14 +38,14 @@ export default function PublicStorefront() {
 
       const { data, error } = await supabase
         .from("storefronts")
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone, payment_cards, payment_yappy, payment_cash, payment_pluxee")
         .eq("slug", slug)
         .maybeSingle();
 
       if (error || !data) {
         setNotFound(true);
       } else {
-        setStorefront(data);
+        setStorefront(data as Storefront);
       }
       setLoading(false);
     };
@@ -85,6 +89,14 @@ export default function PublicStorefront() {
 
   const isPaid = storefront?.status === "paid";
 
+  // Collect enabled payment methods
+  const paymentMethods = [
+    { enabled: storefront?.payment_cards, icon: CreditCard, label: "Cards", color: "text-primary" },
+    { enabled: storefront?.payment_yappy, icon: Smartphone, label: "Yappy", color: "text-attention" },
+    { enabled: storefront?.payment_cash, icon: Banknote, label: "Cash", color: "text-success" },
+    { enabled: storefront?.payment_pluxee, icon: Globe, label: "Pluxee", color: "text-muted-foreground" },
+  ].filter(m => m.enabled);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -101,7 +113,7 @@ export default function PublicStorefront() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-lg mx-auto p-4 pb-32">
+      <main className="max-w-lg mx-auto p-4 pb-44">
         {/* Product image */}
         <div className="aspect-square rounded-2xl bg-muted overflow-hidden mb-6">
           {storefront?.image_url ? (
@@ -142,21 +154,39 @@ export default function PublicStorefront() {
           {(storefront?.quantity || 1) > 1 && (
             <p className="text-sm text-muted-foreground">Quantity: {storefront?.quantity}</p>
           )}
+
+          {/* Payment methods */}
+          {paymentMethods.length > 0 && (
+            <div className="pt-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Accepted payments</p>
+              <div className="flex flex-wrap gap-2">
+                {paymentMethods.map((method, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted/50 text-sm"
+                  >
+                    <method.icon className={cn("w-4 h-4", method.color)} />
+                    <span className="text-foreground font-medium">{method.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 shadow-lg">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-3">
             <span className="text-muted-foreground">Total</span>
-            <span className="text-2xl font-bold text-foreground">
+            <span className="text-3xl font-bold text-foreground">
               ${storefront?.price.toFixed(2)}
             </span>
           </div>
 
           {isPaid ? (
-            <div className="w-full py-4 rounded-xl bg-success/10 text-success font-medium text-center flex items-center justify-center gap-2">
+            <div className="w-full py-4 rounded-full bg-success/10 text-success font-semibold text-center flex items-center justify-center gap-2">
               <CheckCircle className="w-5 h-5" />
               Payment complete
             </div>
