@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          related_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          related_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          related_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_interaction: string | null
+          lifecycle: string
+          name: string
+          order_count: number | null
+          phone: string | null
+          tags: string[] | null
+          total_spent: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_interaction?: string | null
+          lifecycle?: string
+          name: string
+          order_count?: number | null
+          phone?: string | null
+          tags?: string[] | null
+          total_spent?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_interaction?: string | null
+          lifecycle?: string
+          name?: string
+          order_count?: number | null
+          phone?: string | null
+          tags?: string[] | null
+          total_spent?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -51,10 +123,14 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string
+          customer_name: string | null
+          customer_phone: string | null
           description: string | null
+          fulfillment_note: string | null
           id: string
           image_url: string | null
           price: number
+          quantity: number | null
           slug: string
           status: string
           title: string
@@ -64,10 +140,14 @@ export type Database = {
         Insert: {
           comment?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
           description?: string | null
+          fulfillment_note?: string | null
           id?: string
           image_url?: string | null
           price: number
+          quantity?: number | null
           slug: string
           status?: string
           title: string
@@ -77,10 +157,14 @@ export type Database = {
         Update: {
           comment?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
           description?: string | null
+          fulfillment_note?: string | null
           id?: string
           image_url?: string | null
           price?: number
+          quantity?: number | null
           slug?: string
           status?: string
           title?: string
