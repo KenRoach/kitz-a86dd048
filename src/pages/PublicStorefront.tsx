@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Storefront {
   id: string;
@@ -20,6 +24,8 @@ interface Storefront {
   payment_yappy: boolean;
   payment_cash: boolean;
   payment_pluxee: boolean;
+  buyer_name: string | null;
+  ordered_at: string | null;
 }
 
 export default function PublicStorefront() {
@@ -27,6 +33,15 @@ export default function PublicStorefront() {
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+
+  // Buyer form
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerPhone, setBuyerPhone] = useState("");
+  const [buyerEmail, setBuyerEmail] = useState("");
+  const [buyerNote, setBuyerNote] = useState("");
 
   useEffect(() => {
     const fetchStorefront = async () => {
@@ -38,7 +53,7 @@ export default function PublicStorefront() {
 
       const { data, error } = await supabase
         .from("storefronts")
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone, payment_cards, payment_yappy, payment_cash, payment_pluxee")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone, payment_cards, payment_yappy, payment_cash, payment_pluxee, buyer_name, ordered_at")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -46,12 +61,50 @@ export default function PublicStorefront() {
         setNotFound(true);
       } else {
         setStorefront(data as Storefront);
+        // If already ordered, show that
+        if (data.ordered_at || data.buyer_name) {
+          setOrderPlaced(true);
+        }
       }
       setLoading(false);
     };
 
     fetchStorefront();
   }, [slug]);
+
+  const handlePlaceOrder = async () => {
+    if (!buyerName.trim() || !buyerPhone.trim()) {
+      toast.error("Please fill in your name and phone number");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await supabase.functions.invoke("place-order", {
+        body: {
+          slug,
+          buyerName: buyerName.trim(),
+          buyerPhone: buyerPhone.trim(),
+          buyerEmail: buyerEmail.trim(),
+          buyerNote: buyerNote.trim(),
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      setOrderPlaced(true);
+      setShowCheckout(false);
+      toast.success("Order placed! The seller will contact you soon.");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast.error("Failed to place order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleWhatsAppContact = () => {
     const message = `Hi! I'd like to pay for: ${storefront?.title} ($${storefront?.price.toFixed(2)})`;
@@ -109,11 +162,17 @@ export default function PublicStorefront() {
               Paid
             </span>
           )}
+          {orderPlaced && !isPaid && (
+            <span className="flex items-center gap-1 text-sm font-medium text-primary">
+              <ShoppingBag className="w-4 h-4" />
+              Order placed
+            </span>
+          )}
         </div>
       </header>
 
       {/* Main content */}
-      <main className="max-w-lg mx-auto p-4 pb-44">
+      <main className="max-w-lg mx-auto p-4 pb-48">
         {/* Product image */}
         <div className="aspect-square rounded-2xl bg-muted overflow-hidden mb-6">
           {storefront?.image_url ? (
@@ -172,6 +231,99 @@ export default function PublicStorefront() {
               </div>
             </div>
           )}
+
+          {/* Checkout Form */}
+          {showCheckout && !orderPlaced && !isPaid && (
+            <div className="bg-card rounded-2xl p-5 border border-border space-y-4 animate-fade-in">
+              <h3 className="font-semibold text-foreground">Your details</h3>
+              
+              <div>
+                <Label htmlFor="buyerName" className="text-muted-foreground text-sm">
+                  Your name *
+                </Label>
+                <div className="relative mt-1">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="buyerName"
+                    value={buyerName}
+                    onChange={(e) => setBuyerName(e.target.value)}
+                    placeholder="John Doe"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="buyerPhone" className="text-muted-foreground text-sm">
+                  WhatsApp / Phone *
+                </Label>
+                <div className="relative mt-1">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="buyerPhone"
+                    value={buyerPhone}
+                    onChange={(e) => setBuyerPhone(e.target.value)}
+                    placeholder="+507 6000-0000"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="buyerEmail" className="text-muted-foreground text-sm">
+                  Email (optional)
+                </Label>
+                <div className="relative mt-1">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="buyerEmail"
+                    type="email"
+                    value={buyerEmail}
+                    onChange={(e) => setBuyerEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="buyerNote" className="text-muted-foreground text-sm">
+                  Note (optional)
+                </Label>
+                <Textarea
+                  id="buyerNote"
+                  value={buyerNote}
+                  onChange={(e) => setBuyerNote(e.target.value)}
+                  placeholder="Any special requests..."
+                  className="mt-1 resize-none"
+                  rows={2}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Order Confirmation */}
+          {orderPlaced && !isPaid && (
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center animate-fade-in">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Order received!</h3>
+              <p className="text-muted-foreground text-sm">
+                The seller has been notified and will contact you to arrange payment.
+              </p>
+              {storefront?.seller_phone && (
+                <Button
+                  variant="outline"
+                  onClick={handleWhatsAppContact}
+                  className="mt-4 gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Message seller on WhatsApp
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
@@ -190,14 +342,37 @@ export default function PublicStorefront() {
               <CheckCircle className="w-5 h-5" />
               Payment complete
             </div>
+          ) : orderPlaced ? (
+            <div className="w-full py-4 rounded-full bg-primary/10 text-primary font-semibold text-center flex items-center justify-center gap-2">
+              <ShoppingBag className="w-5 h-5" />
+              Awaiting payment
+            </div>
+          ) : showCheckout ? (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCheckout(false)}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handlePlaceOrder}
+                disabled={submitting || !buyerName.trim() || !buyerPhone.trim()}
+                className="flex-1 py-6"
+                size="lg"
+              >
+                {submitting ? "Placing order..." : "Place order"}
+              </Button>
+            </div>
           ) : (
             <Button
-              onClick={handleWhatsAppContact}
+              onClick={() => setShowCheckout(true)}
               className="w-full py-6 text-lg gap-2"
               size="lg"
             >
-              <MessageCircle className="w-5 h-5" />
-              Contact to pay
+              <ShoppingBag className="w-5 h-5" />
+              Order now
             </Button>
           )}
         </div>
