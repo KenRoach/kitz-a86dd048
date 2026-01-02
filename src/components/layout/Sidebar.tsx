@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Store, Users, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -11,6 +12,11 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
+  const { profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <aside className="w-64 border-r border-border bg-sidebar p-4 flex flex-col">
@@ -42,9 +48,20 @@ export function Sidebar() {
 
       <div className="mt-auto pt-4 border-t border-border">
         <div className="px-4 py-3">
-          <p className="text-sm font-medium text-foreground">Maria's Bakery</p>
-          <p className="text-xs text-muted-foreground">Pro Plan</p>
+          <p className="text-sm font-medium text-foreground truncate">
+            {profile?.business_name || "My Business"}
+          </p>
+          {profile?.business_type && (
+            <p className="text-xs text-muted-foreground truncate">{profile.business_type}</p>
+          )}
         </div>
+        <button
+          onClick={handleSignOut}
+          className="nav-item w-full text-left text-muted-foreground hover:text-destructive"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Sign out</span>
+        </button>
       </div>
     </aside>
   );
