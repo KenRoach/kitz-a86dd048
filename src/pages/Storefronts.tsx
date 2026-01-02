@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StorefrontCard } from "@/components/storefront/StorefrontCard";
 import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
+import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface Storefront {
   id: string;
@@ -22,6 +24,7 @@ export default function Storefronts() {
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [loading, setLoading] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editingStorefront, setEditingStorefront] = useState<Storefront | null>(null);
 
   const fetchStorefronts = async () => {
     if (!user) return;
@@ -48,8 +51,35 @@ export default function Storefronts() {
   }, [user]);
 
   const getShareableLink = (slug: string) => {
-    // In production, this would be kitz.shop/s/[slug]
     return `${window.location.origin}/s/${slug}`;
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from("storefronts")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete storefront");
+    } else {
+      toast.success("Storefront deleted");
+      fetchStorefronts();
+    }
+  };
+
+  const handleShare = async (id: string) => {
+    const { error } = await supabase
+      .from("storefronts")
+      .update({ status: "shared" })
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to share storefront");
+    } else {
+      toast.success("Storefront is now live and shareable!");
+      fetchStorefronts();
+    }
   };
 
   return (
@@ -100,8 +130,11 @@ export default function Storefronts() {
                 description={storefront.description || ""}
                 price={`$${storefront.price.toFixed(2)}`}
                 status={storefront.status}
-                link={storefront.status !== "draft" ? getShareableLink(storefront.slug) : undefined}
+                link={getShareableLink(storefront.slug)}
                 delay={index * 100}
+                onEdit={() => setEditingStorefront(storefront)}
+                onDelete={() => handleDelete(storefront.id)}
+                onShare={() => handleShare(storefront.id)}
               />
             ))}
           </div>
@@ -112,6 +145,14 @@ export default function Storefronts() {
           open={wizardOpen}
           onClose={() => setWizardOpen(false)}
           onCreated={fetchStorefronts}
+        />
+
+        {/* Edit Dialog */}
+        <EditStorefrontDialog
+          storefront={editingStorefront}
+          open={!!editingStorefront}
+          onClose={() => setEditingStorefront(null)}
+          onUpdated={fetchStorefronts}
         />
       </div>
     </AppLayout>
