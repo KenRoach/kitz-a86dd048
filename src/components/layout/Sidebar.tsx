@@ -26,14 +26,8 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-card p-5 flex flex-col shadow-lg">
-      {/* Logo area */}
-      <div className="mb-8 px-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">
-            kitz
-          </h1>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Business OS</p>
-        </div>
+      {/* Theme toggle */}
+      <div className="mb-6 px-3 flex justify-end">
         <button
           onClick={toggleTheme}
           className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-200"
