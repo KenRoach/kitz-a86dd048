@@ -133,28 +133,28 @@ export default function Storefronts() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Storefronts</h1>
-            <p className="text-muted-foreground mt-1">One link per order. Share and get paid.</p>
+        <div className="flex items-center justify-between gap-3 animate-fade-in">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground">Storefronts</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1 truncate">One link per order. Share and get paid.</p>
           </div>
-          <Button onClick={() => setWizardOpen(true)} className="gap-2">
+          <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="w-4 h-4" />
-            New
+            <span className="hidden sm:inline">New</span>
           </Button>
         </div>
 
         {/* Filter tabs */}
         {storefronts.length > 0 && (
-          <div className="flex gap-2 animate-fade-in" style={{ animationDelay: "50ms" }}>
+          <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-1 animate-fade-in scrollbar-hide" style={{ animationDelay: "50ms" }}>
             {(["all", "draft", "sent", "paid"] as FilterStatus[]).map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                  "px-2.5 py-1.5 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0",
                   filter === status
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
@@ -162,7 +162,7 @@ export default function Storefronts() {
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
                 {counts[status] > 0 && (
-                  <span className="ml-1.5 text-xs opacity-70">({counts[status]})</span>
+                  <span className="ml-1 md:ml-1.5 text-[10px] md:text-xs opacity-70">({counts[status]})</span>
                 )}
               </button>
             ))}

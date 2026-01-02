@@ -25,7 +25,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-card p-5 flex flex-col shadow-lg">
+    <aside className="hidden md:flex w-64 bg-card p-5 flex-col shadow-lg">
       {/* Theme toggle */}
       <div className="mb-6 px-3 flex justify-end">
         <button
