@@ -13,9 +13,11 @@ interface Storefront {
   id: string;
   title: string;
   description: string | null;
+  comment: string | null;
   price: number;
   status: "draft" | "shared" | "paid";
   slug: string;
+  image_url: string | null;
   created_at: string;
 }
 
@@ -40,6 +42,8 @@ export default function Storefronts() {
       setStorefronts((data || []).map(s => ({
         ...s,
         description: s.description ?? null,
+        comment: s.comment ?? null,
+        image_url: s.image_url ?? null,
         status: s.status as "draft" | "shared" | "paid"
       })));
     }
@@ -131,6 +135,8 @@ export default function Storefronts() {
                 price={`$${storefront.price.toFixed(2)}`}
                 status={storefront.status}
                 link={getShareableLink(storefront.slug)}
+                imageUrl={storefront.image_url}
+                comment={storefront.comment}
                 delay={index * 100}
                 onEdit={() => setEditingStorefront(storefront)}
                 onDelete={() => handleDelete(storefront.id)}
