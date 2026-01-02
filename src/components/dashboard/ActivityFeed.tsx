@@ -4,18 +4,19 @@ interface Activity {
   id: string;
   message: string;
   time: string;
-  type: "payment" | "message" | "order" | "customer";
+  type: "payment" | "message" | "order" | "customer" | "storefront";
 }
 
 interface ActivityFeedProps {
   activities: Activity[];
 }
 
-const dotColors = {
+const dotColors: Record<Activity["type"], string> = {
   payment: "bg-success",
   message: "bg-primary",
   order: "bg-attention",
   customer: "bg-muted-foreground",
+  storefront: "bg-primary",
 };
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
