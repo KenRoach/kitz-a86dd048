@@ -109,6 +109,13 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         imageUrl = await uploadImage();
       }
 
+      // Fetch seller's phone from profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
       const slug = generateSlug(title);
       const totalPrice = parseFloat(price) * parseInt(quantity);
 
@@ -124,6 +131,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         image_url: imageUrl,
         slug,
         status: sendNow ? "sent" : "draft",
+        seller_phone: profile?.phone || null,
       });
 
       if (error) {
