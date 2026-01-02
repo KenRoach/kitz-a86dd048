@@ -95,6 +95,7 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          instagram: string | null
           latitude: number | null
           logo_url: string | null
           longitude: number | null
@@ -118,6 +119,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          instagram?: string | null
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
@@ -141,6 +143,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          instagram?: string | null
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
