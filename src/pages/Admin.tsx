@@ -47,6 +47,11 @@ export default function Admin() {
         setBusinessName(data.business_name || "");
         setPhone(data.phone || "");
         setAddress(data.address || "");
+        setRuc((data as any).ruc || "");
+        setCity((data as any).city || "");
+        setCountry((data as any).country || "");
+        setLogoUrl((data as any).logo_url || null);
+        setPhotoUrl((data as any).photo_url || null);
       }
       setLoading(false);
     };
@@ -104,7 +109,12 @@ export default function Admin() {
           business_name: businessName.trim(),
           phone: phone.trim() || null,
           address: address.trim() || null,
-        })
+          ruc: ruc.trim() || null,
+          city: city.trim() || null,
+          country: country.trim() || null,
+          logo_url: newLogoUrl,
+          photo_url: newPhotoUrl,
+        } as any)
         .eq("user_id", user.id);
 
       if (error) {
