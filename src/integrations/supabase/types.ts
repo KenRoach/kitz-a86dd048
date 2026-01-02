@@ -163,6 +163,10 @@ export type Database = {
       }
       storefronts: {
         Row: {
+          buyer_email: string | null
+          buyer_name: string | null
+          buyer_note: string | null
+          buyer_phone: string | null
           comment: string | null
           created_at: string
           customer_name: string | null
@@ -171,6 +175,7 @@ export type Database = {
           fulfillment_note: string | null
           id: string
           image_url: string | null
+          ordered_at: string | null
           payment_cards: boolean | null
           payment_cash: boolean | null
           payment_pluxee: boolean | null
@@ -185,6 +190,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_note?: string | null
+          buyer_phone?: string | null
           comment?: string | null
           created_at?: string
           customer_name?: string | null
@@ -193,6 +202,7 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null
@@ -207,6 +217,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_note?: string | null
+          buyer_phone?: string | null
           comment?: string | null
           created_at?: string
           customer_name?: string | null
@@ -215,6 +229,7 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null

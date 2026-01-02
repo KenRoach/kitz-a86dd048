@@ -23,6 +23,7 @@ interface Storefront {
   customer_name: string | null;
   customer_phone: string | null;
   fulfillment_note: string | null;
+  buyer_name: string | null;
   created_at: string;
 }
 
@@ -200,6 +201,7 @@ export default function Storefronts() {
                 quantity={sf.quantity}
                 link={getShareableLink(sf.slug)}
                 imageUrl={sf.image_url}
+                buyerName={sf.buyer_name}
                 delay={index * 50}
                 onEdit={() => setEditingStorefront(sf)}
                 onDelete={() => handleDelete(sf.id)}
