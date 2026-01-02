@@ -109,10 +109,10 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         imageUrl = await uploadImage();
       }
 
-      // Fetch seller's phone from profile
+      // Fetch seller's profile (phone and payment methods)
       const { data: profile } = await supabase
         .from("profiles")
-        .select("phone")
+        .select("phone, payment_cards, payment_yappy, payment_cash, payment_pluxee")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -132,6 +132,10 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         slug,
         status: sendNow ? "sent" : "draft",
         seller_phone: profile?.phone || null,
+        payment_cards: (profile as any)?.payment_cards ?? false,
+        payment_yappy: (profile as any)?.payment_yappy ?? false,
+        payment_cash: (profile as any)?.payment_cash ?? true,
+        payment_pluxee: (profile as any)?.payment_pluxee ?? false,
       });
 
       if (error) {
