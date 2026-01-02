@@ -86,6 +86,37 @@ serve(async (req) => {
       related_id: storefront.id,
     });
 
+    // Send WhatsApp notification to seller (if configured)
+    const whatsappToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+    const whatsappPhoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+    
+    if (whatsappToken && whatsappPhoneId && storefront.seller_phone) {
+      try {
+        const sellerPhone = storefront.seller_phone.replace(/\D/g, "");
+        const message = `🛒 *New Order!*\n\n*${storefront.title}*\n💰 $${storefront.price.toFixed(2)}\n\n👤 ${buyerName}\n📱 ${buyerPhone}${buyerEmail ? `\n✉️ ${buyerEmail}` : ""}${buyerNote ? `\n📝 ${buyerNote}` : ""}`;
+        
+        await fetch(`https://graph.facebook.com/v18.0/${whatsappPhoneId}/messages`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${whatsappToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: sellerPhone,
+            type: "text",
+            text: { body: message },
+          }),
+        });
+        console.log("WhatsApp notification sent to seller");
+      } catch (waError) {
+        console.error("Failed to send WhatsApp notification:", waError);
+        // Don't fail the order if WhatsApp fails
+      }
+    } else {
+      console.log("WhatsApp notification skipped - credentials not configured or no seller phone");
+    }
+
     // Add/update customer in CRM
     const { data: existingCustomer } = await supabase
       .from("customers")
