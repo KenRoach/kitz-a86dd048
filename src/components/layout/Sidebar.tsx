@@ -24,21 +24,26 @@ export function Sidebar() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <aside className="hidden md:flex w-64 bg-card p-5 flex-col shadow-lg">
-      {/* Theme toggle */}
-      <div className="mb-6 px-3 flex justify-end">
-        <button
-          onClick={toggleTheme}
-          className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-200"
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
-        </button>
+      {/* Greeting + Business Name */}
+      <div className="mb-6 px-3">
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+          {getGreeting()}
+        </p>
+        <h1 className="text-lg font-semibold text-foreground mt-0.5 truncate">
+          {profile?.business_name || "My Business"}
+        </h1>
+        {profile?.business_type && (
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{profile.business_type}</p>
+        )}
       </div>
 
       <nav className="flex-1 space-y-2">
@@ -62,16 +67,15 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto pt-4">
-        {/* Profile card */}
-        <div className="px-3 py-4 rounded-xl bg-muted/50 mb-3">
-          <p className="text-sm font-semibold text-foreground truncate">
-            {profile?.business_name || "My Business"}
-          </p>
-          {profile?.business_type && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">{profile.business_type}</p>
-          )}
-        </div>
+      <div className="mt-auto pt-4 space-y-2">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground w-full"
+        >
+          {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <span className="font-medium">{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+        </button>
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive w-full"
