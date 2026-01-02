@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ExternalLink, Copy } from "lucide-react";
+import { ExternalLink, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export type StorefrontStatus = "draft" | "shared" | "paid";
@@ -36,6 +36,15 @@ export function StorefrontCard({
     }
   };
 
+  const handleWhatsAppShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (link) {
+      const message = `Hi! Check out ${title} for ${price}\n\n${description ? description + "\n\n" : ""}Order here: ${link}`;
+      const encodedMessage = encodeURIComponent(message);
+      window.open(`https://wa.me/?text=${encodedMessage}`, "_blank");
+    }
+  };
+
   return (
     <div
       className="action-card animate-fade-in"
@@ -53,12 +62,20 @@ export function StorefrontCard({
 
       <div className="flex items-center justify-between pt-4 border-t border-border">
         <span className="text-lg font-semibold text-foreground">{price}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {link && (
             <>
               <button
+                onClick={handleWhatsAppShare}
+                className="p-2 rounded-lg hover:bg-success/10 transition-colors group"
+                title="Share on WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4 text-muted-foreground group-hover:text-success transition-colors" />
+              </button>
+              <button
                 onClick={handleCopyLink}
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
+                title="Copy link"
               >
                 <Copy className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -68,6 +85,7 @@ export function StorefrontCard({
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
                 onClick={(e) => e.stopPropagation()}
+                title="Open link"
               >
                 <ExternalLink className="w-4 h-4 text-muted-foreground" />
               </a>
