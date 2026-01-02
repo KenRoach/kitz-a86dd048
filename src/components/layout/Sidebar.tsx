@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -13,19 +14,37 @@ const navItems = [
 export function Sidebar() {
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
     await signOut();
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
     <aside className="w-64 bg-card p-5 flex flex-col shadow-lg">
       {/* Logo area */}
-      <div className="mb-8 px-3">
-        <h1 className="text-xl font-bold text-foreground tracking-tight">
-          kitz
-        </h1>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Business OS</p>
+      <div className="mb-8 px-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">
+            kitz
+          </h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Business OS</p>
+        </div>
+        <button
+          onClick={toggleTheme}
+          className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-200"
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5" />
+          ) : (
+            <Moon className="w-5 h-5" />
+          )}
+        </button>
       </div>
 
       <nav className="flex-1 space-y-2">
