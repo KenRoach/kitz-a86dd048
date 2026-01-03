@@ -16,8 +16,8 @@ export function MobileNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-sm border-t border-border/30 md:hidden safe-area-bottom">
-      <div className="flex items-center justify-around py-2 px-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/50 md:hidden safe-area-bottom">
+      <div className="flex items-center justify-around py-1.5 px-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -25,7 +25,7 @@ export function MobileNav() {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-1.5 px-3 rounded-xl transition-all min-w-[60px]",
+                "flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-lg transition-all flex-1",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground active:text-foreground active:scale-95"
