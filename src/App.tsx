@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Storefronts from "./pages/Storefronts";
 import OrderHistory from "./pages/OrderHistory";
@@ -72,21 +73,23 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner position="top-center" />
-          <BrowserRouter>
-            <AuthProvider>
-              <AppRoutes />
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="top-center" />
+            <BrowserRouter>
+              <AuthProvider>
+                <AppRoutes />
+              </AuthProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
