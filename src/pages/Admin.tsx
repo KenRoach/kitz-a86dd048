@@ -306,12 +306,12 @@ export default function Admin() {
 
   return (
     <AppLayout>
-      <div className="space-y-8 max-w-2xl">
+      <div className="space-y-3 md:space-y-6 max-w-2xl">
         {/* Header with Share Button */}
-        <div className="animate-fade-in flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Admin</h1>
-            <p className="text-muted-foreground mt-1">Set it once. Everything runs from here.</p>
+        <div className="animate-fade-in flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">Admin</h1>
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">Set it once. Everything runs from here.</p>
           </div>
           <div className="flex gap-2 shrink-0">
             <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>

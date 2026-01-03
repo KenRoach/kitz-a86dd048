@@ -68,11 +68,11 @@ export default function OrderHistory() {
 
   return (
     <AppLayout>
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-3 md:space-y-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1">{t.orderHistoryDesc}</p>
+          <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
+          <p className="text-xs md:text-base text-muted-foreground mt-0.5">{t.orderHistoryDesc}</p>
         </div>
 
         {/* Search */}
