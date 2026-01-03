@@ -2,11 +2,12 @@ import { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send } from "lucide-react";
+import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
 
 interface StorefrontWizardProps {
   open: boolean;
@@ -14,7 +15,7 @@ interface StorefrontWizardProps {
   onCreated: () => void;
 }
 
-type Step = "what" | "confirm";
+type Step = "type" | "what" | "confirm";
 
 const generateSlug = (title: string) => {
   return title
@@ -26,26 +27,41 @@ const generateSlug = (title: string) => {
 
 export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardProps) {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>("what");
+  const [step, setStep] = useState<Step>("type");
   
-  // Item fields
+  // Type selection
+  const [isBundle, setIsBundle] = useState(false);
+  
+  // Single item fields
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // Bundle fields
+  const [bundleTitle, setBundleTitle] = useState("");
+  const [bundleItems, setBundleItems] = useState<BundleItem[]>([createEmptyItem()]);
+  
   const [loading, setLoading] = useState(false);
   const [sendNow, setSendNow] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const steps: Step[] = ["what", "confirm"];
+  const steps: Step[] = ["type", "what", "confirm"];
   const currentIndex = steps.indexOf(step);
 
-  const totalPrice = (parseFloat(price) || 0) * (parseInt(quantity) || 1);
+  const totalPrice = isBundle 
+    ? bundleItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0)
+    : (parseFloat(price) || 0) * (parseInt(quantity) || 1);
 
   const canProceed = () => {
     switch (step) {
+      case "type":
+        return true;
       case "what":
+        if (isBundle) {
+          return bundleTitle.trim().length > 0 && bundleItems.some(item => item.title.trim() && parseFloat(item.price) > 0);
+        }
         return title.trim().length > 0 && parseFloat(price) > 0;
       case "confirm":
         return true;
@@ -107,46 +123,72 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         .eq("user_id", user.id)
         .maybeSingle();
 
-      const slug = generateSlug(title);
+      const storefrontTitle = isBundle ? bundleTitle : title;
+      const slug = generateSlug(storefrontTitle);
       
       let mainImageUrl: string | null = null;
-      if (imageFile) {
+      if (!isBundle && imageFile) {
         mainImageUrl = await uploadImage(imageFile);
       }
 
       // Create the storefront
-      const { error: storefrontError } = await supabase
+      const { data: storefront, error: storefrontError } = await supabase
         .from("storefronts")
         .insert({
           user_id: user.id,
-          title: title.trim(),
-          description: null,
+          title: storefrontTitle.trim(),
+          description: isBundle ? `Bundle with ${bundleItems.filter(i => i.title.trim()).length} items` : null,
           price: totalPrice,
-          quantity: parseInt(quantity),
+          quantity: isBundle ? 1 : parseInt(quantity),
           customer_name: null,
           customer_phone: null,
           fulfillment_note: null,
           image_url: mainImageUrl,
           slug,
           status: sendNow ? "sent" : "draft",
-          is_bundle: false,
+          is_bundle: isBundle,
           seller_phone: profile?.phone || null,
           payment_cards: (profile as any)?.payment_cards ?? false,
           payment_yappy: (profile as any)?.payment_yappy ?? false,
           payment_cash: (profile as any)?.payment_cash ?? true,
           payment_pluxee: (profile as any)?.payment_pluxee ?? false,
-        });
+        })
+        .select("id")
+        .single();
 
-      if (storefrontError) {
+      if (storefrontError || !storefront) {
         toast.error("Failed to create storefront");
         return;
+      }
+
+      // If bundle, create bundle items
+      if (isBundle) {
+        const validItems = bundleItems.filter(item => item.title.trim() && parseFloat(item.price) > 0);
+        
+        for (let i = 0; i < validItems.length; i++) {
+          const item = validItems[i];
+          let itemImageUrl: string | null = null;
+          
+          if (item.imageFile) {
+            itemImageUrl = await uploadImage(item.imageFile);
+          }
+          
+          await supabase.from("storefront_items").insert({
+            storefront_id: storefront.id,
+            title: item.title.trim(),
+            price: parseFloat(item.price),
+            quantity: parseInt(item.quantity) || 1,
+            image_url: itemImageUrl,
+            sort_order: i,
+          });
+        }
       }
 
       // Log activity
       await supabase.from("activity_log").insert({
         user_id: user.id,
         type: "storefront",
-        message: `Created storefront: ${title} — $${totalPrice.toFixed(2)}`
+        message: `Created ${isBundle ? "bundle" : "storefront"}: ${storefrontTitle} — $${totalPrice.toFixed(2)}`
       });
 
       toast.success(sendNow ? "Storefront created and ready to share!" : "Storefront saved as draft");
@@ -160,19 +202,96 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   };
 
   const resetAndClose = () => {
-    setStep("what");
+    setStep("type");
+    setIsBundle(false);
     setTitle("");
     setPrice("");
     setQuantity("1");
     setImageFile(null);
     setImagePreview(null);
+    setBundleTitle("");
+    setBundleItems([createEmptyItem()]);
     setSendNow(true);
     onClose();
   };
 
   const renderStep = () => {
     switch (step) {
+      case "type":
+        return (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-medium text-foreground">What type of order?</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Choose how you want to sell</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setIsBundle(false)}
+                className={cn(
+                  "p-4 rounded-xl border-2 text-left transition-all",
+                  !isBundle
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <ShoppingBag className={cn("w-6 h-6 mb-2", !isBundle ? "text-primary" : "text-muted-foreground")} />
+                <p className="font-medium text-foreground text-sm">Single item</p>
+                <p className="text-xs text-muted-foreground mt-1">One product or service</p>
+              </button>
+              
+              <button
+                onClick={() => setIsBundle(true)}
+                className={cn(
+                  "p-4 rounded-xl border-2 text-left transition-all",
+                  isBundle
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <Package className={cn("w-6 h-6 mb-2", isBundle ? "text-primary" : "text-muted-foreground")} />
+                <p className="font-medium text-foreground text-sm">Bundle</p>
+                <p className="text-xs text-muted-foreground mt-1">Multiple items together</p>
+              </button>
+            </div>
+          </div>
+        );
+
       case "what":
+        if (isBundle) {
+          return (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-xl bg-primary/10">
+                  <Package className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-medium text-foreground">Create your bundle</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Add items to your package</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Bundle name</label>
+                <Input
+                  value={bundleTitle}
+                  onChange={(e) => setBundleTitle(e.target.value)}
+                  placeholder="e.g., Family Meal Deal, Party Pack..."
+                  className="text-base"
+                  autoFocus
+                />
+              </div>
+
+              <BundleItemsInput items={bundleItems} onChange={setBundleItems} />
+            </div>
+          );
+        }
+
         return (
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
@@ -251,6 +370,9 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         );
 
       case "confirm":
+        const displayTitle = isBundle ? bundleTitle : title;
+        const validBundleItems = bundleItems.filter(i => i.title.trim() && parseFloat(i.price) > 0);
+        
         return (
           <div className="space-y-4 animate-fade-in">
             <div className="mb-3">
@@ -258,19 +380,35 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
             </div>
 
             <div className="bg-muted/50 rounded-xl overflow-hidden">
-              {imagePreview && (
+              {!isBundle && imagePreview && (
                 <img src={imagePreview} alt={title} className="w-full h-20 sm:h-24 object-cover" />
               )}
               <div className="p-3 sm:p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium text-foreground text-sm sm:text-base">{title}</p>
-                    {parseInt(quantity) > 1 && (
+                    <div className="flex items-center gap-2">
+                      {isBundle && <Package className="w-4 h-4 text-primary" />}
+                      <p className="font-medium text-foreground text-sm sm:text-base">{displayTitle}</p>
+                    </div>
+                    {isBundle ? (
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{validBundleItems.length} items</p>
+                    ) : parseInt(quantity) > 1 && (
                       <p className="text-[10px] sm:text-xs text-muted-foreground">Qty: {quantity}</p>
                     )}
                   </div>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">${totalPrice.toFixed(2)}</p>
                 </div>
+                
+                {isBundle && validBundleItems.length > 0 && (
+                  <div className="pt-2 border-t border-border/50 space-y-1">
+                    {validBundleItems.map((item) => (
+                      <div key={item.id} className="flex justify-between text-xs text-muted-foreground">
+                        <span>{item.title} {parseInt(item.quantity) > 1 && `×${item.quantity}`}</span>
+                        <span>${((parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
