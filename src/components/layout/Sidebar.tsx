@@ -10,7 +10,6 @@ const navItems = [
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
-  { icon: Settings, labelKey: "admin" as const, path: "/admin" },
 ];
 
 export function Sidebar() {
@@ -68,6 +67,19 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4 space-y-2">
+        {/* Admin link */}
+        <Link
+          to="/admin"
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200",
+            location.pathname === "/admin" 
+              ? "bg-primary text-primary-foreground shadow-md" 
+              : "hover:bg-muted hover:text-foreground"
+          )}
+        >
+          <Settings className="w-5 h-5" />
+          <span className="font-medium">{t.admin}</span>
+        </Link>
         {/* Language toggle */}
         <button
           onClick={toggleLanguage}
