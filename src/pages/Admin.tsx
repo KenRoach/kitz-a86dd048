@@ -463,58 +463,79 @@ export default function Admin() {
         {/* Payments */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "150ms" }}>
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Payments</h2>
+          <p className="text-sm text-muted-foreground -mt-2">Accept payments your way</p>
           
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-2">
+          {/* Online Payments */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground">Online payments</h3>
+            <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-violet-600" />
                 </div>
-                <span className="font-medium text-foreground">Credit / Debit cards</span>
+                <div>
+                  <span className="font-medium text-foreground">Stripe</span>
+                  <p className="text-sm text-muted-foreground">Accept cards worldwide</p>
+                </div>
               </div>
               <Switch
                 checked={profile.payment_cards}
                 onCheckedChange={(checked) => updateProfile("payment_cards", checked)}
               />
             </div>
-            
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-attention/10 flex items-center justify-center">
-                  <Smartphone className="w-5 h-5 text-attention" />
+          </div>
+
+          {/* Local Payments */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground">Local payments</h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-attention/10 flex items-center justify-center">
+                    <Smartphone className="w-5 h-5 text-attention" />
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Yappy</span>
+                    <p className="text-sm text-muted-foreground">Banco General mobile payments</p>
+                  </div>
                 </div>
-                <span className="font-medium text-foreground">Yappy (Banco General)</span>
+                <Switch
+                  checked={profile.payment_yappy}
+                  onCheckedChange={(checked) => updateProfile("payment_yappy", checked)}
+                />
               </div>
-              <Switch
-                checked={profile.payment_yappy}
-                onCheckedChange={(checked) => updateProfile("payment_yappy", checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                  <Banknote className="w-5 h-5 text-success" />
+              
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    <Banknote className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Cash</span>
+                    <p className="text-sm text-muted-foreground">In-person payments</p>
+                  </div>
                 </div>
-                <span className="font-medium text-foreground">Cash</span>
+                <Switch
+                  checked={profile.payment_cash}
+                  onCheckedChange={(checked) => updateProfile("payment_cash", checked)}
+                />
               </div>
-              <Switch
-                checked={profile.payment_cash}
-                onCheckedChange={(checked) => updateProfile("payment_cash", checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-muted-foreground" />
+              
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <Globe className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Pluxee</span>
+                    <p className="text-sm text-muted-foreground">Employee benefit cards</p>
+                  </div>
                 </div>
-                <span className="font-medium text-foreground">Pluxee</span>
+                <Switch
+                  checked={profile.payment_pluxee}
+                  onCheckedChange={(checked) => updateProfile("payment_pluxee", checked)}
+                />
               </div>
-              <Switch
-                checked={profile.payment_pluxee}
-                onCheckedChange={(checked) => updateProfile("payment_pluxee", checked)}
-              />
             </div>
           </div>
         </section>

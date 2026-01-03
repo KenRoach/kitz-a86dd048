@@ -63,17 +63,6 @@ const INTEGRATIONS: Integration[] = [
     status: "coming_soon",
     category: "social",
   },
-  // Payments
-  {
-    id: "stripe",
-    name: "Stripe",
-    description: "Accept card payments worldwide",
-    icon: CreditCard,
-    color: "text-violet-600",
-    bgColor: "bg-violet-500/10",
-    status: "available",
-    category: "payments",
-  },
   // Productivity
   {
     id: "google_calendar",
@@ -217,7 +206,6 @@ export function IntegrationsSection() {
   };
 
   const messagingIntegrations = INTEGRATIONS.filter(i => i.category === "messaging" || i.category === "social");
-  const paymentIntegrations = INTEGRATIONS.filter(i => i.category === "payments");
   const productivityIntegrations = INTEGRATIONS.filter(i => i.category === "productivity");
   const analyticsIntegrations = INTEGRATIONS.filter(i => i.category === "analytics");
 
@@ -230,23 +218,6 @@ export function IntegrationsSection() {
         </h3>
         <div className="space-y-2">
           {messagingIntegrations.map((integration) => (
-            <IntegrationCard
-              key={integration.id}
-              integration={integration}
-              isConnected={connectedIntegrations.has(integration.id)}
-              onToggle={handleToggle}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Payments */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Payments
-        </h3>
-        <div className="space-y-2">
-          {paymentIntegrations.map((integration) => (
             <IntegrationCard
               key={integration.id}
               integration={integration}
