@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, Package } from "lucide-react";
+import { LayoutDashboard, Store, History, Package, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -8,7 +8,7 @@ const navItems = [
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orders" as const, path: "/order-history" },
-  { icon: Settings, labelKey: "admin" as const, path: "/admin" },
+  { icon: Menu, labelKey: "more" as const, path: "/admin" },
 ];
 
 export function MobileNav() {

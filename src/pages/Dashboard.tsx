@@ -4,6 +4,9 @@ import { MomentumScore } from "@/components/dashboard/MomentumScore";
 import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
+import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
+import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
+import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +39,20 @@ export default function Dashboard() {
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if user has seen onboarding
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem("kitz_onboarding_complete", "true");
+    setShowOnboarding(false);
+  };
 
   useEffect(() => {
     if (user) {
@@ -183,9 +200,32 @@ export default function Dashboard() {
 
   const isPositiveChange = parseFloat(changePercent) >= 0;
 
+  if (loading) {
+    return (
+      <AppLayout>
+        <DashboardSkeleton />
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
+      <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
+      
       <div className="space-y-6 md:space-y-8">
+        {/* Header with Share */}
+        <div className="flex items-center justify-between animate-fade-in">
+          <div>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              {getGreeting()}
+            </p>
+            <h1 className="text-lg font-semibold text-foreground mt-0.5">
+              {profile?.business_name || "My Business"}
+            </h1>
+          </div>
+          <ProfileShareButton />
+        </div>
+
         {/* Hero Balance Section */}
         <div className="animate-fade-in">
 

@@ -4,6 +4,7 @@ import { CustomerCard } from "@/components/crm/CustomerCard";
 import { CustomerProfile } from "@/components/crm/CustomerProfile";
 import { Search, Users, ShoppingBag } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CustomersSkeleton } from "@/components/ui/dashboard-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -89,7 +90,7 @@ export default function OrderHistory() {
         )}
 
         {/* Loading */}
-        {loading && <div className="text-center py-12 text-muted-foreground">{t.loading}</div>}
+        {loading && <CustomersSkeleton />}
 
         {!loading && customers.length === 0 && (
           <EmptyState

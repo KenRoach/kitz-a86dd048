@@ -13,6 +13,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
+import { StorefrontsSkeleton } from "@/components/ui/dashboard-skeleton";
 
 interface Storefront {
   id: string;
@@ -306,7 +307,7 @@ export default function Storefronts() {
         )}
 
         {/* Loading */}
-        {loading && <div className="text-center py-12 text-muted-foreground">{t.loading}</div>}
+        {loading && <StorefrontsSkeleton />}
 
         {/* Empty state */}
         {!loading && storefronts.length === 0 && (
