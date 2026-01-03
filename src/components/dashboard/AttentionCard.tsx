@@ -21,9 +21,9 @@ const iconMap = {
 
 const colorMap = {
   payment: {
-    bg: "bg-attention/10",
-    text: "text-attention",
-    iconBg: "bg-attention",
+    bg: "bg-action/10",
+    text: "text-action",
+    iconBg: "bg-action",
   },
   followup: {
     bg: "bg-primary/10",
@@ -55,20 +55,20 @@ export function AttentionCard({
 
   return (
     <div
-      className="neu-card-flat p-3 sm:p-4 cursor-pointer hover:shadow-md transition-all duration-200 animate-fade-in group"
+      className="bg-card rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-200 shadow-sm"
       style={{ animationDelay: `${delay}ms` }}
       onClick={onAction}
     >
-      <div className="flex items-center gap-3 sm:gap-4">
-        <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0", colors.iconBg)}>
-          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      <div className="flex items-center gap-4">
+        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", colors.iconBg)}>
+          <Icon className="w-5 h-5 text-card" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-foreground text-sm sm:text-base">{title}</h4>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">{description}</p>
+          <h4 className="font-medium text-foreground text-sm">{title}</h4>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 text-primary shrink-0">
-          <span className="text-xs sm:text-sm font-medium hidden sm:block">{action}</span>
+        <div className="flex items-center gap-2 text-action shrink-0">
+          <span className="text-xs font-medium hidden sm:block">{action}</span>
           <ArrowRight className="w-4 h-4" />
         </div>
       </div>
