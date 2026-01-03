@@ -12,15 +12,20 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen w-full bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 w-full overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-screen md:h-auto w-full overflow-hidden">
+        {/* Fixed header */}
         <MobileHeader />
-        <main className="flex-1 overflow-x-hidden pb-20 md:pb-0">
+        
+        {/* Scrollable content area */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-16 md:pb-0">
           <div className="w-full max-w-5xl mx-auto px-3 py-4 md:px-6 md:py-8">
             <PageTransition>
               {children}
             </PageTransition>
           </div>
         </main>
+        
+        {/* Fixed bottom nav */}
         <MobileNav />
       </div>
     </div>
