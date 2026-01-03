@@ -85,6 +85,7 @@ export default function PublicStorefront() {
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [bundleItems, setBundleItems] = useState<StorefrontItem[]>([]);
   const [businessName, setBusinessName] = useState<string | null>(null);
+  const [sellerUsername, setSellerUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -133,17 +134,20 @@ export default function PublicStorefront() {
         const storefrontData = data as unknown as Storefront;
         setStorefront(storefrontData);
         
-        // Fetch business name from the seller's profile
+        // Fetch business name and username from the seller's profile
         if (storefrontData.user_id) {
           const { data: profileData } = await supabase
             .from("public_profiles" as any)
-            .select("business_name")
+            .select("business_name, username")
             .eq("user_id", storefrontData.user_id)
             .maybeSingle();
           
-          const profile = profileData as unknown as { business_name: string | null } | null;
+          const profile = profileData as unknown as { business_name: string | null; username: string | null } | null;
           if (profile?.business_name) {
             setBusinessName(profile.business_name);
+          }
+          if (profile?.username) {
+            setSellerUsername(profile.username);
           }
         }
         
@@ -273,7 +277,13 @@ export default function PublicStorefront() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
+          {sellerUsername ? (
+            <Link to={`/p/@${sellerUsername}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              {businessName || "Store"}
+            </Link>
+          ) : (
+            <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
+          )}
           {isPaid && (
             <span className="flex items-center gap-1 text-sm font-medium text-success">
               <CheckCircle className="w-4 h-4" />
