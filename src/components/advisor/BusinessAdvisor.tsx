@@ -9,11 +9,12 @@ import {
   SheetTitle,
   SheetTrigger 
 } from "@/components/ui/sheet";
-import { Sparkles, Send, X, Loader2, TrendingUp } from "lucide-react";
+import { Sparkles, Send, Loader2, TrendingUp, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useVoice } from "@/hooks/useVoice";
 
 type Message = {
   role: "user" | "assistant";
@@ -42,10 +43,40 @@ export function BusinessAdvisor() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const { 
+    isListening, 
+    isSpeaking, 
+    isSupported: voiceSupported,
+    startListening, 
+    stopListening, 
+    speak, 
+    stopSpeaking 
+  } = useVoice({
+    language,
+    onTranscript: (text) => {
+      setInput(text);
+      // Auto-send after voice input
+      setTimeout(() => sendMessage(text), 300);
+    }
+  });
+
   const suggestions = language === "es" ? SUGGESTIONS_ES : SUGGESTIONS_EN;
+
+  // Auto-speak completed assistant messages
+  const lastMessageRef = useRef<string>("");
+  useEffect(() => {
+    if (messages.length > 0 && autoSpeak && !isLoading) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.role === "assistant" && lastMsg.content && lastMsg.content !== lastMessageRef.current) {
+        lastMessageRef.current = lastMsg.content;
+        speak(lastMsg.content);
+      }
+    }
+  }, [messages, isLoading, autoSpeak, speak]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -260,6 +291,60 @@ export function BusinessAdvisor() {
         </ScrollArea>
 
         <form onSubmit={handleSubmit} className="p-4 border-t bg-background">
+          {/* Voice controls */}
+          {voiceSupported && (
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={isListening ? "destructive" : "outline"}
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isLoading}
+                  className="gap-2"
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff className="w-4 h-4" />
+                      {language === "es" ? "Parar" : "Stop"}
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4" />
+                      {language === "es" ? "Hablar" : "Speak"}
+                    </>
+                  )}
+                </Button>
+                {isListening && (
+                  <span className="text-xs text-muted-foreground animate-pulse">
+                    {language === "es" ? "Escuchando..." : "Listening..."}
+                  </span>
+                )}
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (isSpeaking) {
+                    stopSpeaking();
+                  }
+                  setAutoSpeak(!autoSpeak);
+                }}
+                className="gap-2"
+              >
+                {autoSpeak ? (
+                  <>
+                    <Volume2 className="w-4 h-4" />
+                    {isSpeaking && <span className="text-xs">{language === "es" ? "Hablando..." : "Speaking..."}</span>}
+                  </>
+                ) : (
+                  <VolumeX className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          )}
+          
           <div className="flex gap-2">
             <Textarea
               ref={textareaRef}
@@ -269,7 +354,7 @@ export function BusinessAdvisor() {
               placeholder={language === "es" ? "Pregunta sobre tu negocio..." : "Ask about your business..."}
               className="min-h-[44px] max-h-32 resize-none"
               rows={1}
-              disabled={isLoading}
+              disabled={isLoading || isListening}
             />
             <Button 
               type="submit" 
