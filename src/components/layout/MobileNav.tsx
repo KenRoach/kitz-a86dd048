@@ -16,8 +16,8 @@ export function MobileNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/50 md:hidden safe-area-bottom">
-      <div className="flex items-center justify-around py-1 px-0.5">
+    <nav className="shrink-0 bg-background border-t border-border/50 md:hidden safe-area-bottom">
+      <div className="flex items-center justify-around py-1.5 px-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
