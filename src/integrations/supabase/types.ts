@@ -109,6 +109,7 @@ export type Database = {
           storefront_image_url: string | null
           updated_at: string
           user_id: string
+          username: string | null
           website: string | null
         }
         Insert: {
@@ -133,6 +134,7 @@ export type Database = {
           storefront_image_url?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
           website?: string | null
         }
         Update: {
@@ -157,6 +159,7 @@ export type Database = {
           storefront_image_url?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           website?: string | null
         }
         Relationships: []

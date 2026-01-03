@@ -11,7 +11,10 @@ import {
   ArrowUpRight,
   Copy,
   Check,
-  ShoppingBag
+  ShoppingBag,
+  Share2,
+  Twitter,
+  Facebook
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -56,26 +59,50 @@ export default function PublicProfile() {
         return;
       }
 
-      // Fetch profile by user_id
-      const { data: profileData, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", profileId)
-        .maybeSingle();
+      // Check if it's a username (starts with @) or user_id
+      const isUsername = profileId.startsWith("@");
+      const lookupValue = isUsername ? profileId.slice(1) : profileId;
 
-      if (error || !profileData) {
-        setNotFound(true);
-        setLoading(false);
-        return;
+      let profileData;
+      
+      if (isUsername) {
+        // Fetch by username
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("username", lookupValue)
+          .maybeSingle();
+        
+        if (error || !data) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+        profileData = data;
+      } else {
+        // Fetch by user_id
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", lookupValue)
+          .maybeSingle();
+        
+        if (error || !data) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+        profileData = data;
       }
 
       setProfile(profileData as Profile);
 
       // Fetch active storefronts for this user
+      const userId = (profileData as any).user_id;
       const { data: storefrontData } = await supabase
         .from("storefronts")
         .select("id, title, price, image_url, slug, status")
-        .eq("user_id", profileId)
+        .eq("user_id", userId)
         .eq("status", "sent")
         .order("created_at", { ascending: false })
         .limit(6);
@@ -90,11 +117,28 @@ export default function PublicProfile() {
     fetchProfile();
   }, [profileId]);
 
+  const pageUrl = window.location.href;
+  const shareText = `Check out ${profile?.business_name || "this business"}! ✨`;
+
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(pageUrl);
     setCopied(true);
     toast.success("Link copied!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = `${shareText} ${pageUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleShareTwitter = () => {
+    const text = `${shareText}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(pageUrl)}`, "_blank");
+  };
+
+  const handleShareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`, "_blank");
   };
 
   const handleWhatsApp = () => {
@@ -147,17 +191,34 @@ export default function PublicProfile() {
           <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 via-transparent to-orange-500/20" />
         </div>
 
-        {/* Floating share button */}
-        <button
-          onClick={handleCopyLink}
-          className="absolute top-6 right-6 z-20 p-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all group"
-        >
-          {copied ? (
-            <Check className="w-5 h-5 text-green-400" />
-          ) : (
-            <Copy className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-          )}
-        </button>
+        {/* Floating share buttons */}
+        <div className="absolute top-6 right-6 z-20 flex gap-2">
+          <button
+            onClick={handleShareWhatsApp}
+            className="p-3 rounded-full bg-green-500/20 backdrop-blur-xl border border-green-500/30 hover:bg-green-500/30 transition-all"
+            title="Share on WhatsApp"
+          >
+            <MessageCircle className="w-5 h-5 text-green-400" />
+          </button>
+          <button
+            onClick={handleShareTwitter}
+            className="p-3 rounded-full bg-blue-500/20 backdrop-blur-xl border border-blue-500/30 hover:bg-blue-500/30 transition-all"
+            title="Share on Twitter"
+          >
+            <Twitter className="w-5 h-5 text-blue-400" />
+          </button>
+          <button
+            onClick={handleCopyLink}
+            className="p-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all group"
+            title="Copy link"
+          >
+            {copied ? (
+              <Check className="w-5 h-5 text-green-400" />
+            ) : (
+              <Copy className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+            )}
+          </button>
+        </div>
 
         {/* Content at bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">

@@ -75,6 +75,7 @@ interface ProfileData {
   payment_pluxee: boolean;
   latitude: number | null;
   longitude: number | null;
+  username: string | null;
 }
 
 export default function Admin() {
@@ -102,6 +103,7 @@ export default function Admin() {
     payment_pluxee: false,
     latitude: null,
     longitude: null,
+    username: null,
   });
   
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -110,7 +112,9 @@ export default function Admin() {
   const [storefrontPreview, setStorefrontPreview] = useState<string | null>(null);
   const [profileLinkCopied, setProfileLinkCopied] = useState(false);
 
-  const profileLink = user ? `${window.location.origin}/p/${user.id}` : "";
+  const profileLink = profile.username 
+    ? `${window.location.origin}/p/@${profile.username}` 
+    : user ? `${window.location.origin}/p/${user.id}` : "";
 
   const handleCopyProfileLink = () => {
     navigator.clipboard.writeText(profileLink);
@@ -153,6 +157,7 @@ export default function Admin() {
           payment_pluxee: (data as any).payment_pluxee ?? false,
           latitude: (data as any).latitude || null,
           longitude: (data as any).longitude || null,
+          username: (data as any).username || null,
         });
         setLogoPreview((data as any).logo_url);
         setStorefrontPreview((data as any).storefront_image_url);
@@ -231,6 +236,9 @@ export default function Admin() {
       const phoneCountry = COUNTRIES.find(c => c.code === profile.phone_country);
       const fullPhone = profile.phone ? `${phoneCountry?.phoneCode || ""} ${profile.phone}`.trim() : null;
 
+      // Clean username - lowercase, no spaces, alphanumeric only
+      const cleanUsername = profile.username?.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") || null;
+
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -251,6 +259,7 @@ export default function Admin() {
           payment_pluxee: profile.payment_pluxee,
           latitude: profile.latitude,
           longitude: profile.longitude,
+          username: cleanUsername,
         } as any)
         .eq("user_id", user.id);
 
@@ -363,6 +372,28 @@ export default function Admin() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Username / Profile Link */}
+          <div className="pt-4 border-t border-border">
+            <Label htmlFor="username" className="text-muted-foreground">Profile username</Label>
+            <div className="flex gap-2 mt-1.5">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                <Input
+                  id="username"
+                  value={profile.username || ""}
+                  onChange={(e) => updateProfile("username", e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                  placeholder="yourbusiness"
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            {profile.username && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Your profile: <span className="font-mono text-foreground">{profileLink}</span>
+              </p>
+            )}
           </div>
         </section>
 
