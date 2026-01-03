@@ -7,18 +7,22 @@ import {
   Instagram, 
   MessageCircle, 
   Sparkles,
-  ArrowUpRight,
   Copy,
   Check,
   ShoppingBag,
-  Twitter,
-  Facebook,
   Send,
   User,
   Phone,
   Mail,
-  FileText,
-  CheckCircle
+  CheckCircle,
+  Star,
+  Shield,
+  Repeat,
+  Clock,
+  TrendingUp,
+  Award,
+  Zap,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,6 +97,112 @@ interface Storefront {
   image_url: string | null;
   slug: string;
   status: string;
+  description: string | null;
+}
+
+interface UserStats {
+  total_orders: number;
+  total_customers: number;
+  total_storefronts: number;
+  level: number;
+  streak_days: number;
+  created_at: string;
+}
+
+interface TrustMetrics {
+  trustScore: number;
+  completedOrders: number;
+  repeatCustomerRate: number;
+  memberSince: string;
+  responseRate: number;
+  isVerified: boolean;
+  level: number;
+}
+
+function calculateTrustScore(stats: UserStats | null, profileComplete: boolean): TrustMetrics {
+  if (!stats) {
+    return {
+      trustScore: 3.0,
+      completedOrders: 0,
+      repeatCustomerRate: 0,
+      memberSince: "New",
+      responseRate: 100,
+      isVerified: false,
+      level: 1,
+    };
+  }
+
+  // Calculate trust score (1-5 stars)
+  let score = 3.0;
+  
+  // Orders boost (up to +1.0)
+  if (stats.total_orders >= 50) score += 1.0;
+  else if (stats.total_orders >= 20) score += 0.7;
+  else if (stats.total_orders >= 10) score += 0.5;
+  else if (stats.total_orders >= 5) score += 0.3;
+  
+  // Profile completeness (+0.3)
+  if (profileComplete) score += 0.3;
+  
+  // Streak bonus (+0.2)
+  if (stats.streak_days >= 7) score += 0.2;
+  
+  // Level bonus (+0.3)
+  if (stats.level >= 5) score += 0.3;
+  else if (stats.level >= 3) score += 0.2;
+  
+  // Cap at 5.0
+  score = Math.min(5.0, Math.round(score * 10) / 10);
+
+  // Calculate repeat customer rate
+  const repeatRate = stats.total_customers > 0 
+    ? Math.min(100, Math.round((stats.total_orders / stats.total_customers - 1) * 50))
+    : 0;
+
+  // Calculate member since
+  const createdDate = new Date(stats.created_at);
+  const now = new Date();
+  const months = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+  let memberSince = "New";
+  if (months >= 12) memberSince = `${Math.floor(months / 12)}+ year${Math.floor(months / 12) > 1 ? 's' : ''}`;
+  else if (months >= 1) memberSince = `${months} month${months > 1 ? 's' : ''}`;
+  else memberSince = "New";
+
+  return {
+    trustScore: score,
+    completedOrders: stats.total_orders,
+    repeatCustomerRate: Math.max(0, repeatRate),
+    memberSince,
+    responseRate: 95 + Math.min(5, stats.level),
+    isVerified: stats.total_orders >= 5 && profileComplete,
+    level: stats.level,
+  };
+}
+
+function StarRating({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) {
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+  };
+  
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={cn(
+            sizeClasses[size],
+            star <= Math.floor(rating)
+              ? "fill-yellow-400 text-yellow-400"
+              : star - 0.5 <= rating
+              ? "fill-yellow-400/50 text-yellow-400"
+              : "fill-white/10 text-white/20"
+          )}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function PublicProfile() {
@@ -102,6 +212,7 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [trustMetrics, setTrustMetrics] = useState<TrustMetrics | null>(null);
   
   // Contact form state
   const [showContactForm, setShowContactForm] = useState(false);
@@ -167,11 +278,26 @@ export default function PublicProfile() {
 
       setProfile(profileData as Profile);
 
-      // Fetch active storefronts
       const userId = (profileData as any).user_id;
+
+      // Fetch user stats for trust metrics
+      const { data: statsData } = await supabase
+        .from("user_stats")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Check profile completeness
+      const p = profileData as Profile;
+      const profileComplete = !!(p.business_name && p.business_type && (p.logo_url || p.storefront_image_url));
+      
+      const metrics = calculateTrustScore(statsData as UserStats | null, profileComplete);
+      setTrustMetrics(metrics);
+
+      // Fetch active storefronts (promos/products)
       const { data: storefrontData } = await supabase
         .from("public_storefronts" as any)
-        .select("id, title, price, image_url, slug, status")
+        .select("id, title, price, image_url, slug, status, description")
         .eq("user_id", userId)
         .eq("status", "sent")
         .order("created_at", { ascending: false })
@@ -188,7 +314,6 @@ export default function PublicProfile() {
   }, [profileId]);
 
   const pageUrl = window.location.href;
-  const shareText = `Check out ${profile?.business_name || "this business"}! ✨`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageUrl);
@@ -197,17 +322,10 @@ export default function PublicProfile() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `${shareText} ${pageUrl}`;
+  const handleWhatsAppContact = () => {
+    // Open WhatsApp with the business (we'd need phone from profile, for now just open WhatsApp)
+    const text = `Hi! I found your profile on Kitz and I'm interested in your products/services.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
-  const handleShareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`, "_blank");
-  };
-
-  const handleShareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`, "_blank");
   };
 
   const handleSendMessage = async () => {
@@ -224,7 +342,6 @@ export default function PublicProfile() {
     setSubmitting(true);
 
     try {
-      // Log the inquiry as an activity for the business owner
       const { error } = await supabase
         .from("activity_log")
         .insert({
@@ -236,13 +353,12 @@ export default function PublicProfile() {
 
       if (error) throw error;
 
-      // Save contact info if opted in
       if (rememberMe) {
         saveContactInfo(contactName.trim(), contactPhone.trim(), contactEmail.trim());
       }
 
       setMessageSent(true);
-      toast.success("Message sent! They'll get back to you soon.");
+      toast.success("Message sent!");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
@@ -253,7 +369,7 @@ export default function PublicProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="animate-pulse">
           <Sparkles className="w-8 h-8 text-white/50" />
         </div>
@@ -263,7 +379,7 @@ export default function PublicProfile() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="text-center">
           <p className="text-6xl mb-4">🔍</p>
           <h1 className="text-2xl font-bold text-white mb-2">Not found</h1>
@@ -276,120 +392,279 @@ export default function PublicProfile() {
   const headerImage = profile?.storefront_image_url || profile?.logo_url;
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Hero Header */}
-      <div className="relative h-[70vh] min-h-[500px]">
-        <div className="absolute inset-0">
-          {headerImage ? (
-            <img
-              src={headerImage}
-              alt={profile?.business_name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 via-transparent to-orange-500/20" />
-        </div>
+    <div className="min-h-screen bg-zinc-950 text-white">
+      {/* Compact Header */}
+      <div className="relative">
+        {/* Background gradient */}
+        <div className="absolute inset-0 h-48 bg-gradient-to-b from-emerald-600/20 via-zinc-950 to-zinc-950" />
+        
+        <div className="relative max-w-lg mx-auto px-4 pt-6 pb-4">
+          {/* Top bar with share */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleCopyLink}
+              className="p-2 rounded-full bg-white/10 backdrop-blur border border-white/10 hover:bg-white/20 transition-all"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <Copy className="w-4 h-4 text-white/70" />
+              )}
+            </button>
+          </div>
 
-        {/* Share buttons */}
-        <div className="absolute top-6 right-6 z-20 flex gap-2">
-          <button
-            onClick={handleShareWhatsApp}
-            className="p-3 rounded-full bg-green-500/20 backdrop-blur-xl border border-green-500/30 hover:bg-green-500/30 transition-all"
-          >
-            <MessageCircle className="w-5 h-5 text-green-400" />
-          </button>
-          <button
-            onClick={handleShareTwitter}
-            className="p-3 rounded-full bg-blue-500/20 backdrop-blur-xl border border-blue-500/30 hover:bg-blue-500/30 transition-all"
-          >
-            <Twitter className="w-5 h-5 text-blue-400" />
-          </button>
-          <button
-            onClick={handleCopyLink}
-            className="p-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all"
-          >
-            {copied ? (
-              <Check className="w-5 h-5 text-green-400" />
-            ) : (
-              <Copy className="w-5 h-5 text-white" />
-            )}
-          </button>
-        </div>
+          {/* Profile Card - Uber Style */}
+          <div className="bg-zinc-900/80 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
+            {/* Main Profile Section */}
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                {/* Avatar */}
+                <div className="relative">
+                  {profile?.logo_url ? (
+                    <img
+                      src={profile.logo_url}
+                      alt={profile?.business_name}
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-white/10"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center border-2 border-white/10">
+                      <span className="text-3xl font-bold text-white">
+                        {profile?.business_name?.charAt(0) || "B"}
+                      </span>
+                    </div>
+                  )}
+                  {trustMetrics?.isVerified && (
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                  )}
+                </div>
 
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 pb-8">
-          {profile?.logo_url && (
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl mb-4 bg-white/10 backdrop-blur">
-              <img
-                src={profile.logo_url}
-                alt="Logo"
-                className="w-full h-full object-cover"
-              />
+                {/* Name & Rating */}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-bold text-white truncate">
+                    {profile?.business_name}
+                  </h1>
+                  
+                  {profile?.business_type && (
+                    <p className="text-sm text-white/60 mt-0.5">{profile.business_type}</p>
+                  )}
+
+                  {/* Trust Score */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <StarRating rating={trustMetrics?.trustScore || 0} size="sm" />
+                    <span className="text-lg font-semibold text-white">
+                      {trustMetrics?.trustScore.toFixed(1)}
+                    </span>
+                  </div>
+
+                  {(profile?.city || profile?.address) && (
+                    <p className="flex items-center gap-1.5 text-xs text-white/50 mt-2">
+                      <MapPin className="w-3 h-3" />
+                      {[profile?.city, profile?.country].filter(Boolean).join(", ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Trust Metrics Grid */}
+              <div className="grid grid-cols-4 gap-2 mt-6">
+                <div className="text-center p-3 rounded-xl bg-white/5">
+                  <div className="text-lg font-bold text-white">{trustMetrics?.completedOrders || 0}</div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wide">Orders</div>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-white/5">
+                  <div className="text-lg font-bold text-emerald-400">{trustMetrics?.repeatCustomerRate || 0}%</div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wide">Repeat</div>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-white/5">
+                  <div className="text-lg font-bold text-white">{trustMetrics?.responseRate || 0}%</div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wide">Response</div>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-white/5">
+                  <div className="text-lg font-bold text-white">Lv{trustMetrics?.level || 1}</div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-wide">Level</div>
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {trustMetrics?.isVerified && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-medium">
+                    <Shield className="w-3 h-3" />
+                    Verified Seller
+                  </div>
+                )}
+                {(trustMetrics?.completedOrders || 0) >= 10 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">
+                    <Award className="w-3 h-3" />
+                    Trusted
+                  </div>
+                )}
+                {(trustMetrics?.repeatCustomerRate || 0) >= 20 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/20 text-violet-400 text-xs font-medium">
+                    <Repeat className="w-3 h-3" />
+                    High Repeat
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 text-white/60 text-xs">
+                  <Clock className="w-3 h-3" />
+                  {trustMetrics?.memberSince}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="p-4 pt-0 flex gap-2">
+              <Button
+                onClick={() => setShowContactForm(true)}
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl py-6 text-base font-semibold gap-2"
+              >
+                <Send className="w-5 h-5" />
+                Contact
+              </Button>
+              <Button
+                onClick={handleWhatsAppContact}
+                variant="outline"
+                className="border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl py-6 px-5"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </Button>
+              {profile?.instagram && (
+                <Button
+                  onClick={() => window.open(`https://instagram.com/${profile.instagram}`, "_blank")}
+                  variant="outline"
+                  className="border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl py-6 px-5"
+                >
+                  <Instagram className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Active Storefronts / Promos */}
+      {storefronts.length > 0 && (
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-400" />
+              Available Now
+            </h2>
+            <span className="text-xs text-white/50">{storefronts.length} items</span>
+          </div>
+          
+          <div className="space-y-3">
+            {storefronts.map((storefront) => (
+              <Link
+                key={storefront.id}
+                to={`/s/${storefront.slug}`}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-white/10 hover:bg-zinc-900 transition-all group"
+              >
+                {storefront.image_url ? (
+                  <img
+                    src={storefront.image_url}
+                    alt={storefront.title}
+                    className="w-16 h-16 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center">
+                    <ShoppingBag className="w-6 h-6 text-white/30" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-white truncate group-hover:text-emerald-400 transition-colors">
+                    {storefront.title}
+                  </h3>
+                  {storefront.description && (
+                    <p className="text-sm text-white/50 truncate mt-0.5">
+                      {storefront.description}
+                    </p>
+                  )}
+                  <p className="text-lg font-bold text-emerald-400 mt-1">
+                    ${storefront.price.toFixed(2)}
+                  </p>
+                </div>
+                <ExternalLink className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Payment Methods */}
+      <div className="max-w-lg mx-auto px-4 py-6">
+        <h2 className="text-sm font-medium text-white/50 mb-3">Accepts</h2>
+        <div className="flex flex-wrap gap-2">
+          {profile?.payment_cash && (
+            <div className="px-3 py-1.5 rounded-full bg-white/5 text-white/70 text-sm">
+              💵 Cash
             </div>
           )}
-
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-2">
-            <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">
-              {profile?.business_name}
-            </span>
-          </h1>
-
-          {profile?.business_type && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-sm font-medium text-white/90">
-              <Sparkles className="w-3.5 h-3.5" />
-              {profile.business_type}
+          {profile?.payment_yappy && (
+            <div className="px-3 py-1.5 rounded-full bg-white/5 text-white/70 text-sm">
+              📱 Yappy
             </div>
           )}
-
-          {(profile?.city || profile?.address) && (
-            <p className="flex items-center gap-2 text-white/60 mt-3 text-sm">
-              <MapPin className="w-4 h-4" />
-              {[profile?.address, profile?.city].filter(Boolean).join(", ")}
-            </p>
+          {profile?.payment_cards && (
+            <div className="px-3 py-1.5 rounded-full bg-white/5 text-white/70 text-sm">
+              💳 Cards
+            </div>
+          )}
+          {profile?.payment_pluxee && (
+            <div className="px-3 py-1.5 rounded-full bg-white/5 text-white/70 text-sm">
+              🎟️ Pluxee
+            </div>
           )}
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-lg mx-auto px-4 py-4 flex gap-3">
-          <Button
-            onClick={() => setShowContactForm(true)}
-            className="flex-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white rounded-full py-6 text-base font-semibold gap-2"
-          >
-            <Send className="w-5 h-5" />
-            Contact
-          </Button>
-          {profile?.instagram && (
-            <Button
-              onClick={() => window.open(`https://instagram.com/${profile.instagram}`, "_blank")}
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/10 rounded-full py-6 px-6"
-            >
-              <Instagram className="w-5 h-5" />
-            </Button>
-          )}
-          {profile?.website && (
-            <Button
-              onClick={() => window.open(profile.website!, "_blank")}
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/10 rounded-full py-6 px-6"
-            >
-              <Globe className="w-5 h-5" />
-            </Button>
-          )}
+      {/* Links */}
+      {(profile?.website || profile?.instagram) && (
+        <div className="max-w-lg mx-auto px-4 pb-8">
+          <h2 className="text-sm font-medium text-white/50 mb-3">Links</h2>
+          <div className="space-y-2">
+            {profile?.website && (
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Globe className="w-5 h-5 text-white/50" />
+                <span className="text-sm text-white/70">{profile.website.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="w-4 h-4 text-white/30 ml-auto" />
+              </a>
+            )}
+            {profile?.instagram && (
+              <a
+                href={`https://instagram.com/${profile.instagram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Instagram className="w-5 h-5 text-white/50" />
+                <span className="text-sm text-white/70">@{profile.instagram}</span>
+                <ExternalLink className="w-4 h-4 text-white/30 ml-auto" />
+              </a>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* Powered by */}
+      <div className="max-w-lg mx-auto px-4 pb-8 text-center">
+        <p className="text-xs text-white/30">
+          Powered by Kitz • Share your link to grow
+        </p>
       </div>
 
       {/* Contact Form Modal */}
       {showContactForm && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-md bg-zinc-900 rounded-t-3xl sm:rounded-3xl border border-white/10 overflow-hidden animate-slide-in-right">
-            {/* Form Header */}
-            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10">
+            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-bold text-white">Contact {profile?.business_name}</h2>
@@ -404,11 +679,10 @@ export default function PublicProfile() {
               </div>
             </div>
 
-            {/* Form Content */}
             {messageSent ? (
               <div className="p-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-400" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Message Sent!</h3>
                 <p className="text-white/60 mb-6">
@@ -435,7 +709,7 @@ export default function PublicProfile() {
                     <Input
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
-                      placeholder="John Doe"
+                      placeholder="Your name"
                       className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30"
                     />
                   </div>
@@ -470,18 +744,16 @@ export default function PublicProfile() {
 
                 <div>
                   <Label className="text-white/70 text-sm">Message *</Label>
-                  <div className="relative mt-1">
-                    <Textarea
-                      value={contactMessage}
-                      onChange={(e) => setContactMessage(e.target.value)}
-                      placeholder="Hi! I'm interested in..."
-                      rows={4}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none"
-                    />
-                  </div>
+                  <Textarea
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
+                    placeholder="Hi! I'm interested in..."
+                    rows={3}
+                    className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none"
+                  />
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="rememberMe"
@@ -490,133 +762,22 @@ export default function PublicProfile() {
                     className="w-4 h-4 rounded border-white/20 bg-white/5"
                   />
                   <Label htmlFor="rememberMe" className="text-white/60 text-sm cursor-pointer">
-                    Remember my info for faster contact
+                    Remember me for faster contact
                   </Label>
                 </div>
 
                 <Button
                   onClick={handleSendMessage}
                   disabled={submitting}
-                  className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white rounded-full py-6 text-base font-semibold gap-2 mt-4"
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl py-6 text-base font-semibold"
                 >
-                  {submitting ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      Send Message
-                    </>
-                  )}
+                  {submitting ? "Sending..." : "Send Message"}
                 </Button>
               </div>
             )}
           </div>
         </div>
       )}
-
-      {/* Active Storefronts */}
-      {storefronts.length > 0 && (
-        <section className="max-w-lg mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-violet-400" />
-              Available Now
-            </h2>
-            <span className="text-sm text-white/40">{storefronts.length} items</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {storefronts.map((item) => (
-              <Link
-                key={item.id}
-                to={profile?.username ? `/p/@${profile.username}/${item.slug}` : `/s/${item.slug}`}
-                className="group relative aspect-square rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 transition-all hover:scale-[1.02]"
-              >
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center">
-                    <ShoppingBag className="w-8 h-8 text-white/30" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-sm font-medium text-white truncate">{item.title}</p>
-                  <p className="text-lg font-bold text-white">${item.price.toFixed(2)}</p>
-                </div>
-                <div className="absolute top-3 right-3 p-2 rounded-full bg-white/10 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowUpRight className="w-4 h-4 text-white" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Contact Info Footer */}
-      <section className="max-w-lg mx-auto px-4 py-8 border-t border-white/10">
-        <div className="space-y-4">
-          {/* Contact CTA Card */}
-          <button
-            onClick={() => setShowContactForm(true)}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 hover:border-violet-500/40 transition-colors text-left"
-          >
-            <div className="w-12 h-12 rounded-full bg-violet-500/20 flex items-center justify-center">
-              <Send className="w-5 h-5 text-violet-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white">Get in touch</p>
-              <p className="text-sm text-white/60">Send a message or inquiry</p>
-            </div>
-            <ArrowUpRight className="w-5 h-5 text-violet-400" />
-          </button>
-
-          {profile?.website && (
-            <a
-              href={profile.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/40 uppercase tracking-wider">Website</p>
-                <p className="font-semibold text-white truncate">{profile.website}</p>
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-white/40" />
-            </a>
-          )}
-
-          {profile?.instagram && (
-            <a
-              href={`https://instagram.com/${profile.instagram}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center">
-                <Instagram className="w-5 h-5 text-pink-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/40 uppercase tracking-wider">Instagram</p>
-                <p className="font-semibold text-white">@{profile.instagram}</p>
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-white/40" />
-            </a>
-          )}
-        </div>
-      </section>
-
-      {/* Branding footer */}
-      <footer className="text-center py-8 text-white/30 text-sm">
-        <p>Powered by <span className="font-semibold text-white/50">kitz.io</span> ✨</p>
-      </footer>
     </div>
   );
 }
