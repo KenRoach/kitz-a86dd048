@@ -174,14 +174,14 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     switch (step) {
       case "what":
         return (
-          <div className="space-y-5 animate-fade-in">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-xl bg-primary/10">
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-foreground">What are you selling?</h3>
-                <p className="text-sm text-muted-foreground">Create a shareable order link</p>
+                <h3 className="text-base sm:text-lg font-medium text-foreground">What are you selling?</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Create a shareable order link</p>
               </div>
             </div>
 
@@ -189,17 +189,17 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Chicken Bowl, 24 Cupcakes, Haircut..."
-                className="text-lg py-5"
+                placeholder="e.g., Chicken Bowl, Cupcakes..."
+                className="text-base py-4 sm:py-5"
                 autoFocus
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Price</label>
+                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Price</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">$</span>
                   <Input
                     type="number"
                     step="0.01"
@@ -207,24 +207,24 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     placeholder="0.00"
-                    className="pl-8 text-lg"
+                    className="pl-7 sm:pl-8 text-base sm:text-lg"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Quantity</label>
+                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Quantity</label>
                 <Input
                   type="number"
                   min="1"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="text-lg"
+                  className="text-base sm:text-lg"
                 />
               </div>
             </div>
 
             {parseFloat(price) > 0 && parseInt(quantity) > 1 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Total: <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
               </p>
             )}
@@ -233,7 +233,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             {imagePreview ? (
               <div className="relative">
-                <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover rounded-xl" />
+                <img src={imagePreview} alt="Preview" className="w-full h-24 sm:h-32 object-cover rounded-xl" />
                 <button onClick={removeImage} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full">
                   <X className="w-4 h-4" />
                 </button>
@@ -241,10 +241,10 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
+                className="w-full py-3 sm:py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
               >
                 <Upload className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Add photo (optional)</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Add photo (optional)</span>
               </button>
             )}
           </div>
@@ -252,24 +252,24 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
 
       case "confirm":
         return (
-          <div className="space-y-5 animate-fade-in">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-foreground">Ready to share?</h3>
+          <div className="space-y-4 animate-fade-in">
+            <div className="mb-3">
+              <h3 className="text-base sm:text-lg font-medium text-foreground">Ready to share?</h3>
             </div>
 
             <div className="bg-muted/50 rounded-xl overflow-hidden">
               {imagePreview && (
-                <img src={imagePreview} alt={title} className="w-full h-24 object-cover" />
+                <img src={imagePreview} alt={title} className="w-full h-20 sm:h-24 object-cover" />
               )}
-              <div className="p-4 space-y-3">
+              <div className="p-3 sm:p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium text-foreground">{title}</p>
+                    <p className="font-medium text-foreground text-sm sm:text-base">{title}</p>
                     {parseInt(quantity) > 1 && (
-                      <p className="text-xs text-muted-foreground">Qty: {quantity}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Qty: {quantity}</p>
                     )}
                   </div>
-                  <p className="text-xl font-semibold text-foreground">${totalPrice.toFixed(2)}</p>
+                  <p className="text-lg sm:text-xl font-semibold text-foreground">${totalPrice.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -278,25 +278,25 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
               <button
                 onClick={() => setSendNow(true)}
                 className={cn(
-                  "flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all",
+                  "flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-medium transition-all",
                   sendNow
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border text-muted-foreground hover:border-primary/50"
                 )}
               >
-                <Send className="w-4 h-4 inline mr-2" />
+                <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1.5 sm:mr-2" />
                 Share now
               </button>
               <button
                 onClick={() => setSendNow(false)}
                 className={cn(
-                  "flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all",
+                  "flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-medium transition-all",
                   !sendNow
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border text-muted-foreground hover:border-primary/50"
                 )}
               >
-                Save as draft
+                Save draft
               </button>
             </div>
           </div>
@@ -306,29 +306,29 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && resetAndClose()}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-        <div className="flex gap-1 p-4 pb-0 sticky top-0 bg-background z-10">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto p-0 gap-0 overflow-hidden max-h-[85vh] overflow-y-auto rounded-2xl">
+        <div className="flex gap-1 p-3 sm:p-4 pb-0 sticky top-0 bg-background z-10">
           {steps.map((s, i) => (
             <div key={s} className={cn("h-1 flex-1 rounded-full transition-colors", i <= currentIndex ? "bg-primary" : "bg-muted")} />
           ))}
         </div>
 
-        <div className="p-6">{renderStep()}</div>
+        <div className="p-4 sm:p-6">{renderStep()}</div>
 
-        <div className="flex items-center justify-between p-6 pt-0 sticky bottom-0 bg-background">
-          <Button variant="ghost" onClick={handleBack} disabled={currentIndex === 0} className={cn(currentIndex === 0 && "invisible")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+        <div className="flex items-center justify-between p-4 sm:p-6 pt-0 sticky bottom-0 bg-background">
+          <Button variant="ghost" size="sm" onClick={handleBack} disabled={currentIndex === 0} className={cn(currentIndex === 0 && "invisible")}>
+            <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
 
           {step === "confirm" ? (
-            <Button onClick={handleCreate} disabled={loading}>
-              {loading ? "Creating..." : <><Check className="w-4 h-4 mr-2" />{sendNow ? "Create & Share" : "Save Draft"}</>}
+            <Button onClick={handleCreate} disabled={loading} size="sm">
+              {loading ? "Creating..." : <><Check className="w-4 h-4 mr-1 sm:mr-2" />{sendNow ? "Create & Share" : "Save Draft"}</>}
             </Button>
           ) : (
-            <Button onClick={handleNext} disabled={!canProceed()}>
+            <Button onClick={handleNext} disabled={!canProceed()} size="sm">
               Continue
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
             </Button>
           )}
         </div>
