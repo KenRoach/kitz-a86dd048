@@ -136,18 +136,20 @@ export default function PublicStorefront() {
         
         // Fetch business name and username from the seller's profile
         if (storefrontData.user_id) {
-          const { data: profileData } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from("public_profiles" as any)
             .select("business_name, username")
             .eq("user_id", storefrontData.user_id)
             .maybeSingle();
           
-          const profile = profileData as unknown as { business_name: string | null; username: string | null } | null;
-          if (profile?.business_name) {
-            setBusinessName(profile.business_name);
-          }
-          if (profile?.username) {
-            setSellerUsername(profile.username);
+          if (!profileError && profileData) {
+            const profile = profileData as unknown as { business_name: string | null; username: string | null };
+            if (profile.business_name) {
+              setBusinessName(profile.business_name.trim());
+            }
+            if (profile.username) {
+              setSellerUsername(profile.username);
+            }
           }
         }
         
