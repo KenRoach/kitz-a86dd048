@@ -152,21 +152,27 @@ export default function Storefronts() {
 
         {/* Filter tabs */}
         {storefronts.length > 0 && (
-          <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-1 animate-fade-in scrollbar-hide" style={{ animationDelay: "50ms" }}>
+          <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-1 animate-fade-in scrollbar-hide relative z-10" style={{ animationDelay: "50ms" }}>
             {(["all", "draft", "sent", "paid"] as FilterStatus[]).map((status) => (
               <button
                 key={status}
+                type="button"
                 onClick={() => setFilter(status)}
                 className={cn(
-                  "px-2.5 py-1.5 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0",
+                  "px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer select-none active:scale-95",
                   filter === status
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 {statusLabels[status]}
                 {counts[status] > 0 && (
-                  <span className="ml-1 md:ml-1.5 text-[10px] md:text-xs opacity-70">({counts[status]})</span>
+                  <span className={cn(
+                    "ml-1.5 md:ml-2 text-[10px] md:text-xs",
+                    filter === status ? "opacity-80" : "opacity-60"
+                  )}>
+                    ({counts[status]})
+                  </span>
                 )}
               </button>
             ))}
