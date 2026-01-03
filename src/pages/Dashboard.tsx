@@ -7,6 +7,7 @@ import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
+import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -342,6 +343,8 @@ export default function Dashboard() {
           />
         )}
       </div>
+      
+      <BusinessAdvisor />
     </AppLayout>
   );
 }
