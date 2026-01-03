@@ -2,19 +2,12 @@ import { useState } from "react";
 import { 
   MessageCircle, 
   Instagram, 
-  Facebook, 
-  Mail, 
   Calendar, 
   Zap, 
-  CreditCard,
   MapPin,
-  BarChart3,
-  ShoppingBag,
   Check,
-  ChevronRight,
   ExternalLink
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -32,11 +25,11 @@ interface Integration {
 }
 
 const INTEGRATIONS: Integration[] = [
-  // Messaging
+  // Messaging - Most important for Panama
   {
     id: "whatsapp",
     name: "WhatsApp Business",
-    description: "Send order updates & chat with customers",
+    description: "Envía actualizaciones y chatea con clientes",
     icon: MessageCircle,
     color: "text-green-600",
     bgColor: "bg-green-500/10",
@@ -46,28 +39,18 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "instagram",
     name: "Instagram",
-    description: "Sync DMs & share storefronts to stories",
+    description: "Comparte storefronts en historias",
     icon: Instagram,
     color: "text-pink-600",
     bgColor: "bg-gradient-to-br from-purple-500/10 to-pink-500/10",
     status: "available",
     category: "social",
   },
-  {
-    id: "facebook",
-    name: "Facebook / Messenger",
-    description: "Manage page messages & marketplace",
-    icon: Facebook,
-    color: "text-blue-600",
-    bgColor: "bg-blue-500/10",
-    status: "coming_soon",
-    category: "social",
-  },
-  // Productivity
+  // Productivity - Available in Panama
   {
     id: "google_calendar",
     name: "Google Calendar",
-    description: "Sync bookings & appointments",
+    description: "Sincroniza citas y reservaciones",
     icon: Calendar,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
@@ -75,56 +58,25 @@ const INTEGRATIONS: Integration[] = [
     category: "productivity",
   },
   {
-    id: "mailchimp",
-    name: "Mailchimp",
-    description: "Email marketing & customer lists",
-    icon: Mail,
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-500/10",
-    status: "available",
-    category: "productivity",
-  },
-  {
     id: "zapier",
     name: "Zapier",
-    description: "Connect 5,000+ apps automatically",
+    description: "Conecta +5,000 apps automáticamente",
     icon: Zap,
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
     status: "available",
     category: "productivity",
   },
-  // Analytics
+  // Analytics - Available in Panama
   {
     id: "google_business",
     name: "Google Business Profile",
-    description: "Manage your Google listing & reviews",
+    description: "Gestiona tu perfil y reseñas en Google",
     icon: MapPin,
     color: "text-red-500",
     bgColor: "bg-red-500/10",
     status: "available",
     category: "analytics",
-  },
-  {
-    id: "google_analytics",
-    name: "Google Analytics",
-    description: "Track storefront visits & conversions",
-    icon: BarChart3,
-    color: "text-orange-600",
-    bgColor: "bg-orange-500/10",
-    status: "coming_soon",
-    category: "analytics",
-  },
-  // E-commerce
-  {
-    id: "shopify",
-    name: "Shopify",
-    description: "Sync products & inventory",
-    icon: ShoppingBag,
-    color: "text-green-600",
-    bgColor: "bg-green-500/10",
-    status: "coming_soon",
-    category: "productivity",
   },
 ];
 
@@ -166,16 +118,10 @@ function IntegrationCard({ integration, isConnected, onToggle }: IntegrationCard
         </div>
       </div>
       
-      {isComingSoon ? (
-        <Button variant="ghost" size="sm" disabled className="text-muted-foreground">
-          Notify me
-        </Button>
-      ) : (
-        <Switch
-          checked={isConnected}
-          onCheckedChange={(checked) => onToggle(integration.id, checked)}
-        />
-      )}
+      <Switch
+        checked={isConnected}
+        onCheckedChange={(checked) => onToggle(integration.id, checked)}
+      />
     </div>
   );
 }
