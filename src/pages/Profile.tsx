@@ -211,16 +211,15 @@ export default function Profile() {
                 )}
                 {language === "es" ? "Copiar enlace" : "Copy Link"}
               </Button>
-              <Link to={publicProfileUrl.replace(window.location.origin, "")} target="_blank">
-                <Button 
-                  variant="secondary" 
-                  size="sm"
-                  className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
-                >
-                  <ExternalLink className="w-4 h-4 mr-1" />
-                  {language === "es" ? "Ver perfil" : "View Profile"}
-                </Button>
-              </Link>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
+                onClick={() => window.open(publicProfileUrl, "_blank")}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                {language === "es" ? "Ver perfil" : "View Profile"}
+              </Button>
               <Button 
                 variant="secondary" 
                 size="sm"
