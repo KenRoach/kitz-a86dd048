@@ -7,6 +7,7 @@ import { Plus, Send, CheckCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ type FilterStatus = "all" | "draft" | "sent" | "paid";
 
 export default function Storefronts() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [loading, setLoading] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -131,18 +133,20 @@ export default function Storefronts() {
     paid: storefronts.filter((s) => s.status === "paid").length,
   };
 
+  const statusLabels = { all: t.all, draft: t.draft, sent: t.sent, paid: t.paid };
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 animate-fade-in">
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground">Storefronts</h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1 truncate">One link per order. Share and get paid.</p>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1 truncate">{t.storefrontsDesc}</p>
           </div>
           <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New</span>
+            <span className="hidden sm:inline">{t.new}</span>
           </Button>
         </div>
 
@@ -160,7 +164,7 @@ export default function Storefronts() {
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {statusLabels[status]}
                 {counts[status] > 0 && (
                   <span className="ml-1 md:ml-1.5 text-[10px] md:text-xs opacity-70">({counts[status]})</span>
                 )}
@@ -170,7 +174,7 @@ export default function Storefronts() {
         )}
 
         {/* Loading */}
-        {loading && <div className="text-center py-12 text-muted-foreground">Loading...</div>}
+        {loading && <div className="text-center py-12 text-muted-foreground">{t.loading}</div>}
 
         {/* Empty state */}
         {!loading && storefronts.length === 0 && (
@@ -178,11 +182,11 @@ export default function Storefronts() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
               <Plus className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No storefronts yet</h3>
-            <p className="text-muted-foreground mb-6">Create your first to start selling</p>
+            <h3 className="text-lg font-medium text-foreground mb-2">{t.noStorefrontsYet}</h3>
+            <p className="text-muted-foreground mb-6">{t.createFirstToStart}</p>
             <Button onClick={() => setWizardOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Create storefront
+              {t.createStorefront}
             </Button>
           </div>
         )}

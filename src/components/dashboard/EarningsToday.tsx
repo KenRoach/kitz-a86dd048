@@ -1,4 +1,5 @@
 import { TrendingUp, ArrowUpRight } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Earning {
   id: string;
@@ -13,10 +14,11 @@ interface EarningsTodayProps {
 }
 
 export function EarningsToday({ earnings, total }: EarningsTodayProps) {
+  const { t } = useLanguage();
   return (
     <div className="neu-card-flat p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">Today's Earnings</h3>
+        <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">{t.todaysEarnings}</h3>
         <div className="flex items-center gap-1 text-success">
           <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </div>
@@ -36,8 +38,8 @@ export function EarningsToday({ earnings, total }: EarningsTodayProps) {
       
       {earnings.length === 0 ? (
         <div className="py-4 sm:py-6 text-center rounded-xl bg-muted/50">
-          <p className="text-xs sm:text-sm text-muted-foreground">No payments yet today</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Earnings will appear here</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{t.noPaymentsYet}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t.earningsAppearHere}</p>
         </div>
       ) : (
         <div className="space-y-1.5 sm:space-y-2">
