@@ -1,10 +1,13 @@
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface MomentumScoreProps {
   score: number;
 }
 
 export function MomentumScore({ score }: MomentumScoreProps) {
+  const { t } = useLanguage();
+
   const getColor = () => {
     if (score >= 70) return "text-success";
     if (score >= 40) return "text-attention";
@@ -24,10 +27,10 @@ export function MomentumScore({ score }: MomentumScoreProps) {
   };
 
   const getMessage = () => {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good progress";
-    if (score >= 40) return "Building up";
-    return "Needs focus";
+    if (score >= 80) return t.excellent;
+    if (score >= 60) return t.goodProgress;
+    if (score >= 40) return t.buildingUp;
+    return t.needsFocus;
   };
 
   const circumference = 2 * Math.PI * 42;
@@ -36,7 +39,7 @@ export function MomentumScore({ score }: MomentumScoreProps) {
   return (
     <div className="neu-card-flat p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">Momentum</h3>
+        <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">{t.momentum}</h3>
         <span className={cn("text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full", getBgColor(), getColor())}>
           {getMessage()}
         </span>
@@ -78,8 +81,8 @@ export function MomentumScore({ score }: MomentumScoreProps) {
         
         <div className="flex-1 space-y-1.5 sm:space-y-2 min-w-0">
           <div className="flex justify-between text-[10px] sm:text-xs">
-            <span className="text-muted-foreground">Low</span>
-            <span className="text-muted-foreground">High</span>
+            <span className="text-muted-foreground">{t.low}</span>
+            <span className="text-muted-foreground">{t.high}</span>
           </div>
           <div className="h-1.5 sm:h-2 rounded-full bg-muted overflow-hidden">
             <div 
@@ -90,7 +93,7 @@ export function MomentumScore({ score }: MomentumScoreProps) {
             />
           </div>
           <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-            Based on activity & conversions
+            {t.basedOnActivity}
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ interface Activity {
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
+  const { t, getGreeting } = useLanguage();
   const navigate = useNavigate();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -64,13 +66,6 @@ export default function Dashboard() {
     }
 
     setLoading(false);
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
   };
 
   const paidStorefronts = storefronts.filter(s => s.status === "paid");
@@ -133,12 +128,12 @@ export default function Dashboard() {
       items.push({
         id: `draft-${sf.id}`,
         type: "confirm",
-        title: "Complete storefront",
-        description: `"${sf.title}" is ready to share`,
-        action: "Share now",
+        title: t.completeStorefront,
+        description: `"${sf.title}" ${t.readyToShare}`,
+        action: t.shareNow,
         onAction: async () => {
           await supabase.from("storefronts").update({ status: "sent" }).eq("id", sf.id);
-          toast.success("Storefront shared!");
+          toast.success(t.sent + "!");
           fetchData();
         }
       });
@@ -148,11 +143,11 @@ export default function Dashboard() {
       items.push({
         id: `sent-${sf.id}`,
         type: "payment",
-        title: "Awaiting payment",
+        title: t.awaitingPayment,
         description: `${sf.customer_name || "Customer"} — ${sf.title} ($${sf.price.toFixed(2)})`,
-        action: "Send reminder",
+        action: t.sendReminder,
         onAction: () => {
-          toast.success("Reminder sent!");
+          toast.success(t.sent + "!");
         }
       });
     });
@@ -198,18 +193,18 @@ export default function Dashboard() {
                 {getGreeting()}
               </p>
               <h1 className="text-lg md:text-xl font-semibold text-foreground mt-0.5 md:mt-1">
-                {profile?.business_name || "Dashboard"}
+                {profile?.business_name || t.dashboard}
               </h1>
             </div>
             <Button onClick={() => navigate("/storefronts")} size="sm" className="gap-1.5 md:gap-2">
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New</span>
+              <span className="hidden sm:inline">{t.new}</span>
             </Button>
           </div>
 
           {/* Main Balance Card */}
           <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl md:rounded-3xl p-5 md:p-8 text-primary-foreground shadow-glow animate-glow-pulse">
-            <p className="text-primary-foreground/70 text-xs md:text-sm font-medium mb-1 md:mb-2">Total Balance</p>
+            <p className="text-primary-foreground/70 text-xs md:text-sm font-medium mb-1 md:mb-2">{t.totalBalance}</p>
             <div className="flex items-end gap-2 md:gap-4 mb-3 md:mb-4">
               <span className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -227,7 +222,7 @@ export default function Dashboard() {
                   <span className="text-xs md:text-sm font-medium">{changePercent}%</span>
                 </div>
               )}
-              <span className="text-primary-foreground/70 text-xs md:text-sm">vs yesterday</span>
+              <span className="text-primary-foreground/70 text-xs md:text-sm">{t.vsYesterday}</span>
             </div>
           </div>
         </div>
@@ -235,24 +230,24 @@ export default function Dashboard() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">Today</p>
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.today}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">${totalToday.toFixed(2)}</p>
             <p className="text-[10px] md:text-xs text-success mt-0.5 md:mt-1">{todaysPaid.length} orders</p>
           </div>
           <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">Pending</p>
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.pending}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{sentStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-attention mt-0.5 md:mt-1">awaiting</p>
+            <p className="text-[10px] md:text-xs text-attention mt-0.5 md:mt-1">{t.awaiting}</p>
           </div>
           <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">Drafts</p>
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.drafts}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{draftStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">to complete</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.toComplete}</p>
           </div>
           <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">Completed</p>
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.completed}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{paidStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-success mt-0.5 md:mt-1">all time</p>
+            <p className="text-[10px] md:text-xs text-success mt-0.5 md:mt-1">{t.allTime}</p>
           </div>
         </div>
 
@@ -260,8 +255,8 @@ export default function Dashboard() {
         {attentionItems && attentionItems.length > 0 && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">Needs Attention</h2>
-              <span className="text-xs text-muted-foreground">{attentionItems.length} items</span>
+              <h2 className="text-sm font-semibold text-foreground">{t.needsAttention}</h2>
+              <span className="text-xs text-muted-foreground">{attentionItems.length} {t.items}</span>
             </div>
             <div className="space-y-3">
               {attentionItems.map((item, index) => (
@@ -282,9 +277,9 @@ export default function Dashboard() {
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-success/10 flex items-center justify-center">
               <span className="text-2xl">✓</span>
             </div>
-            <p className="text-foreground font-semibold">All caught up</p>
+            <p className="text-foreground font-semibold">{t.allCaughtUp}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Business is running smoothly
+              {t.businessRunningSmooth}
             </p>
           </div>
         )}
@@ -308,13 +303,13 @@ export default function Dashboard() {
             <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-primary/10 flex items-center justify-center">
               <ArrowUpRight className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Start selling</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">{t.startSelling}</h3>
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-              Create your first storefront and share it with customers to get paid
+              {t.createFirstStorefront}
             </p>
             <Button onClick={() => navigate("/storefronts")} size="lg">
               <Plus className="w-4 h-4 mr-2" />
-              Create storefront
+              {t.createStorefront}
             </Button>
           </div>
         )}

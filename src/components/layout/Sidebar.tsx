@@ -1,20 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: Store, label: "Storefronts", path: "/storefronts" },
-  { icon: History, label: "Order History", path: "/order-history" },
-  { icon: Settings, label: "Admin", path: "/admin" },
+  { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/" },
+  { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
+  { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
+  { icon: Settings, labelKey: "admin" as const, path: "/admin" },
 ];
 
 export function Sidebar() {
   const location = useLocation();
   const { profile, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t, getGreeting } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut();
@@ -24,11 +26,8 @@ export function Sidebar() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
   };
 
   return (
@@ -61,27 +60,35 @@ export function Sidebar() {
               )}
             >
               <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              <span className="font-medium">{t[item.labelKey]}</span>
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto pt-4 space-y-2">
+        {/* Language toggle */}
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground w-full"
+        >
+          <Globe className="w-5 h-5" />
+          <span className="font-medium">{language === "en" ? "Español" : "English"}</span>
+        </button>
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground w-full"
         >
           {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          <span className="font-medium">{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+          <span className="font-medium">{theme === "dark" ? t.lightMode : t.darkMode}</span>
         </button>
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive w-full"
         >
           <LogOut className="w-5 h-5" />
-          <span className="font-medium">Sign out</span>
+          <span className="font-medium">{t.signOut}</span>
         </button>
       </div>
     </aside>

@@ -5,6 +5,7 @@ import { CustomerProfile } from "@/components/crm/CustomerProfile";
 import { Search, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Customer {
   id: string;
@@ -21,6 +22,7 @@ interface Customer {
 
 export default function OrderHistory() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -67,8 +69,8 @@ export default function OrderHistory() {
       <div className="space-y-4 md:space-y-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground">Order History</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1">Your business memory — auto-updated from orders.</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1">{t.orderHistoryDesc}</p>
         </div>
 
         {/* Search */}
@@ -77,7 +79,7 @@ export default function OrderHistory() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search customers..."
+              placeholder={t.searchCustomers}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -86,7 +88,7 @@ export default function OrderHistory() {
         )}
 
         {/* Loading */}
-        {loading && <div className="text-center py-12 text-muted-foreground">Loading...</div>}
+        {loading && <div className="text-center py-12 text-muted-foreground">{t.loading}</div>}
 
         {/* Empty state */}
         {!loading && customers.length === 0 && (
@@ -94,9 +96,9 @@ export default function OrderHistory() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
               <Users className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No customers yet</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">{t.noCustomersYet}</h3>
             <p className="text-muted-foreground">
-              Customers appear here automatically when you create storefronts
+              {t.customersAppearAuto}
             </p>
           </div>
         )}
