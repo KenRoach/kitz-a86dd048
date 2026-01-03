@@ -9,8 +9,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, TrendingDown, Plus, ArrowUpRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface Storefront {
   id: string;
@@ -285,19 +286,18 @@ export default function Dashboard() {
 
         {/* Empty state for new users */}
         {!loading && storefronts.length === 0 && (
-          <div className="neu-card-flat p-10 text-center animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <ArrowUpRight className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">{t.startSelling}</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-              {t.createFirstStorefront}
-            </p>
-            <Button onClick={() => navigate("/storefronts")} size="lg">
-              <Plus className="w-4 h-4 mr-2" />
-              {t.createStorefront}
-            </Button>
-          </div>
+          <EmptyState
+            icon={Rocket}
+            title={t.startSelling}
+            description={t.createFirstStorefront}
+            actionLabel={t.createStorefront}
+            onAction={() => navigate("/storefronts")}
+            tips={[
+              "Create a storefront in under 30 seconds",
+              "Share instantly via WhatsApp or link",
+              "Get notified when customers order"
+            ]}
+          />
         )}
       </div>
     </AppLayout>

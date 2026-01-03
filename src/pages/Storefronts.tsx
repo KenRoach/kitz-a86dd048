@@ -5,13 +5,14 @@ import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
 import { QuickCreate } from "@/components/storefront/QuickCreate";
 import { ShareDialog } from "@/components/storefront/ShareDialog";
-import { Plus } from "lucide-react";
+import { Plus, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface Storefront {
   id: string;
@@ -309,17 +310,18 @@ export default function Storefronts() {
 
         {/* Empty state */}
         {!loading && storefronts.length === 0 && (
-          <div className="text-center py-16 animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Plus className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">{t.noStorefrontsYet}</h3>
-            <p className="text-muted-foreground mb-6">{t.createFirstToStart}</p>
-            <Button onClick={() => setWizardOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              {t.createStorefront}
-            </Button>
-          </div>
+          <EmptyState
+            icon={Store}
+            title={t.noStorefrontsYet}
+            description="Storefronts are shareable links you send to customers. Create one in seconds and get paid faster."
+            actionLabel={t.createStorefront}
+            onAction={() => setWizardOpen(true)}
+            tips={[
+              "Use Quick Create above for instant links",
+              "AI helps suggest pricing and descriptions",
+              "Share via WhatsApp, email, or QR code"
+            ]}
+          />
         )}
 
         {/* Storefronts list */}

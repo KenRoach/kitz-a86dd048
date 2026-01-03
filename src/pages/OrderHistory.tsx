@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CustomerCard } from "@/components/crm/CustomerCard";
 import { CustomerProfile } from "@/components/crm/CustomerProfile";
-import { Search, Users } from "lucide-react";
+import { Search, Users, ShoppingBag } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -90,17 +91,17 @@ export default function OrderHistory() {
         {/* Loading */}
         {loading && <div className="text-center py-12 text-muted-foreground">{t.loading}</div>}
 
-        {/* Empty state */}
         {!loading && customers.length === 0 && (
-          <div className="text-center py-16 animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Users className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">{t.noCustomersYet}</h3>
-            <p className="text-muted-foreground">
-              {t.customersAppearAuto}
-            </p>
-          </div>
+          <EmptyState
+            icon={ShoppingBag}
+            title={t.noCustomersYet}
+            description="Your customers will appear here automatically when they place orders through your storefronts."
+            tips={[
+              "Create and share a storefront to get started",
+              "Customers are added when orders come in",
+              "Track spending, orders, and engagement"
+            ]}
+          />
         )}
 
         {/* Customer list */}

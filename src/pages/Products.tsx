@@ -33,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface Product {
   id: string;
@@ -516,21 +517,18 @@ export default function Products() {
 
         {/* Products Grid */}
         {products.length === 0 ? (
-          <div className="neu-card-flat p-12 text-center animate-fade-in">
-            <Package className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-1">
-              {language === "es" ? "Sin productos aún" : "No products yet"}
-            </h3>
-            <p className="text-muted-foreground text-sm mb-6">
-              {language === "es" 
-                ? "Crea productos para reutilizarlos en tus vitrinas" 
-                : "Create products to reuse across your storefronts"}
-            </p>
-            <Button onClick={openNewDialog} className="gap-2">
-              <Plus className="w-4 h-4" />
-              {language === "es" ? "Crear producto" : "Create product"}
-            </Button>
-          </div>
+          <EmptyState
+            icon={Package}
+            title={language === "es" ? "Sin productos aún" : "No products yet"}
+            description={language === "es" 
+              ? "Crea tu catálogo de productos para reutilizarlos fácilmente en tus vitrinas."
+              : "Build your product catalog once, reuse across all your storefronts."}
+            actionLabel={language === "es" ? "Crear producto" : "Create product"}
+            onAction={openNewDialog}
+            tips={language === "es" 
+              ? ["La IA genera descripciones automáticamente", "Añade imágenes para mejores ventas", "Organiza por categorías"]
+              : ["AI generates descriptions for you", "Add images for better sales", "Organize by categories"]}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => (
