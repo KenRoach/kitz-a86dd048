@@ -6,6 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation helpers
+const validatePhone = (phone: string): boolean => {
+  // Allow common phone formats: +507 6000-0000, 6000-0000, etc.
+  const cleaned = phone.replace(/[\s\-\(\)\.]/g, "");
+  return /^\+?[1-9]\d{6,14}$/.test(cleaned);
+};
+
+const validateEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const sanitizeInput = (input: string, maxLength: number): string => {
+  return input.trim().slice(0, maxLength);
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -15,8 +30,10 @@ serve(async (req) => {
   try {
     const { slug, buyerName, buyerPhone, buyerEmail, buyerNote } = await req.json();
 
-    console.log("Place order request:", { slug, buyerName, buyerPhone, buyerEmail });
+    // Log without sensitive data
+    console.log("Place order request received for slug:", slug);
 
+    // Validate required fields
     if (!slug) {
       return new Response(
         JSON.stringify({ error: "Storefront slug is required" }),
@@ -27,6 +44,36 @@ serve(async (req) => {
     if (!buyerName || !buyerPhone) {
       return new Response(
         JSON.stringify({ error: "Name and phone are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Sanitize and validate inputs
+    const sanitizedName = sanitizeInput(buyerName, 100);
+    const sanitizedPhone = sanitizeInput(buyerPhone, 20);
+    const sanitizedEmail = buyerEmail ? sanitizeInput(buyerEmail, 255) : null;
+    const sanitizedNote = buyerNote ? sanitizeInput(buyerNote, 500) : null;
+
+    // Validate name length
+    if (sanitizedName.length < 2) {
+      return new Response(
+        JSON.stringify({ error: "Name must be at least 2 characters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate phone format
+    if (!validatePhone(sanitizedPhone)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid phone number format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate email if provided
+    if (sanitizedEmail && !validateEmail(sanitizedEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -62,10 +109,10 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from("storefronts")
       .update({
-        buyer_name: buyerName.trim(),
-        buyer_phone: buyerPhone.trim(),
-        buyer_email: buyerEmail?.trim() || null,
-        buyer_note: buyerNote?.trim() || null,
+        buyer_name: sanitizedName,
+        buyer_phone: sanitizedPhone,
+        buyer_email: sanitizedEmail,
+        buyer_note: sanitizedNote,
         ordered_at: new Date().toISOString(),
       })
       .eq("id", storefront.id);
@@ -78,11 +125,11 @@ serve(async (req) => {
       );
     }
 
-    // Log activity for the seller
+    // Log activity for the seller (without exposing buyer details in logs)
     await supabase.from("activity_log").insert({
       user_id: storefront.user_id,
       type: "order",
-      message: `New order: ${storefront.title} from ${buyerName} — $${storefront.price.toFixed(2)}`,
+      message: `New order: ${storefront.title} — $${storefront.price.toFixed(2)}`,
       related_id: storefront.id,
     });
 
@@ -93,7 +140,7 @@ serve(async (req) => {
     if (whatsappToken && whatsappPhoneId && storefront.seller_phone) {
       try {
         const sellerPhone = storefront.seller_phone.replace(/\D/g, "");
-        const message = `🛒 *New Order!*\n\n*${storefront.title}*\n💰 $${storefront.price.toFixed(2)}\n\n👤 ${buyerName}\n📱 ${buyerPhone}${buyerEmail ? `\n✉️ ${buyerEmail}` : ""}${buyerNote ? `\n📝 ${buyerNote}` : ""}`;
+        const message = `🛒 *New Order!*\n\n*${storefront.title}*\n💰 $${storefront.price.toFixed(2)}\n\n👤 ${sanitizedName}\n📱 ${sanitizedPhone}${sanitizedEmail ? `\n✉️ ${sanitizedEmail}` : ""}${sanitizedNote ? `\n📝 ${sanitizedNote}` : ""}`;
         
         await fetch(`https://graph.facebook.com/v18.0/${whatsappPhoneId}/messages`, {
           method: "POST",
@@ -151,10 +198,10 @@ serve(async (req) => {
                 </div>
                 <h3>Customer Details</h3>
                 <ul style="list-style: none; padding: 0;">
-                  <li><strong>Name:</strong> ${buyerName}</li>
-                  <li><strong>Phone:</strong> ${buyerPhone}</li>
-                  ${buyerEmail ? `<li><strong>Email:</strong> ${buyerEmail}</li>` : ""}
-                  ${buyerNote ? `<li><strong>Note:</strong> ${buyerNote}</li>` : ""}
+                  <li><strong>Name:</strong> ${sanitizedName}</li>
+                  <li><strong>Phone:</strong> ${sanitizedPhone}</li>
+                  ${sanitizedEmail ? `<li><strong>Email:</strong> ${sanitizedEmail}</li>` : ""}
+                  ${sanitizedNote ? `<li><strong>Note:</strong> ${sanitizedNote}</li>` : ""}
                 </ul>
                 <p style="color: #666; font-size: 14px; margin-top: 30px;">
                   — ${sellerProfile?.business_name || "Your Store"}
@@ -182,15 +229,15 @@ serve(async (req) => {
       .from("customers")
       .select("id")
       .eq("user_id", storefront.user_id)
-      .eq("phone", buyerPhone.trim())
+      .eq("phone", sanitizedPhone)
       .maybeSingle();
 
     if (!existingCustomer) {
       await supabase.from("customers").insert({
         user_id: storefront.user_id,
-        name: buyerName.trim(),
-        phone: buyerPhone.trim(),
-        email: buyerEmail?.trim() || null,
+        name: sanitizedName,
+        phone: sanitizedPhone,
+        email: sanitizedEmail,
         lifecycle: "lead",
         tags: ["New", "Online Order"],
       });
@@ -198,7 +245,7 @@ serve(async (req) => {
       await supabase.from("activity_log").insert({
         user_id: storefront.user_id,
         type: "customer",
-        message: `New customer from order: ${buyerName}`,
+        message: `New customer from order: ${sanitizedName}`,
       });
     }
 

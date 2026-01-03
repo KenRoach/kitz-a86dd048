@@ -24,7 +24,6 @@ interface Profile {
   id: string;
   business_name: string;
   business_type: string | null;
-  phone: string | null;
   address: string | null;
   city: string | null;
   country: string | null;
@@ -66,9 +65,9 @@ export default function PublicProfile() {
       let profileData;
       
       if (isUsername) {
-        // Fetch by username
+        // Fetch by username using public view (excludes sensitive data like phone, RUC)
         const { data, error } = await supabase
-          .from("profiles")
+          .from("public_profiles" as any)
           .select("*")
           .eq("username", lookupValue)
           .maybeSingle();
@@ -80,9 +79,9 @@ export default function PublicProfile() {
         }
         profileData = data;
       } else {
-        // Fetch by user_id
+        // Fetch by user_id using public view (excludes sensitive data like phone, RUC)
         const { data, error } = await supabase
-          .from("profiles")
+          .from("public_profiles" as any)
           .select("*")
           .eq("user_id", lookupValue)
           .maybeSingle();
@@ -97,10 +96,10 @@ export default function PublicProfile() {
 
       setProfile(profileData as Profile);
 
-      // Fetch active storefronts for this user
+      // Fetch active storefronts for this user using public view
       const userId = (profileData as any).user_id;
       const { data: storefrontData } = await supabase
-        .from("storefronts")
+        .from("public_storefronts" as any)
         .select("id, title, price, image_url, slug, status")
         .eq("user_id", userId)
         .eq("status", "sent")
@@ -108,7 +107,7 @@ export default function PublicProfile() {
         .limit(6);
 
       if (storefrontData) {
-        setStorefronts(storefrontData as Storefront[]);
+        setStorefronts(storefrontData as unknown as Storefront[]);
       }
 
       setLoading(false);
@@ -141,11 +140,7 @@ export default function PublicProfile() {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`, "_blank");
   };
 
-  const handleWhatsApp = () => {
-    if (!profile?.phone) return;
-    const phone = profile.phone.replace(/[^0-9+]/g, "");
-    window.open(`https://wa.me/${phone}`, "_blank");
-  };
+  // WhatsApp removed - phone number not exposed in public view for security
 
   if (loading) {
     return (
@@ -261,15 +256,6 @@ export default function PublicProfile() {
       {/* Action buttons - Sticky glass card */}
       <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-lg mx-auto px-4 py-4 flex gap-3">
-          {profile?.phone && (
-            <Button
-              onClick={handleWhatsApp}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white rounded-full py-6 text-base font-semibold gap-2"
-            >
-              <MessageCircle className="w-5 h-5" />
-              WhatsApp
-            </Button>
-          )}
           {profile?.instagram && (
             <Button
               onClick={() => window.open(`https://instagram.com/${profile.instagram}`, "_blank")}
@@ -338,20 +324,6 @@ export default function PublicProfile() {
       {/* Contact Info Footer */}
       <section className="max-w-lg mx-auto px-4 py-8 border-t border-white/10">
         <div className="space-y-4">
-          {profile?.phone && (
-            <a
-              href={`tel:${profile.phone}`}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                <Phone className="w-5 h-5 text-green-400" />
-              </div>
-              <div>
-                <p className="text-xs text-white/40 uppercase tracking-wider">Call us</p>
-                <p className="font-semibold text-white">{profile.phone}</p>
-              </div>
-            </a>
-          )}
 
           {profile?.website && (
             <a
