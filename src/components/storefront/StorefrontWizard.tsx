@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +15,7 @@ interface StorefrontWizardProps {
   onCreated: () => void;
 }
 
-type Step = "type" | "what" | "details" | "confirm";
+type Step = "type" | "what" | "confirm";
 type StorefrontType = "single" | "bundle";
 
 const generateSlug = (title: string) => {
@@ -44,12 +43,11 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   const [bundleItems, setBundleItems] = useState<BundleItem[]>([createEmptyItem()]);
   
   // Common fields
-  const [fulfillmentNote, setFulfillmentNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [sendNow, setSendNow] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const steps: Step[] = ["type", "what", "details", "confirm"];
+  const steps: Step[] = ["type", "what", "confirm"];
   const currentIndex = steps.indexOf(step);
 
   const getBundleTotal = () => {
@@ -71,8 +69,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           return bundleTitle.trim().length > 0 && 
                  bundleItems.some(item => item.title.trim() && parseFloat(item.price) > 0);
         }
-      case "details":
-        return true;
       case "confirm":
         return true;
     }
@@ -166,7 +162,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           quantity: isBundle ? 1 : parseInt(quantity),
           customer_name: null,
           customer_phone: null,
-          fulfillment_note: fulfillmentNote.trim() || null,
+          fulfillment_note: null,
           image_url: mainImageUrl,
           slug,
           status: sendNow ? "sent" : "draft",
@@ -230,7 +226,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     setTitle("");
     setPrice("");
     setQuantity("1");
-    setFulfillmentNote("");
     setImageFile(null);
     setImagePreview(null);
     setBundleTitle("");
@@ -408,24 +403,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           );
         }
 
-      case "details":
-        return (
-          <div className="space-y-5 animate-fade-in">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-foreground">Fulfillment details</h3>
-              <p className="text-sm text-muted-foreground">How and when will you deliver?</p>
-            </div>
-
-            <Textarea
-              value={fulfillmentNote}
-              onChange={(e) => setFulfillmentNote(e.target.value)}
-              placeholder="e.g., Pickup Friday 3pm, Delivery to 123 Main St..."
-              className="min-h-[100px] resize-none"
-              autoFocus
-            />
-          </div>
-        );
-
       case "confirm":
         return (
           <div className="space-y-5 animate-fade-in">
@@ -468,10 +445,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                       </div>
                     ))}
                   </div>
-                )}
-
-                {fulfillmentNote && (
-                  <p className="text-sm text-muted-foreground">{fulfillmentNote}</p>
                 )}
               </div>
             </div>
@@ -530,7 +503,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
               </Button>
             ) : (
               <Button onClick={handleNext} disabled={!canProceed()}>
-                {step === "details" ? "Skip" : "Continue"}
+                Continue
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             )}
