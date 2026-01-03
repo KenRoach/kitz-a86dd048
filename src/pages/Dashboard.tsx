@@ -212,7 +212,7 @@ export default function Dashboard() {
     <AppLayout>
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
-      <div className="space-y-5 md:space-y-8">
+      <div className="space-y-3 md:space-y-6">
         {/* Header with Share - hidden on mobile since MobileHeader shows greeting */}
         <div className="hidden md:flex items-center justify-between animate-fade-in">
           <div>
