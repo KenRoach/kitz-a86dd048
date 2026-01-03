@@ -81,7 +81,8 @@ interface Storefront {
 }
 
 export default function PublicStorefront() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, username, storefrontSlug } = useParams<{ slug?: string; username?: string; storefrontSlug?: string }>();
+  const effectiveSlug = storefrontSlug || slug;
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [bundleItems, setBundleItems] = useState<StorefrontItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +114,7 @@ export default function PublicStorefront() {
 
   useEffect(() => {
     const fetchStorefront = async () => {
-      if (!slug) {
+      if (!effectiveSlug) {
         setNotFound(true);
         setLoading(false);
         return;
@@ -122,7 +123,7 @@ export default function PublicStorefront() {
       const { data, error } = await supabase
         .from("storefronts")
         .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone, payment_cards, payment_yappy, payment_cash, payment_pluxee, buyer_name, ordered_at, is_bundle")
-        .eq("slug", slug)
+        .eq("slug", effectiveSlug)
         .maybeSingle();
 
       if (error || !data) {
@@ -152,7 +153,7 @@ export default function PublicStorefront() {
     };
 
     fetchStorefront();
-  }, [slug]);
+  }, [effectiveSlug]);
 
   const handlePlaceOrder = async () => {
     if (!buyerName.trim() || !buyerPhone.trim()) {
@@ -165,7 +166,7 @@ export default function PublicStorefront() {
     try {
       const response = await supabase.functions.invoke("place-order", {
         body: {
-          slug,
+          slug: effectiveSlug,
           buyerName: buyerName.trim(),
           buyerPhone: buyerPhone.trim(),
           buyerEmail: buyerEmail.trim(),
