@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
-  { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/" },
+  { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },

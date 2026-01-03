@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
-  { icon: LayoutDashboard, labelKey: "home" as const, path: "/" },
+  { icon: LayoutDashboard, labelKey: "home" as const, path: "/dashboard" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orders" as const, path: "/order-history" },

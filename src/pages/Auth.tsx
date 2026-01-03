@@ -50,8 +50,8 @@ export default function Auth() {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created! Welcome to Business OS.");
-          navigate("/");
+          toast.success("Account created! Welcome to kitz.");
+          navigate("/dashboard");
         }
       } else {
         const validation = signInSchema.safeParse({ email, password });
@@ -66,7 +66,7 @@ export default function Auth() {
           toast.error("Invalid email or password");
         } else {
           toast.success("Welcome back!");
-          navigate("/");
+          navigate("/dashboard");
         }
       }
     } catch (err) {
