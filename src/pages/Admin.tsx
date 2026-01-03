@@ -12,8 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2 } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check } from "lucide-react";
 import { IntegrationsSection } from "@/components/admin/IntegrationsSection";
+import { useState as useStateReact } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -107,6 +108,16 @@ export default function Admin() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [storefrontFile, setStorefrontFile] = useState<File | null>(null);
   const [storefrontPreview, setStorefrontPreview] = useState<string | null>(null);
+  const [profileLinkCopied, setProfileLinkCopied] = useState(false);
+
+  const profileLink = user ? `${window.location.origin}/p/${user.id}` : "";
+
+  const handleCopyProfileLink = () => {
+    navigator.clipboard.writeText(profileLink);
+    setProfileLinkCopied(true);
+    toast.success("Profile link copied!");
+    setTimeout(() => setProfileLinkCopied(false), 2000);
+  };
   
   const logoInputRef = useRef<HTMLInputElement>(null);
   const storefrontInputRef = useRef<HTMLInputElement>(null);
@@ -278,10 +289,30 @@ export default function Admin() {
   return (
     <AppLayout>
       <div className="space-y-8 max-w-2xl">
-        {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground">Admin</h1>
-          <p className="text-muted-foreground mt-1">Set it once. Everything runs from here.</p>
+        {/* Header with Share Button */}
+        <div className="animate-fade-in flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Admin</h1>
+            <p className="text-muted-foreground mt-1">Set it once. Everything runs from here.</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyProfileLink}
+            className="gap-2 shrink-0"
+          >
+            {profileLinkCopied ? (
+              <>
+                <Check className="w-4 h-4 text-success" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4" />
+                Share Profile
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Brand Section */}
