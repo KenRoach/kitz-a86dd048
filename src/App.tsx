@@ -63,6 +63,7 @@ function AppRoutes() {
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/s/:slug" element={<PublicStorefront />} />
       <Route path="/p/:profileId" element={<PublicProfile />} />
+      <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

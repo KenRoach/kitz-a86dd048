@@ -50,10 +50,27 @@ export default function Storefronts() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editingStorefront, setEditingStorefront] = useState<Storefront | null>(null);
   const [filter, setFilter] = useState<FilterStatus>("all");
+  const [username, setUsername] = useState<string | null>(null);
   
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareData, setShareData] = useState<{ link: string; title: string; price: number } | null>(null);
+
+  // Fetch username on mount
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data?.username) {
+        setUsername(data.username);
+      }
+    };
+    fetchUsername();
+  }, [user]);
 
   const fetchStorefronts = async () => {
     if (!user) return;
@@ -82,7 +99,12 @@ export default function Storefronts() {
     fetchStorefronts();
   }, [user]);
 
-  const getShareableLink = (slug: string) => `${window.location.origin}/s/${slug}`;
+  const getShareableLink = (slug: string) => {
+    if (username) {
+      return `${window.location.origin}/p/@${username}/${slug}`;
+    }
+    return `${window.location.origin}/s/${slug}`;
+  };
 
   const handleDelete = async (id: string) => {
     await supabase.from("storefronts").delete().eq("id", id);
