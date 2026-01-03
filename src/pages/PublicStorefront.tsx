@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 const BUYER_INFO_KEY = "kitz_buyer_info";
 const BUYER_INFO_EXPIRY_DAYS = 120;
@@ -628,6 +629,9 @@ export default function PublicStorefront() {
           )}
         </div>
       </div>
+      
+      {/* Chat Widget */}
+      <ChatWidget />
     </div>
   );
 }
