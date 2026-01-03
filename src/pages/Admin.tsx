@@ -12,7 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { IntegrationsSection } from "@/components/admin/IntegrationsSection";
 import { useState as useStateReact } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,6 +119,7 @@ export default function Admin() {
   const [storefrontFile, setStorefrontFile] = useState<File | null>(null);
   const [storefrontPreview, setStorefrontPreview] = useState<string | null>(null);
   const [profileLinkCopied, setProfileLinkCopied] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
 
   const profileLink = profile.username 
     ? `${window.location.origin}/p/@${profile.username}` 
@@ -304,24 +313,58 @@ export default function Admin() {
             <h1 className="text-2xl font-bold text-foreground">Admin</h1>
             <p className="text-muted-foreground mt-1">Set it once. Everything runs from here.</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyProfileLink}
-            className="gap-2 shrink-0"
-          >
-            {profileLinkCopied ? (
-              <>
-                <Check className="w-4 h-4 text-success" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4" />
-                Share Profile
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <QrCode className="w-4 h-4" />
+                  QR Code
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Profile QR Code</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <div className="bg-white p-4 rounded-xl">
+                    <QRCodeSVG value={profileLink} size={200} />
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Scan to visit your profile
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(profileLink);
+                      toast.success("Link copied!");
+                    }}
+                    className="gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy Link
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyProfileLink}
+              className="gap-2"
+            >
+              {profileLinkCopied ? (
+                <>
+                  <Check className="w-4 h-4 text-success" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Brand Section */}
