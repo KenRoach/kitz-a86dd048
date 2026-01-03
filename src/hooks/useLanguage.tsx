@@ -229,7 +229,7 @@ const translations: Record<Language, Translations> = {
     goodEvening: "Buenas noches",
     
     dashboard: "Inicio",
-    storefronts: "Vitrinas",
+    storefronts: "Tiendas",
     products: "Productos",
     orderHistory: "Historial",
     admin: "Admin",
@@ -274,7 +274,7 @@ const translations: Record<Language, Translations> = {
     createFirstStorefront: "Crea tu primera vitrina y compártela con clientes para recibir pagos",
     createStorefront: "Crear vitrina",
     
-    storefrontsTitle: "Vitrinas",
+    storefrontsTitle: "Tiendas",
     storefrontsDesc: "Un enlace por pedido. Comparte y cobra.",
     noStorefrontsYet: "Sin vitrinas aún",
     createFirstToStart: "Crea tu primera vitrina para empezar",
