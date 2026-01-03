@@ -2,12 +2,13 @@ import { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag } from "lucide-react";
+import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
+import { ProductSelector } from "./ProductSelector";
 
 interface StorefrontWizardProps {
   open: boolean;
@@ -34,10 +35,13 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   
   // Single item fields
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [showProductSelector, setShowProductSelector] = useState(false);
   
   // Bundle fields
   const [bundleTitle, setBundleTitle] = useState("");
@@ -137,7 +141,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         .insert({
           user_id: user.id,
           title: storefrontTitle.trim(),
-          description: isBundle ? `Bundle with ${bundleItems.filter(i => i.title.trim()).length} items` : null,
+          description: isBundle ? `Bundle with ${bundleItems.filter(i => i.title.trim()).length} items` : (description.trim() || null),
           price: totalPrice,
           quantity: isBundle ? 1 : parseInt(quantity),
           customer_name: null,
@@ -205,10 +209,13 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     setStep("type");
     setIsBundle(false);
     setTitle("");
+    setDescription("");
     setPrice("");
     setQuantity("1");
     setImageFile(null);
     setImagePreview(null);
+    setSelectedProductId(null);
+    setShowProductSelector(false);
     setBundleTitle("");
     setBundleItems([createEmptyItem()]);
     setSendNow(true);
@@ -300,71 +307,153 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-medium text-foreground">What are you selling?</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Create a shareable order link</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Pick from catalog or enter manually</p>
               </div>
             </div>
 
-            <div>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Chicken Bowl, Cupcakes..."
-                className="text-base py-4 sm:py-5"
-                autoFocus
-              />
+            {/* Toggle between catalog and manual */}
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setShowProductSelector(true)}
+                className={cn(
+                  "flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-1.5",
+                  showProductSelector
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                )}
+              >
+                <Library className="w-3.5 h-3.5" />
+                From catalog
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProductSelector(false);
+                  setSelectedProductId(null);
+                }}
+                className={cn(
+                  "flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-1.5",
+                  !showProductSelector
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                )}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Manual entry
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <div>
-                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Price</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">$</span>
+            {showProductSelector ? (
+              <ProductSelector
+                selectedId={selectedProductId || undefined}
+                onSelect={(product) => {
+                  setSelectedProductId(product.id);
+                  setTitle(product.title);
+                  setDescription(product.description || "");
+                  setPrice(product.price.toString());
+                  setImagePreview(product.image_url);
+                  setImageFile(null);
+                }}
+              />
+            ) : (
+              <>
+                <div>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0.00"
-                    className="pl-7 sm:pl-8 text-base sm:text-lg"
+                    value={title}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setSelectedProductId(null);
+                    }}
+                    placeholder="e.g., Chicken Bowl, Cupcakes..."
+                    className="text-base py-4 sm:py-5"
+                    autoFocus
                   />
                 </div>
-              </div>
-              <div>
-                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Quantity</label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="text-base sm:text-lg"
-                />
-              </div>
-            </div>
 
-            {parseFloat(price) > 0 && parseInt(quantity) > 1 && (
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Total: <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
-              </p>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Price</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">$</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="0.00"
+                        className="pl-7 sm:pl-8 text-base sm:text-lg"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Quantity</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="text-base sm:text-lg"
+                    />
+                  </div>
+                </div>
+
+                {parseFloat(price) > 0 && parseInt(quantity) > 1 && (
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Total: <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
+                  </p>
+                )}
+
+                {/* Image upload */}
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                {imagePreview ? (
+                  <div className="relative">
+                    <img src={imagePreview} alt="Preview" className="w-full h-24 sm:h-32 object-cover rounded-xl" />
+                    <button onClick={removeImage} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 sm:py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
+                  >
+                    <Upload className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-xs sm:text-sm text-muted-foreground">Add photo (optional)</span>
+                  </button>
+                )}
+              </>
             )}
 
-            {/* Image upload */}
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-            {imagePreview ? (
-              <div className="relative">
-                <img src={imagePreview} alt="Preview" className="w-full h-24 sm:h-32 object-cover rounded-xl" />
-                <button onClick={removeImage} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full">
-                  <X className="w-4 h-4" />
-                </button>
+            {/* Show selected product summary when using catalog */}
+            {showProductSelector && selectedProductId && title && (
+              <div className="p-3 bg-muted/50 rounded-xl space-y-2">
+                <div className="flex items-center gap-3">
+                  {imagePreview && (
+                    <img src={imagePreview} alt={title} className="w-12 h-12 rounded-lg object-cover" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-sm truncate">{title}</p>
+                    <p className="text-primary font-semibold">${parseFloat(price).toFixed(2)}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Quantity</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="text-sm"
+                  />
+                </div>
+                {parseInt(quantity) > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Total: <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
+                  </p>
+                )}
               </div>
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-3 sm:py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
-              >
-                <Upload className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs sm:text-sm text-muted-foreground">Add photo (optional)</span>
-              </button>
             )}
           </div>
         );
