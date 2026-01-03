@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check, QrCode } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check, QrCode, Bot } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog,
@@ -21,10 +21,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IntegrationsSection } from "@/components/admin/IntegrationsSection";
+import { AutopilotPanel } from "@/components/autopilot/AutopilotPanel";
 import { useState as useStateReact } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const BUSINESS_TYPES = [
   "Restaurant",
@@ -304,6 +307,8 @@ export default function Admin() {
 
   const selectedCountry = COUNTRIES.find(c => c.code === profile.phone_country);
 
+  const { language } = useLanguage();
+
   return (
     <AppLayout>
       <div className="space-y-3 md:space-y-6 max-w-2xl">
@@ -311,7 +316,9 @@ export default function Admin() {
         <div className="animate-fade-in flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">Admin</h1>
-            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">Set it once. Everything runs from here.</p>
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">
+              {language === "es" ? "Configura una vez. Todo funciona desde aquí." : "Set it once. Everything runs from here."}
+            </p>
           </div>
           <div className="flex gap-2 shrink-0">
             <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
@@ -367,9 +374,26 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Brand Section */}
-        <section className="neu-card-flat p-6 space-y-5 animate-fade-in">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Brand</h2>
+        {/* Tabs for Settings vs Autopilot */}
+        <Tabs defaultValue="settings" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="settings">
+              {language === "es" ? "Configuración" : "Settings"}
+            </TabsTrigger>
+            <TabsTrigger value="autopilot" className="gap-2">
+              <Bot className="w-4 h-4" />
+              {language === "es" ? "Autopilot" : "Autopilot"}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="autopilot" className="mt-0">
+            <AutopilotPanel />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-0 space-y-3 md:space-y-6">
+            {/* Brand Section */}
+            <section className="neu-card-flat p-6 space-y-5 animate-fade-in">
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Brand</h2>
           
           <div className="grid grid-cols-2 gap-6">
             {/* Logo */}
@@ -705,6 +729,8 @@ export default function Admin() {
             {saving ? "Saving..." : "Save all changes"}
           </Button>
         </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
