@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { HelpCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MomentumScoreProps {
   score: number;
@@ -39,7 +46,19 @@ export function MomentumScore({ score }: MomentumScoreProps) {
   return (
     <div className="neu-card-flat p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">{t.momentum}</h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">{t.momentum}</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[200px]">
+                <p className="text-xs">Your business momentum based on recent orders, active storefronts, and customer engagement.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <span className={cn("text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full", getBgColor(), getColor())}>
           {getMessage()}
         </span>
