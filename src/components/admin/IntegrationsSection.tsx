@@ -58,9 +58,9 @@ const INTEGRATIONS: Integration[] = [
     category: "productivity",
   },
   {
-    id: "zapier",
-    name: "Zapier",
-    description: "Conecta +5,000 apps automáticamente",
+    id: "n8n",
+    name: "n8n",
+    description: "Automatiza flujos de trabajo",
     icon: Zap,
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
