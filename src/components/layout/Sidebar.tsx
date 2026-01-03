@@ -80,6 +80,9 @@ export function Sidebar() {
           <Settings className="w-5 h-5" />
           <span className="font-medium">{t.admin}</span>
         </Link>
+        
+        {/* Separator */}
+        <div className="h-px bg-border mx-2 my-2" />
         {/* Language toggle */}
         <button
           onClick={toggleLanguage}
