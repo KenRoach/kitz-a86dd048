@@ -161,6 +161,50 @@ export type Database = {
         }
         Relationships: []
       }
+      storefront_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          price: number
+          quantity: number
+          sort_order: number
+          storefront_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          price: number
+          quantity?: number
+          sort_order?: number
+          storefront_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          price?: number
+          quantity?: number
+          sort_order?: number
+          storefront_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_items_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefronts: {
         Row: {
           buyer_email: string | null
@@ -175,6 +219,7 @@ export type Database = {
           fulfillment_note: string | null
           id: string
           image_url: string | null
+          is_bundle: boolean
           ordered_at: string | null
           payment_cards: boolean | null
           payment_cash: boolean | null
@@ -202,6 +247,7 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          is_bundle?: boolean
           ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
@@ -229,6 +275,7 @@ export type Database = {
           fulfillment_note?: string | null
           id?: string
           image_url?: string | null
+          is_bundle?: boolean
           ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
