@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, Share2 } from "lucide-react";
+import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export type StorefrontStatus = "draft" | "sent" | "paid";
 
@@ -62,7 +69,7 @@ export function StorefrontCard({
   onMarkPaid,
 }: StorefrontCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
 
   const handleCopyLink = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -177,6 +184,10 @@ export function StorefrontCard({
                           <Instagram className="w-4 h-4 mr-2 text-pink-500" />
                           Share via Instagram
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setQrDialogOpen(true)}>
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Show QR code
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleCopyLink()}>
                           <Copy className="w-4 h-4 mr-2" />
                           Copy link
@@ -216,11 +227,11 @@ export function StorefrontCard({
                     <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
                   </button>
                   <button 
-                    onClick={handleInstagramShare} 
-                    className="p-1.5 sm:p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 transition-colors" 
-                    title="Instagram"
+                    onClick={() => setQrDialogOpen(true)} 
+                    className="p-1.5 sm:p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors" 
+                    title="QR Code"
                   >
-                    <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-500" />
+                    <QrCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                   </button>
                   <button 
                     onClick={handleCopyLink} 
@@ -238,6 +249,36 @@ export function StorefrontCard({
           </div>
         </div>
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">{title}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-6">
+            <div className="bg-white p-4 rounded-2xl shadow-lg">
+              <QRCodeSVG 
+                value={link || ""} 
+                size={200}
+                level="H"
+                includeMargin
+              />
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground text-center">
+              Scan to view and order
+            </p>
+            <p className="mt-1 text-lg font-bold text-foreground">{price}</p>
+            <button
+              onClick={handleCopyLink}
+              className="mt-4 flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              <Copy className="w-4 h-4" />
+              Copy link
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
