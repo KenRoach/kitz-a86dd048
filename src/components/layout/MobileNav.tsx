@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "home" as const, path: "/" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
+  { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orders" as const, path: "/order-history" },
   { icon: Settings, labelKey: "admin" as const, path: "/admin" },
 ];

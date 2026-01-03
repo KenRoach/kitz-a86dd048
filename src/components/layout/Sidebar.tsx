@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -8,6 +8,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
+  { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
   { icon: Settings, labelKey: "admin" as const, path: "/admin" },
 ];
