@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { StorefrontCard } from "@/components/storefront/StorefrontCard";
 import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
-import { Plus, Send, CheckCircle, Clock } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -141,15 +141,9 @@ export default function Storefronts() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 animate-fade-in">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1 truncate">{t.storefrontsDesc}</p>
-          </div>
-          <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 shrink-0">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">{t.new}</span>
-          </Button>
+        <div className="animate-fade-in">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-0.5 md:mt-1">{t.storefrontsDesc}</p>
         </div>
 
         {/* Filter tabs */}
