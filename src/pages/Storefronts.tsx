@@ -5,6 +5,7 @@ import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
 import { QuickCreate } from "@/components/storefront/QuickCreate";
 import { ShareDialog } from "@/components/storefront/ShareDialog";
+import { MobileFab } from "@/components/layout/MobileFab";
 import { Plus, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -373,6 +374,9 @@ export default function Storefronts() {
           />
         )}
       </div>
+
+      {/* Mobile floating action button */}
+      <MobileFab onClick={() => setWizardOpen(true)} label={t.new} />
     </AppLayout>
   );
 }
