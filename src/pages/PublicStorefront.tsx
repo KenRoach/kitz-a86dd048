@@ -5,9 +5,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+const BUYER_INFO_KEY = "kitz_buyer_info";
+const BUYER_INFO_EXPIRY_DAYS = 120;
+
+interface SavedBuyerInfo {
+  name: string;
+  phone: string;
+  email: string;
+  savedAt: number;
+}
+
+function getSavedBuyerInfo(): SavedBuyerInfo | null {
+  try {
+    const saved = localStorage.getItem(BUYER_INFO_KEY);
+    if (!saved) return null;
+    
+    const info: SavedBuyerInfo = JSON.parse(saved);
+    const expiryMs = BUYER_INFO_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+    
+    // Check if expired
+    if (Date.now() - info.savedAt > expiryMs) {
+      localStorage.removeItem(BUYER_INFO_KEY);
+      return null;
+    }
+    
+    return info;
+  } catch {
+    return null;
+  }
+}
+
+function saveBuyerInfo(name: string, phone: string, email: string) {
+  const info: SavedBuyerInfo = {
+    name,
+    phone,
+    email,
+    savedAt: Date.now(),
+  };
+  localStorage.setItem(BUYER_INFO_KEY, JSON.stringify(info));
+}
 
 interface StorefrontItem {
   id: string;
@@ -48,12 +89,27 @@ export default function PublicStorefront() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [hasSavedInfo, setHasSavedInfo] = useState(false);
 
   // Buyer form
   const [buyerName, setBuyerName] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerNote, setBuyerNote] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Load saved buyer info on mount
+  useEffect(() => {
+    const savedInfo = getSavedBuyerInfo();
+    if (savedInfo) {
+      setBuyerName(savedInfo.name);
+      setBuyerPhone(savedInfo.phone);
+      setBuyerEmail(savedInfo.email);
+      setHasSavedInfo(true);
+      setRememberMe(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStorefront = async () => {
@@ -121,15 +177,37 @@ export default function PublicStorefront() {
         throw new Error(response.error.message);
       }
 
+      // Save buyer info if they opted in
+      if (rememberMe) {
+        saveBuyerInfo(buyerName.trim(), buyerPhone.trim(), buyerEmail.trim());
+        toast.success("Order placed! Your info is saved for faster checkout.");
+      } else if (!hasSavedInfo) {
+        // Show save prompt after order if they didn't have saved info
+        setShowSavePrompt(true);
+      }
+
       setOrderPlaced(true);
       setShowCheckout(false);
-      toast.success("Order placed! The seller will contact you soon.");
+      if (!rememberMe && !showSavePrompt) {
+        toast.success("Order placed! The seller will contact you soon.");
+      }
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error("Failed to place order. Please try again.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSaveInfo = () => {
+    saveBuyerInfo(buyerName.trim(), buyerPhone.trim(), buyerEmail.trim());
+    setShowSavePrompt(false);
+    toast.success("Info saved! Your next purchase will be faster.");
+  };
+
+  const handleSkipSave = () => {
+    setShowSavePrompt(false);
+    toast.success("Order placed! The seller will contact you soon.");
   };
 
   const handleWhatsAppContact = () => {
@@ -401,11 +479,55 @@ export default function PublicStorefront() {
                 rows={2}
               />
             </div>
+
+            {/* Remember me toggle */}
+            <div className="flex items-center justify-between pt-2 border-t border-border">
+              <div className="flex items-center gap-2">
+                <Save className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-foreground">Save my info for faster checkout</span>
+              </div>
+              <Switch
+                checked={rememberMe}
+                onCheckedChange={setRememberMe}
+              />
+            </div>
+            {hasSavedInfo && (
+              <p className="text-xs text-muted-foreground">
+                ✓ Using your saved info
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Save Info Prompt - shown after order if not already saved */}
+        {showSavePrompt && (
+          <div className="bg-card border border-border rounded-2xl p-6 animate-fade-in">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Save className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Save your info?</h3>
+                <p className="text-sm text-muted-foreground">Speed up your next purchase</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              We'll remember your details for 120 days so you can checkout faster next time.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleSkipSave} className="flex-1">
+                No thanks
+              </Button>
+              <Button onClick={handleSaveInfo} className="flex-1 gap-2">
+                <Save className="w-4 h-4" />
+                Save my info
+              </Button>
+            </div>
           </div>
         )}
 
         {/* Order Confirmation */}
-        {orderPlaced && !isPaid && (
+        {orderPlaced && !isPaid && !showSavePrompt && (
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center animate-fade-in">
             <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <CheckCircle className="w-7 h-7 text-primary" />
