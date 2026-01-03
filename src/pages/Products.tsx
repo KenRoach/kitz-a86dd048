@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ProductsSkeleton } from "@/components/ui/dashboard-skeleton";
 
 interface Product {
   id: string;
@@ -294,9 +295,7 @@ export default function Products() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-        </div>
+        <ProductsSkeleton />
       </AppLayout>
     );
   }

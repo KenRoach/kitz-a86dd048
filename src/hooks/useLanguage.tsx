@@ -16,6 +16,7 @@ interface Translations {
   admin: string;
   home: string;
   orders: string;
+  more: string;
   
   // Actions
   signOut: string;
@@ -129,6 +130,7 @@ const translations: Record<Language, Translations> = {
     admin: "Admin",
     home: "Home",
     orders: "Orders",
+    more: "More",
     
     signOut: "Sign out",
     lightMode: "Light mode",
@@ -233,6 +235,7 @@ const translations: Record<Language, Translations> = {
     admin: "Admin",
     home: "Inicio",
     orders: "Pedidos",
+    more: "Más",
     
     signOut: "Cerrar sesión",
     lightMode: "Modo claro",
