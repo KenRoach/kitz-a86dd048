@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library, Wand2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +50,28 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   
   const [loading, setLoading] = useState(false);
   const [sendNow, setSendNow] = useState(true);
+  const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
+  const [suggestedPriceRange, setSuggestedPriceRange] = useState<{ min: number; max: number } | null>(null);
+  const [existingProducts, setExistingProducts] = useState<Array<{ title: string; price: number }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch existing products for pricing reference
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("products")
+        .select("title, price")
+        .eq("user_id", user.id)
+        .limit(20);
+      if (data) {
+        setExistingProducts(data as Array<{ title: string; price: number }>);
+      }
+    };
+    if (open) {
+      fetchProducts();
+    }
+  }, [user, open]);
 
   const steps: Step[] = ["type", "what", "confirm"];
   const currentIndex = steps.indexOf(step);
@@ -103,6 +125,47 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
+  };
+
+  const generateAISuggestions = async () => {
+    if (!title.trim()) {
+      toast.error("Enter a title first");
+      return;
+    }
+
+    setGeneratingSuggestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-storefront", {
+        body: {
+          title: title.trim(),
+          existingProducts: existingProducts
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data.suggestedPriceMin && data.suggestedPriceMax) {
+        setSuggestedPriceRange({ min: data.suggestedPriceMin, max: data.suggestedPriceMax });
+        // Auto-fill with the average if no price set
+        if (!price) {
+          const avgPrice = ((data.suggestedPriceMin + data.suggestedPriceMax) / 2).toFixed(2);
+          setPrice(avgPrice);
+        }
+      }
+      if (data.description) {
+        setDescription(data.description);
+      }
+      toast.success("AI suggestions applied!");
+    } catch (error) {
+      console.error("Error generating suggestions:", error);
+      toast.error("Failed to generate suggestions");
+    } finally {
+      setGeneratingSuggestions(false);
+    }
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -216,6 +279,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     setImagePreview(null);
     setSelectedProductId(null);
     setShowProductSelector(false);
+    setSuggestedPriceRange(null);
     setBundleTitle("");
     setBundleItems([createEmptyItem()]);
     setSendNow(true);
@@ -359,11 +423,28 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
             ) : (
               <>
                 <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs sm:text-sm text-muted-foreground">Title</label>
+                    <button
+                      type="button"
+                      onClick={generateAISuggestions}
+                      disabled={generatingSuggestions || !title.trim()}
+                      className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {generatingSuggestions ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Wand2 className="w-3 h-3" />
+                      )}
+                      AI Suggest
+                    </button>
+                  </div>
                   <Input
                     value={title}
                     onChange={(e) => {
                       setTitle(e.target.value);
                       setSelectedProductId(null);
+                      setSuggestedPriceRange(null);
                     }}
                     placeholder="e.g., Chicken Bowl, Cupcakes..."
                     className="text-base py-4 sm:py-5"
@@ -386,6 +467,11 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                         className="pl-7 sm:pl-8 text-base sm:text-lg"
                       />
                     </div>
+                    {suggestedPriceRange && (
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        AI suggests: ${suggestedPriceRange.min.toFixed(2)} - ${suggestedPriceRange.max.toFixed(2)}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Quantity</label>
@@ -403,6 +489,20 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Total: <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
                   </p>
+                )}
+
+                {/* Description from AI */}
+                {description && (
+                  <div>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Description</label>
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Product description..."
+                      rows={2}
+                      className="text-sm"
+                    />
+                  </div>
                 )}
 
                 {/* Image upload */}
