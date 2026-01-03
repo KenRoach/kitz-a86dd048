@@ -16,7 +16,7 @@ interface StorefrontWizardProps {
   onCreated: () => void;
 }
 
-type Step = "type" | "what" | "who" | "details" | "confirm";
+type Step = "type" | "what" | "details" | "confirm";
 type StorefrontType = "single" | "bundle";
 
 const generateSlug = (title: string) => {
@@ -44,14 +44,12 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   const [bundleItems, setBundleItems] = useState<BundleItem[]>([createEmptyItem()]);
   
   // Common fields
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
   const [fulfillmentNote, setFulfillmentNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [sendNow, setSendNow] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const steps: Step[] = ["type", "what", "who", "details", "confirm"];
+  const steps: Step[] = ["type", "what", "details", "confirm"];
   const currentIndex = steps.indexOf(step);
 
   const getBundleTotal = () => {
@@ -73,8 +71,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           return bundleTitle.trim().length > 0 && 
                  bundleItems.some(item => item.title.trim() && parseFloat(item.price) > 0);
         }
-      case "who":
-        return true;
       case "details":
         return true;
       case "confirm":
@@ -168,8 +164,8 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           description: null,
           price: totalPrice,
           quantity: isBundle ? 1 : parseInt(quantity),
-          customer_name: customerName.trim() || null,
-          customer_phone: customerPhone.trim() || null,
+          customer_name: null,
+          customer_phone: null,
           fulfillment_note: fulfillmentNote.trim() || null,
           image_url: mainImageUrl,
           slug,
@@ -218,32 +214,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
         message: `Created ${isBundle ? "bundle" : "storefront"}: ${storefrontTitle} — $${totalPrice.toFixed(2)}`
       });
 
-      // If customer provided, add to CRM
-      if (customerName.trim()) {
-        const { data: existing } = await supabase
-          .from("customers")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("name", customerName.trim())
-          .maybeSingle();
-
-        if (!existing) {
-          await supabase.from("customers").insert({
-            user_id: user.id,
-            name: customerName.trim(),
-            phone: customerPhone.trim() || null,
-            lifecycle: "lead",
-            tags: ["New"]
-          });
-
-          await supabase.from("activity_log").insert({
-            user_id: user.id,
-            type: "customer",
-            message: `New customer: ${customerName}`
-          });
-        }
-      }
-
       toast.success(sendNow ? "Storefront created and ready to share!" : "Storefront saved as draft");
       resetAndClose();
       onCreated();
@@ -260,8 +230,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     setTitle("");
     setPrice("");
     setQuantity("1");
-    setCustomerName("");
-    setCustomerPhone("");
     setFulfillmentNote("");
     setImageFile(null);
     setImagePreview(null);
@@ -440,35 +408,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           );
         }
 
-      case "who":
-        return (
-          <div className="space-y-5 animate-fade-in">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-foreground">Who is this for?</h3>
-              <p className="text-sm text-muted-foreground">Optional — helps you track the order</p>
-            </div>
-
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Customer name</label>
-              <Input
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="e.g., Maria Rodriguez"
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Phone (for WhatsApp)</label>
-              <Input
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="e.g., +1 555-0123"
-              />
-            </div>
-          </div>
-        );
-
       case "details":
         return (
           <div className="space-y-5 animate-fade-in">
@@ -531,9 +470,6 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                   </div>
                 )}
 
-                {customerName && (
-                  <p className="text-sm text-muted-foreground">For: {customerName}</p>
-                )}
                 {fulfillmentNote && (
                   <p className="text-sm text-muted-foreground">{fulfillmentNote}</p>
                 )}
@@ -594,7 +530,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
               </Button>
             ) : (
               <Button onClick={handleNext} disabled={!canProceed()}>
-                {step === "who" || step === "details" ? "Skip" : "Continue"}
+                {step === "details" ? "Skip" : "Continue"}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             )}
