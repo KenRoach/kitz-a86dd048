@@ -212,7 +212,7 @@ export default function Dashboard() {
     <AppLayout>
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-5 md:space-y-8">
         {/* Header with Share - hidden on mobile since MobileHeader shows greeting */}
         <div className="hidden md:flex items-center justify-between animate-fade-in">
           <div>
@@ -227,59 +227,58 @@ export default function Dashboard() {
         </div>
         
         {/* Mobile: just show share button */}
-        <div className="flex md:hidden justify-end animate-fade-in">
+        <div className="flex md:hidden justify-end animate-fade-in -mb-2">
           <ProfileShareButton />
         </div>
 
         {/* Hero Balance Section */}
         <div className="animate-fade-in">
-
           {/* Main Balance Card */}
-          <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl md:rounded-3xl p-5 md:p-8 text-primary-foreground shadow-glow animate-glow-pulse">
-            <p className="text-primary-foreground/70 text-xs md:text-sm font-medium mb-1 md:mb-2">{t.totalBalance}</p>
-            <div className="flex items-end gap-2 md:gap-4 mb-3 md:mb-4">
-              <span className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+          <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl p-4 md:p-8 text-primary-foreground shadow-glow">
+            <p className="text-primary-foreground/70 text-xs font-medium mb-1">{t.totalBalance}</p>
+            <div className="flex items-end gap-2 mb-2 md:mb-4">
+              <span className="text-3xl md:text-5xl font-bold tracking-tight">
                 ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
               {isPositiveChange ? (
-                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-0.5 md:px-3 md:py-1">
-                  <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="text-xs md:text-sm font-medium">+{changePercent}%</span>
+                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                  <TrendingUp className="w-3 h-3" />
+                  <span className="text-xs font-medium">+{changePercent}%</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-0.5 md:px-3 md:py-1">
-                  <TrendingDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="text-xs md:text-sm font-medium">{changePercent}%</span>
+                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                  <TrendingDown className="w-3 h-3" />
+                  <span className="text-xs font-medium">{changePercent}%</span>
                 </div>
               )}
-              <span className="text-primary-foreground/70 text-xs md:text-sm">{t.vsYesterday}</span>
+              <span className="text-primary-foreground/70 text-xs">{t.vsYesterday}</span>
             </div>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
-          <div className="neu-card-flat p-3.5 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.today}</p>
-            <p className="text-xl md:text-2xl font-bold text-foreground">${totalToday.toFixed(2)}</p>
-            <p className="text-[10px] md:text-xs text-success mt-0.5">{todaysPaid.length} orders</p>
+        {/* Stats Row - 2x2 grid on mobile */}
+        <div className="grid grid-cols-2 gap-2.5 md:gap-4">
+          <div className="neu-card-flat p-3 md:p-5 min-w-0">
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.today}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">${totalToday.toFixed(2)}</p>
+            <p className="text-[10px] text-success mt-0.5">{todaysPaid.length} orders</p>
           </div>
-          <div className="neu-card-flat p-3.5 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.pending}</p>
-            <p className="text-xl md:text-2xl font-bold text-foreground">{sentStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-attention mt-0.5">{t.awaiting}</p>
+          <div className="neu-card-flat p-3 md:p-5 min-w-0">
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.pending}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{sentStorefronts.length}</p>
+            <p className="text-[10px] text-attention mt-0.5">{t.awaiting}</p>
           </div>
-          <div className="neu-card-flat p-3.5 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.drafts}</p>
-            <p className="text-xl md:text-2xl font-bold text-foreground">{draftStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">{t.toComplete}</p>
+          <div className="neu-card-flat p-3 md:p-5 min-w-0">
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.drafts}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{draftStorefronts.length}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t.toComplete}</p>
           </div>
-          <div className="neu-card-flat p-3.5 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.completed}</p>
-            <p className="text-xl md:text-2xl font-bold text-foreground">{paidStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-success mt-0.5">{t.allTime}</p>
+          <div className="neu-card-flat p-3 md:p-5 min-w-0">
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.completed}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{paidStorefronts.length}</p>
+            <p className="text-[10px] text-success mt-0.5">{t.allTime}</p>
           </div>
         </div>
 
