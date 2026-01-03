@@ -12,7 +12,8 @@ import {
   FileText,
   ClipboardList,
   Palette,
-  Send
+  Send,
+  BookOpen
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -121,6 +122,16 @@ const INTEGRATIONS: Integration[] = [
     icon: Palette,
     color: "text-cyan-500",
     bgColor: "bg-cyan-500/10",
+    status: "available",
+    category: "productivity",
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    description: "Notas, bases de datos y gestión de proyectos",
+    icon: BookOpen,
+    color: "text-stone-700 dark:text-stone-300",
+    bgColor: "bg-stone-500/10",
     status: "available",
     category: "productivity",
   },
