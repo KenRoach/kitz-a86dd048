@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check, QrCode, Bot } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2, Share2, Copy, Check, QrCode, Bot, BarChart3, Search, TrendingUp, ExternalLink } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog,
@@ -754,6 +754,128 @@ export default function Admin() {
                 </span>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* Analytics & Discovery */}
+        <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "300ms" }}>
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+              {language === "es" ? "Analytics & Descubrimiento" : "Analytics & Discovery"}
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground -mt-2">
+            {language === "es" 
+              ? "Herramientas gratuitas para medir y hacer crecer tu negocio" 
+              : "Free tools to measure and grow your business"}
+          </p>
+          
+          <div className="space-y-3">
+            {/* Google Business Profile */}
+            <a 
+              href="https://business.google.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">Google Business Profile</span>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "es" ? "Gestiona tu perfil y reseñas en Google" : "Manage your profile and reviews on Google"}
+                  </p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </a>
+
+            {/* Google Analytics */}
+            <a 
+              href="https://analytics.google.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">Google Analytics</span>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "es" ? "Analiza el tráfico de tu sitio web" : "Analyze your website traffic"}
+                  </p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </a>
+
+            {/* Google Search Console */}
+            <a 
+              href="https://search.google.com/search-console" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">Google Search Console</span>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "es" ? "Optimiza tu presencia en búsquedas" : "Optimize your search presence"}
+                  </p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </a>
+
+            {/* Meta Business Suite */}
+            <a 
+              href="https://business.facebook.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">Meta Business Suite</span>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "es" ? "Gestiona Facebook e Instagram" : "Manage Facebook & Instagram"}
+                  </p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </a>
+
+            {/* Hotjar */}
+            <a 
+              href="https://www.hotjar.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">Hotjar</span>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "es" ? "Mapas de calor y grabaciones de usuario" : "Heatmaps and user recordings"}
+                  </p>
+                </div>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </a>
           </div>
         </section>
 
