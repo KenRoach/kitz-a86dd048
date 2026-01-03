@@ -213,9 +213,10 @@ export default function Dashboard() {
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
       <div className="space-y-3 md:space-y-6">
-        {/* Header with Share - only on desktop since MobileHeader shows greeting */}
-        <div className="hidden md:flex items-center justify-between animate-fade-in">
-          <div>
+        {/* Header with Share */}
+        <div className="flex items-center justify-between animate-fade-in">
+          {/* Desktop: show greeting */}
+          <div className="hidden md:block">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               {getGreeting()}
             </p>
@@ -223,6 +224,8 @@ export default function Dashboard() {
               {profile?.business_name || "My Business"}
             </h1>
           </div>
+          {/* Mobile: empty space for alignment */}
+          <div className="md:hidden" />
           <ProfileShareButton />
         </div>
 
