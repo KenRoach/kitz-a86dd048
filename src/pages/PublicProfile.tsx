@@ -31,6 +31,7 @@ interface Profile {
   storefront_image_url: string | null;
   website: string | null;
   instagram: string | null;
+  username: string | null;
 }
 
 interface Storefront {
@@ -293,7 +294,7 @@ export default function PublicProfile() {
             {storefronts.map((item) => (
               <Link
                 key={item.id}
-                to={`/s/${item.slug}`}
+                to={profile?.username ? `/p/@${profile.username}/${item.slug}` : `/s/${item.slug}`}
                 className="group relative aspect-square rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 transition-all hover:scale-[1.02]"
               >
                 {item.image_url ? (
