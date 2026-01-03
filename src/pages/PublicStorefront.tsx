@@ -70,12 +70,10 @@ interface Storefront {
   image_url: string | null;
   customer_name: string | null;
   fulfillment_note: string | null;
-  seller_phone: string | null;
   payment_cards: boolean;
   payment_yappy: boolean;
   payment_cash: boolean;
   payment_pluxee: boolean;
-  buyer_name: string | null;
   ordered_at: string | null;
   is_bundle: boolean;
 }
@@ -120,28 +118,30 @@ export default function PublicStorefront() {
         return;
       }
 
+      // Use public view that excludes sensitive data (buyer info, seller phone)
       const { data, error } = await supabase
-        .from("storefronts")
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, seller_phone, payment_cards, payment_yappy, payment_cash, payment_pluxee, buyer_name, ordered_at, is_bundle")
+        .from("public_storefronts" as any)
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle")
         .eq("slug", effectiveSlug)
         .maybeSingle();
 
       if (error || !data) {
         setNotFound(true);
       } else {
-        setStorefront(data as Storefront);
+        const storefrontData = data as unknown as Storefront;
+        setStorefront(storefrontData);
         
         // If already ordered, show that
-        if (data.ordered_at || data.buyer_name) {
+        if (storefrontData.ordered_at) {
           setOrderPlaced(true);
         }
 
         // Fetch bundle items if it's a bundle
-        if (data.is_bundle) {
+        if (storefrontData.is_bundle) {
           const { data: items } = await supabase
             .from("storefront_items")
             .select("*")
-            .eq("storefront_id", data.id)
+            .eq("storefront_id", storefrontData.id)
             .order("sort_order", { ascending: true });
           
           if (items) {
@@ -211,11 +211,7 @@ export default function PublicStorefront() {
     toast.success("Order placed! The seller will contact you soon.");
   };
 
-  const handleWhatsAppContact = () => {
-    const message = `Hi! I'd like to pay for: ${storefront?.title} ($${storefront?.price.toFixed(2)})`;
-    const phone = storefront?.seller_phone?.replace(/[^0-9+]/g, "") || "";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
-  };
+  // WhatsApp contact is no longer available on public storefront - seller phone is hidden for security
 
   if (loading) {
     return (
@@ -537,16 +533,6 @@ export default function PublicStorefront() {
             <p className="text-muted-foreground text-sm">
               The seller has been notified and will contact you to arrange payment.
             </p>
-            {storefront?.seller_phone && (
-              <Button
-                variant="outline"
-                onClick={handleWhatsAppContact}
-                className="mt-4 gap-2"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Message seller on WhatsApp
-              </Button>
-            )}
           </div>
         )}
       </main>
