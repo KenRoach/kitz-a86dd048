@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode } from "lucide-react";
+import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -39,6 +39,7 @@ interface StorefrontCardProps {
   link?: string;
   imageUrl?: string | null;
   buyerName?: string | null;
+  isBundle?: boolean;
   delay?: number;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -62,6 +63,7 @@ export function StorefrontCard({
   link,
   imageUrl,
   buyerName,
+  isBundle = false,
   delay = 0,
   onEdit,
   onDelete,
@@ -127,11 +129,16 @@ export function StorefrontCard({
       >
         <div className="flex">
           {/* Image or placeholder */}
-          <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-muted flex items-center justify-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-muted flex items-center justify-center relative">
             {imageUrl ? (
               <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
             ) : (
               <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30" />
+            )}
+            {isBundle && (
+              <div className="absolute bottom-1 left-1 p-1 rounded-md bg-primary/90 text-primary-foreground">
+                <Package className="w-3 h-3" />
+              </div>
             )}
           </div>
 

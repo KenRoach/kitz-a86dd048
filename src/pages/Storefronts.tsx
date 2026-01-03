@@ -26,6 +26,7 @@ interface Storefront {
   fulfillment_note: string | null;
   buyer_name: string | null;
   created_at: string;
+  is_bundle: boolean;
 }
 
 type FilterStatus = "all" | "draft" | "sent" | "paid";
@@ -55,6 +56,7 @@ export default function Storefronts() {
           ...s,
           quantity: s.quantity || 1,
           status: s.status as "draft" | "sent" | "paid",
+          is_bundle: s.is_bundle || false,
         }))
       );
     }
@@ -212,6 +214,7 @@ export default function Storefronts() {
                 link={getShareableLink(sf.slug)}
                 imageUrl={sf.image_url}
                 buyerName={sf.buyer_name}
+                isBundle={sf.is_bundle}
                 delay={index * 50}
                 onEdit={() => setEditingStorefront(sf)}
                 onDelete={() => handleDelete(sf.id)}
