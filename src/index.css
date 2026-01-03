@@ -2,118 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Light Neumorphic Fintech - White/Grey/Violet */
-    --background: 220 15% 96%;
-    --foreground: 220 25% 12%;
+    /* Kitz Design System - Calm, Minimal, Gen-Z Native */
+    
+    /* App background: #F7F7FA */
+    --background: 240 14% 97%;
+    /* Primary text: #111111 */
+    --foreground: 0 0% 7%;
 
+    /* Card background: #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 12%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover-foreground: 0 0% 7%;
 
-    /* Violet primary */
-    --primary: 262 83% 58%;
+    /* Primary Purple: #7A47E6 → HSL(258, 76%, 59%) */
+    --primary: 258 76% 59%;
     --primary-foreground: 0 0% 100%;
+    
+    /* Primary Soft: #8E63EA → HSL(258, 74%, 65%) */
+    --primary-soft: 258 74% 65%;
+    
+    /* Primary Tint/Background: #EEE8FF → HSL(258, 100%, 96%) */
+    --primary-tint: 258 100% 96%;
 
-    /* Cool gray secondary */
-    --secondary: 220 14% 92%;
-    --secondary-foreground: 220 20% 25%;
+    /* Secondary (muted cards) */
+    --secondary: 240 14% 97%;
+    /* Secondary text: #6B7280 */
+    --secondary-foreground: 220 9% 46%;
 
-    --muted: 220 14% 90%;
-    --muted-foreground: 220 10% 45%;
+    /* Muted: dividers #E5E7EB */
+    --muted: 220 13% 91%;
+    /* Muted text: #9CA3AF */
+    --muted-foreground: 218 11% 65%;
 
-    --accent: 262 60% 95%;
-    --accent-foreground: 262 83% 50%;
+    /* Accent uses primary tint */
+    --accent: 258 100% 96%;
+    --accent-foreground: 258 76% 50%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 88%;
-    --input: 220 13% 88%;
-    --ring: 262 83% 58%;
+    /* Dividers: #E5E7EB */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 258 76% 59%;
 
     --radius: 1rem;
 
-    /* Custom tokens */
+    /* Action Orange: #F28B30 → HSL(27, 88%, 57%) */
+    --action: 27 88% 57%;
+    --action-foreground: 0 0% 100%;
+
+    /* Status colors */
     --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 27 88% 57%;
     --warning-foreground: 0 0% 100%;
-    --attention: 25 95% 53%;
+    --attention: 27 88% 57%;
     --attention-foreground: 0 0% 100%;
     
     /* Momentum colors */
     --momentum-low: 0 72% 51%;
-    --momentum-mid: 38 92% 50%;
+    --momentum-mid: 27 88% 57%;
     --momentum-high: 152 60% 42%;
     
-    /* Neumorphic shadows */
-    --shadow-sm: 4px 4px 8px hsl(220 20% 85% / 0.5), -4px -4px 8px hsl(0 0% 100% / 0.8);
-    --shadow-md: 6px 6px 12px hsl(220 20% 82% / 0.6), -6px -6px 12px hsl(0 0% 100% / 0.9);
-    --shadow-lg: 10px 10px 20px hsl(220 20% 80% / 0.5), -10px -10px 20px hsl(0 0% 100% / 0.9);
-    --shadow-inset: inset 3px 3px 6px hsl(220 20% 85% / 0.5), inset -3px -3px 6px hsl(0 0% 100% / 0.7);
-    --shadow-glow: 0 0 24px hsl(262 83% 58% / 0.25);
-    --shadow-pressed: inset 2px 2px 5px hsl(220 20% 85% / 0.5), inset -2px -2px 5px hsl(0 0% 100% / 0.7);
+    /* Soft shadows for calm UI */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.08);
+    --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-glow: 0 0 20px hsl(258 76% 59% / 0.15);
+    --shadow-pressed: inset 0 1px 3px hsl(0 0% 0% / 0.06);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 25%;
-    --sidebar-primary: 262 83% 58%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 258 76% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 60% 96%;
-    --sidebar-accent-foreground: 262 83% 50%;
-    --sidebar-border: 220 13% 90%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-accent: 258 100% 96%;
+    --sidebar-accent-foreground: 258 76% 50%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 258 76% 59%;
   }
 
   .dark {
-    /* Dark Neumorphic Fintech */
-    --background: 220 20% 8%;
-    --foreground: 220 10% 95%;
+    /* Dark mode - subtle adjustments */
+    --background: 240 10% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 18% 12%;
-    --card-foreground: 220 10% 95%;
+    --card: 240 10% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 18% 12%;
-    --popover-foreground: 220 10% 95%;
+    --popover: 240 10% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 262 83% 65%;
+    --primary: 258 76% 65%;
     --primary-foreground: 0 0% 100%;
+    
+    --primary-soft: 258 74% 70%;
+    --primary-tint: 258 50% 20%;
 
-    --secondary: 220 15% 16%;
-    --secondary-foreground: 220 10% 80%;
+    --secondary: 240 10% 16%;
+    --secondary-foreground: 218 11% 75%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 240 10% 18%;
+    --muted-foreground: 218 11% 55%;
 
-    --accent: 262 50% 20%;
-    --accent-foreground: 262 83% 75%;
+    --accent: 258 50% 20%;
+    --accent-foreground: 258 76% 75%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 262 83% 65%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 258 76% 65%;
 
-    --shadow-sm: 4px 4px 8px hsl(220 20% 4% / 0.5), -2px -2px 6px hsl(220 15% 18% / 0.3);
-    --shadow-md: 6px 6px 14px hsl(220 20% 4% / 0.6), -4px -4px 10px hsl(220 15% 18% / 0.2);
-    --shadow-lg: 10px 10px 24px hsl(220 20% 4% / 0.5), -6px -6px 16px hsl(220 15% 18% / 0.15);
-    --shadow-inset: inset 3px 3px 6px hsl(220 20% 4% / 0.4), inset -2px -2px 5px hsl(220 15% 18% / 0.2);
-    --shadow-glow: 0 0 30px hsl(262 83% 65% / 0.3);
+    --action: 27 88% 57%;
+    --action-foreground: 0 0% 100%;
 
-    --sidebar-background: 220 18% 10%;
-    --sidebar-foreground: 220 10% 85%;
-    --sidebar-primary: 262 83% 65%;
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.4);
+    --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 24px hsl(258 76% 65% / 0.25);
+
+    --sidebar-background: 240 10% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 258 76% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 50% 18%;
-    --sidebar-accent-foreground: 262 83% 75%;
-    --sidebar-border: 220 15% 16%;
-    --sidebar-ring: 262 83% 65%;
+    --sidebar-accent: 258 50% 18%;
+    --sidebar-accent-foreground: 258 76% 75%;
+    --sidebar-border: 240 10% 16%;
+    --sidebar-ring: 258 76% 65%;
   }
 }
 
@@ -125,6 +150,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -133,15 +160,15 @@
 }
 
 @layer components {
-  /* Neumorphic card styles */
+  /* Calm card styles */
   .neu-card {
-    @apply bg-card rounded-2xl transition-all duration-300;
+    @apply bg-card rounded-2xl transition-all duration-200;
     box-shadow: var(--shadow-md);
   }
 
   .neu-card:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .neu-card-flat {
@@ -182,15 +209,26 @@
     box-shadow: var(--shadow-glow), var(--shadow-md);
   }
 
+  /* Action button (orange CTA) */
+  .btn-action {
+    @apply bg-action text-action-foreground font-medium rounded-xl px-6 py-3 transition-all duration-200;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-action:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
   /* Legacy card hover for compatibility */
   .card-hover {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
     box-shadow: var(--shadow-sm);
   }
 
   .card-hover:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .action-card {
@@ -206,13 +244,11 @@
   }
 
   .suggestion-pill {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-accent text-accent-foreground rounded-full text-sm font-medium transition-all duration-200 cursor-pointer;
-    box-shadow: var(--shadow-sm);
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-primary-tint text-primary rounded-full text-sm font-medium transition-all duration-200 cursor-pointer;
   }
 
   .suggestion-pill:hover {
     @apply bg-primary text-primary-foreground;
-    box-shadow: var(--shadow-glow);
   }
 
   .nav-item {
@@ -224,12 +260,11 @@
   }
 
   .nav-item-active {
-    @apply bg-primary/10 text-primary font-medium;
-    box-shadow: var(--shadow-inset);
+    @apply bg-primary-tint text-primary font-medium;
   }
 
   .status-badge {
-    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
   }
 
   .status-draft {
@@ -237,11 +272,15 @@
   }
 
   .status-shared {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-primary-tint text-primary;
   }
 
   .status-paid {
-    @apply bg-success/15 text-success;
+    @apply bg-success/10 text-success;
+  }
+
+  .status-pending {
+    @apply bg-action/10 text-action;
   }
 
   /* Balance display for fintech */
@@ -275,6 +314,11 @@
   .glow-primary {
     box-shadow: var(--shadow-glow);
   }
+
+  /* Primary gradient background */
+  .bg-primary-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-soft)) 100%);
+  }
 }
 
 @layer utilities {
@@ -283,11 +327,11 @@
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(262 83% 68%) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-soft)) 100%);
   }
 
   .gradient-card {
-    background: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(220 14% 98%) 100%);
+    background: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
   }
 
   .safe-area-bottom {
@@ -301,5 +345,14 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Primary tint background utility */
+  .bg-primary-tint {
+    background-color: hsl(var(--primary-tint));
+  }
+
+  .text-secondary-foreground {
+    color: hsl(var(--secondary-foreground));
   }
 }

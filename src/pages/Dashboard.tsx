@@ -13,7 +13,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, TrendingDown, Rocket } from "lucide-react";
+import { TrendingUp, TrendingDown, Rocket, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
   );
   const yesterdaysTotal = yesterdaysPaid.reduce((sum, s) => sum + s.price, 0);
   const changePercent = yesterdaysTotal > 0 
-    ? ((totalToday - yesterdaysTotal) / yesterdaysTotal * 100).toFixed(1)
+    ? ((totalToday - yesterdaysTotal) / yesterdaysTotal * 100).toFixed(0)
     : totalToday > 0 ? "+100" : "0";
 
   const calculateMomentum = () => {
@@ -143,30 +143,16 @@ export default function Dashboard() {
       onAction: () => void;
     }> = [];
 
-    draftStorefronts.slice(0, 1).forEach(sf => {
-      items.push({
-        id: `draft-${sf.id}`,
-        type: "confirm",
-        title: t.completeStorefront,
-        description: `"${sf.title}" ${t.readyToShare}`,
-        action: t.shareNow,
-        onAction: async () => {
-          await supabase.from("storefronts").update({ status: "sent" }).eq("id", sf.id);
-          toast.success(t.sent + "!");
-          fetchData();
-        }
-      });
-    });
-
-    sentStorefronts.slice(0, 2 - items.length).forEach(sf => {
+    // Awaiting payment items (use orange for pending state)
+    sentStorefronts.slice(0, 3).forEach(sf => {
       items.push({
         id: `sent-${sf.id}`,
         type: "payment",
-        title: t.awaitingPayment,
-        description: `${sf.customer_name || "Customer"} — ${sf.title} ($${sf.price.toFixed(2)})`,
+        title: language === "es" ? "Esperando pago" : "Awaiting payment",
+        description: `${sf.customer_name || "Customer"} — $${sf.price.toFixed(2)}`,
         action: t.sendReminder,
         onAction: () => {
-          toast.success(t.sent + "!");
+          toast.success(language === "es" ? "Recordatorio enviado" : "Reminder sent");
         }
       });
     });
@@ -192,11 +178,11 @@ export default function Dashboard() {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return language === "es" ? "Ahora" : "Just now";
+    if (mins < 60) return `${mins}m`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
+    if (hours < 24) return `${hours}h`;
+    return `${Math.floor(hours / 24)}d`;
   }
 
   const isPositiveChange = parseFloat(changePercent) >= 0;
@@ -213,98 +199,100 @@ export default function Dashboard() {
     <AppLayout>
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
-      <div className="space-y-3 md:space-y-6">
-        {/* Header with Share */}
-        <div className="flex items-center justify-between animate-fade-in">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg md:text-2xl font-semibold text-foreground">
+            <h1 className="text-xl font-semibold text-foreground">
               {t.dashboard}
             </h1>
-            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
-              {language === "es" ? "Tu negocio en un vistazo. Monitorea y crece." : "Your business at a glance. Monitor and grow."}
-            </p>
           </div>
           <ProfileShareButton />
         </div>
 
-        {/* Hero Balance Section */}
-        <div className="animate-fade-in">
-          {/* Main Balance Card */}
-          <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl p-4 md:p-8 text-primary-foreground shadow-glow">
-            <p className="text-primary-foreground/70 text-xs font-medium mb-1">{t.totalBalance}</p>
-            <div className="flex items-end gap-2 mb-2 md:mb-4">
-              <span className="text-3xl md:text-5xl font-bold tracking-tight">
-                ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {isPositiveChange ? (
-                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
-                  <TrendingUp className="w-3 h-3" />
-                  <span className="text-xs font-medium">+{changePercent}%</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
-                  <TrendingDown className="w-3 h-3" />
-                  <span className="text-xs font-medium">{changePercent}%</span>
-                </div>
-              )}
-              <span className="text-primary-foreground/70 text-xs">{t.vsYesterday}</span>
-            </div>
+        {/* Balance Card - Purple gradient */}
+        <div className="bg-primary rounded-2xl p-6 text-primary-foreground">
+          <p className="text-sm text-primary-foreground/70 mb-1">
+            {language === "es" ? "Balance Total" : "Total Balance"}
+          </p>
+          <div className="flex items-baseline gap-3 mb-3">
+            <span className="text-4xl font-semibold tracking-tight">
+              ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            {isPositiveChange ? (
+              <div className="flex items-center gap-1">
+                <TrendingUp className="w-4 h-4" />
+                <span>+{changePercent}%</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <TrendingDown className="w-4 h-4" />
+                <span>{changePercent}%</span>
+              </div>
+            )}
+            <span className="text-primary-foreground/60">
+              {language === "es" ? "vs ayer" : "vs yesterday"}
+            </span>
           </div>
         </div>
 
-        {/* Stats Row - 2x2 grid on mobile */}
-        <div className="grid grid-cols-2 gap-2.5 md:gap-4">
-          <div className="neu-card-flat p-3 md:p-5 min-w-0">
-            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.today}</p>
-            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">${totalToday.toFixed(2)}</p>
-            <p className="text-[10px] text-success mt-0.5">{todaysPaid.length} orders</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-card rounded-2xl p-4 shadow-sm">
+            <p className="text-xs text-muted-foreground mb-1">
+              {language === "es" ? "Hoy" : "Today"}
+            </p>
+            <p className="text-2xl font-semibold text-foreground">${totalToday.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {todaysPaid.length} {language === "es" ? "órdenes" : "orders"}
+            </p>
           </div>
-          <div className="neu-card-flat p-3 md:p-5 min-w-0">
-            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.pending}</p>
-            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{sentStorefronts.length}</p>
-            <p className="text-[10px] text-attention mt-0.5">{t.awaiting}</p>
-          </div>
-          <div className="neu-card-flat p-3 md:p-5 min-w-0">
-            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.drafts}</p>
-            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{draftStorefronts.length}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{t.toComplete}</p>
-          </div>
-          <div className="neu-card-flat p-3 md:p-5 min-w-0">
-            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide truncate">{t.completed}</p>
-            <p className="text-lg md:text-2xl font-bold text-foreground mt-0.5">{paidStorefronts.length}</p>
-            <p className="text-[10px] text-success mt-0.5">{t.allTime}</p>
+          <div className="bg-card rounded-2xl p-4 shadow-sm">
+            <p className="text-xs text-muted-foreground mb-1">
+              {language === "es" ? "Borradores" : "Drafts"}
+            </p>
+            <p className="text-2xl font-semibold text-foreground">{draftStorefronts.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {language === "es" ? "pendientes" : "pending"}
+            </p>
           </div>
         </div>
 
-        {/* Needs Attention */}
+        {/* Attention Section */}
         {attentionItems && attentionItems.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">{t.needsAttention}</h2>
-              <span className="text-xs text-muted-foreground">{attentionItems.length} {t.items}</span>
-            </div>
-            <div className="space-y-3">
-              {attentionItems.map((item, index) => (
-                <AttentionCard
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-foreground">
+              {language === "es" ? "Requiere atención" : "Needs attention"}
+            </h2>
+            <div className="space-y-2">
+              {attentionItems.map((item) => (
+                <div
                   key={item.id}
-                  {...item}
-                  delay={index * 100}
-                  onAction={item.onAction}
-                />
+                  onClick={item.onAction}
+                  className="bg-card rounded-2xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <div className="w-10 h-10 rounded-full bg-action/10 flex items-center justify-center">
+                    <Circle className="w-4 h-4 text-action fill-action" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{item.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </section>
         )}
 
-        {/* Calm state */}
+        {/* Calm state when nothing needs attention */}
         {attentionItems === null && (
-          <div className="neu-card-flat p-8 text-center animate-fade-in">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-success/10 flex items-center justify-center">
-              <span className="text-2xl">✓</span>
+          <div className="bg-card rounded-2xl p-8 text-center shadow-sm">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+              <span className="text-xl">✓</span>
             </div>
-            <p className="text-foreground font-semibold">{t.allCaughtUp}</p>
+            <p className="font-medium text-foreground">{t.allCaughtUp}</p>
             <p className="text-sm text-muted-foreground mt-1">
               {t.businessRunningSmooth}
             </p>
@@ -312,16 +300,14 @@ export default function Dashboard() {
         )}
 
         {/* Momentum + Earnings */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <MomentumScore score={calculateMomentum()} />
           <EarningsToday earnings={todaysEarnings} total={totalToday} />
         </div>
 
         {/* Activity Feed */}
         {formattedActivities.length > 0 && (
-          <section>
-            <ActivityFeed activities={formattedActivities} />
-          </section>
+          <ActivityFeed activities={formattedActivities} />
         )}
 
         {/* Empty state for new users */}
@@ -333,9 +319,9 @@ export default function Dashboard() {
             actionLabel={t.createStorefront}
             onAction={() => navigate("/storefronts")}
             tips={[
-              "Create a storefront in under 30 seconds",
-              "Share instantly via WhatsApp or link",
-              "Get notified when customers order"
+              language === "es" ? "Crea una vitrina en menos de 30 segundos" : "Create a storefront in under 30 seconds",
+              language === "es" ? "Comparte al instante por WhatsApp" : "Share instantly via WhatsApp",
+              language === "es" ? "Recibe notificaciones cuando ordenen" : "Get notified when customers order"
             ]}
           />
         )}
