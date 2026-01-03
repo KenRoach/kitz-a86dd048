@@ -187,15 +187,7 @@ export default function Dashboard() {
       <div className="space-y-6 md:space-y-8">
         {/* Hero Balance Section */}
         <div className="animate-fade-in">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <div>
-              <p className="text-muted-foreground text-xs md:text-sm font-medium uppercase tracking-wider">
-                {getGreeting()}
-              </p>
-              <h1 className="text-lg md:text-xl font-semibold text-foreground mt-0.5 md:mt-1">
-                {profile?.business_name || t.dashboard}
-              </h1>
-            </div>
+          <div className="flex items-center justify-end mb-4 md:mb-6">
             <Button onClick={() => navigate("/storefronts")} size="sm" className="gap-1.5 md:gap-2">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">{t.new}</span>
