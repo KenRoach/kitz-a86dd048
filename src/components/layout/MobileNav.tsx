@@ -17,7 +17,7 @@ export function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/50 md:hidden safe-area-bottom">
-      <div className="flex items-center justify-around py-1.5 px-1">
+      <div className="flex items-center justify-around py-1 px-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -25,7 +25,7 @@ export function MobileNav() {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-lg transition-all flex-1",
+                "flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-lg transition-all flex-1",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground active:text-foreground active:scale-95"
@@ -33,12 +33,12 @@ export function MobileNav() {
             >
               <item.icon 
                 className={cn(
-                  "w-5 h-5 transition-all",
+                  "w-[18px] h-[18px] transition-all",
                   isActive && "stroke-[2.5px]"
                 )} 
               />
               <span className={cn(
-                "text-[10px] transition-all",
+                "text-[9px] transition-all leading-tight",
                 isActive ? "font-semibold" : "font-medium"
               )}>
                 {t[item.labelKey]}
