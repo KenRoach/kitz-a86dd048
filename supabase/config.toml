@@ -3,6 +3,9 @@ project_id = "mqkjbejuuedauygeccbj"
 [functions.business-advisor]
 verify_jwt = false
 
+[functions.autopilot]
+verify_jwt = false
+
 [functions.place-order]
 verify_jwt = false
 

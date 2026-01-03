@@ -41,6 +41,114 @@ export type Database = {
         }
         Relationships: []
       }
+      autopilot_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string
+          executed_at: string | null
+          id: string
+          metadata: Json | null
+          related_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description: string
+          executed_at?: string | null
+          id?: string
+          metadata?: Json | null
+          related_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string
+          executed_at?: string | null
+          id?: string
+          metadata?: Json | null
+          related_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      autopilot_queue: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          payload: Json
+          priority: number
+          scheduled_for: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          priority?: number
+          scheduled_for?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          priority?: number
+          scheduled_for?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      autopilot_settings: {
+        Row: {
+          auto_create_storefronts: boolean
+          auto_followup_customers: boolean
+          created_at: string
+          enabled: boolean
+          followup_after_days: number
+          id: string
+          max_followups_per_day: number
+          max_storefronts_per_day: number
+          min_product_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_create_storefronts?: boolean
+          auto_followup_customers?: boolean
+          created_at?: string
+          enabled?: boolean
+          followup_after_days?: number
+          id?: string
+          max_followups_per_day?: number
+          max_storefronts_per_day?: number
+          min_product_price?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_create_storefronts?: boolean
+          auto_followup_customers?: boolean
+          created_at?: string
+          enabled?: boolean
+          followup_after_days?: number
+          id?: string
+          max_followups_per_day?: number
+          max_storefronts_per_day?: number
+          min_product_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           category: Database["public"]["Enums"]["badge_category"]
