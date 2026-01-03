@@ -260,26 +260,26 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.today}</p>
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          <div className="neu-card-flat p-3.5 md:p-5">
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.today}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">${totalToday.toFixed(2)}</p>
-            <p className="text-[10px] md:text-xs text-success mt-0.5 md:mt-1">{todaysPaid.length} orders</p>
+            <p className="text-[10px] md:text-xs text-success mt-0.5">{todaysPaid.length} orders</p>
           </div>
-          <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.pending}</p>
+          <div className="neu-card-flat p-3.5 md:p-5">
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.pending}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{sentStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-attention mt-0.5 md:mt-1">{t.awaiting}</p>
+            <p className="text-[10px] md:text-xs text-attention mt-0.5">{t.awaiting}</p>
           </div>
-          <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.drafts}</p>
+          <div className="neu-card-flat p-3.5 md:p-5">
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.drafts}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{draftStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.toComplete}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">{t.toComplete}</p>
           </div>
-          <div className="neu-card-flat p-4 md:p-5">
-            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5 md:mb-1">{t.completed}</p>
+          <div className="neu-card-flat p-3.5 md:p-5">
+            <p className="text-muted-foreground text-[10px] md:text-xs font-medium uppercase tracking-wider mb-0.5">{t.completed}</p>
             <p className="text-xl md:text-2xl font-bold text-foreground">{paidStorefronts.length}</p>
-            <p className="text-[10px] md:text-xs text-success mt-0.5 md:mt-1">{t.allTime}</p>
+            <p className="text-[10px] md:text-xs text-success mt-0.5">{t.allTime}</p>
           </div>
         </div>
 
