@@ -4,6 +4,7 @@ import { MomentumScore } from "@/components/dashboard/MomentumScore";
 import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
+import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -188,7 +190,7 @@ export default function Dashboard() {
         {/* Hero Balance Section */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-end mb-4 md:mb-6">
-            <Button onClick={() => navigate("/storefronts")} size="sm" className="gap-1.5 md:gap-2">
+            <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 md:gap-2">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">{t.new}</span>
             </Button>
@@ -299,12 +301,14 @@ export default function Dashboard() {
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
               {t.createFirstStorefront}
             </p>
-            <Button onClick={() => navigate("/storefronts")} size="lg">
+            <Button onClick={() => setWizardOpen(true)} size="lg">
               <Plus className="w-4 h-4 mr-2" />
               {t.createStorefront}
             </Button>
           </div>
         )}
+
+        <StorefrontWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onCreated={fetchData} />
       </div>
     </AppLayout>
   );
