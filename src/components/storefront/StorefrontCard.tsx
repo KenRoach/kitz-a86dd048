@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash } from "lucide-react";
+import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -46,6 +46,7 @@ interface StorefrontCardProps {
   onDelete?: () => void;
   onSend?: () => void;
   onMarkPaid?: () => void;
+  onReorder?: () => void;
 }
 
 const statusConfig = {
@@ -71,6 +72,7 @@ export function StorefrontCard({
   onDelete,
   onSend,
   onMarkPaid,
+  onReorder,
 }: StorefrontCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -212,6 +214,12 @@ export function StorefrontCard({
                       </>
                     )}
                     <DropdownMenuSeparator />
+                    {status === "paid" && onReorder && (
+                      <DropdownMenuItem onClick={onReorder}>
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Reorder
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={onEdit}>
                       <Pencil className="w-4 h-4 mr-2" />
                       Edit
@@ -260,7 +268,13 @@ export function StorefrontCard({
                 </div>
               )}
               {status === "paid" && (
-                <span className="text-[10px] sm:text-xs text-success font-semibold bg-success/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full">Completed</span>
+                <button 
+                  onClick={onReorder}
+                  className="text-[10px] sm:text-xs text-primary font-medium bg-primary/10 hover:bg-primary/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full transition-colors flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Reorder
+                </button>
               )}
             </div>
           </div>
