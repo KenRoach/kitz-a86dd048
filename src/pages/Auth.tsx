@@ -80,8 +80,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-3xl font-semibold text-foreground">Business OS</h1>
-          <p className="text-muted-foreground mt-2">AI-first operations for your business</p>
+          <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
         </div>
 
         <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in" style={{ animationDelay: "100ms" }}>
