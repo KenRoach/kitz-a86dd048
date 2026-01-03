@@ -17,7 +17,7 @@ export function MobileHeader() {
   };
 
   return (
-    <header className="md:hidden sticky top-0 z-50 bg-background border-b border-border/50">
+    <header className="md:hidden shrink-0 bg-background border-b border-border/50">
       <div className="flex items-center justify-between px-3 py-2.5">
         <div className="flex-1 min-w-0">
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
