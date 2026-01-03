@@ -308,7 +308,7 @@ export default function Products() {
         <div className="flex items-center justify-between gap-2 animate-fade-in">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">
-              {language === "es" ? "Productos" : "Products"}
+              {language === "es" ? "Productos y/o Servicios" : "Products & Services"}
             </h1>
             <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">
               {language === "es" 
