@@ -4,7 +4,6 @@ import { MomentumScore } from "@/components/dashboard/MomentumScore";
 import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
-import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +35,6 @@ export default function Dashboard() {
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -189,12 +187,6 @@ export default function Dashboard() {
       <div className="space-y-6 md:space-y-8">
         {/* Hero Balance Section */}
         <div className="animate-fade-in">
-          <div className="flex items-center justify-end mb-4 md:mb-6">
-            <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 md:gap-2">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.new}</span>
-            </Button>
-          </div>
 
           {/* Main Balance Card */}
           <div className="bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl md:rounded-3xl p-5 md:p-8 text-primary-foreground shadow-glow animate-glow-pulse">
@@ -301,14 +293,12 @@ export default function Dashboard() {
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
               {t.createFirstStorefront}
             </p>
-            <Button onClick={() => setWizardOpen(true)} size="lg">
+            <Button onClick={() => navigate("/storefronts")} size="lg">
               <Plus className="w-4 h-4 mr-2" />
               {t.createStorefront}
             </Button>
           </div>
         )}
-
-        <StorefrontWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onCreated={fetchData} />
       </div>
     </AppLayout>
   );
