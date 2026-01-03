@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          category: Database["public"]["Enums"]["badge_category"]
+          created_at: string
+          criteria: Json
+          description: string
+          description_es: string
+          icon: string
+          id: string
+          level: number
+          name: string
+          name_es: string
+          points_required: number
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["badge_category"]
+          created_at?: string
+          criteria?: Json
+          description: string
+          description_es: string
+          icon: string
+          id?: string
+          level?: number
+          name: string
+          name_es: string
+          points_required?: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["badge_category"]
+          created_at?: string
+          criteria?: Json
+          description?: string
+          description_es?: string
+          icon?: string
+          id?: string
+          level?: number
+          name?: string
+          name_es?: string
+          points_required?: number
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
@@ -344,6 +386,86 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          created_at: string
+          id: string
+          last_active_date: string | null
+          level: number
+          profile_completeness: number
+          streak_days: number
+          total_customers: number
+          total_orders: number
+          total_products: number
+          total_revenue: number
+          total_storefronts: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          profile_completeness?: number
+          streak_days?: number
+          total_customers?: number
+          total_orders?: number
+          total_products?: number
+          total_revenue?: number
+          total_storefronts?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          profile_completeness?: number
+          streak_days?: number
+          total_customers?: number
+          total_orders?: number
+          total_products?: number
+          total_revenue?: number
+          total_storefronts?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -471,10 +593,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      calculate_level: { Args: { xp: number }; Returns: number }
     }
     Enums: {
-      [_ in never]: never
+      badge_category: "usage" | "growth" | "consistency" | "milestone"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -601,6 +723,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      badge_category: ["usage", "growth", "consistency", "milestone"],
+    },
   },
 } as const
