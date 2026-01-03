@@ -6,7 +6,13 @@ import {
   Zap, 
   MapPin,
   Check,
-  ExternalLink
+  ExternalLink,
+  FileSpreadsheet,
+  HardDrive,
+  FileText,
+  ClipboardList,
+  Palette,
+  Send
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +52,47 @@ const INTEGRATIONS: Integration[] = [
     status: "available",
     category: "social",
   },
-  // Productivity - Available in Panama
+  {
+    id: "telegram",
+    name: "Telegram",
+    description: "Mensajes y notificaciones automáticas",
+    icon: Send,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    status: "available",
+    category: "messaging",
+  },
+  // Google Tools - Free
+  {
+    id: "google_sheets",
+    name: "Google Sheets",
+    description: "Exporta pedidos e inventario a hojas de cálculo",
+    icon: FileSpreadsheet,
+    color: "text-green-600",
+    bgColor: "bg-green-500/10",
+    status: "available",
+    category: "productivity",
+  },
+  {
+    id: "google_drive",
+    name: "Google Drive",
+    description: "Almacena fotos y documentos de tu negocio",
+    icon: HardDrive,
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-500/10",
+    status: "available",
+    category: "productivity",
+  },
+  {
+    id: "google_forms",
+    name: "Google Forms",
+    description: "Crea encuestas y formularios de pedidos",
+    icon: ClipboardList,
+    color: "text-purple-600",
+    bgColor: "bg-purple-500/10",
+    status: "available",
+    category: "productivity",
+  },
   {
     id: "google_calendar",
     name: "Google Calendar",
@@ -54,6 +100,27 @@ const INTEGRATIONS: Integration[] = [
     icon: Calendar,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
+    status: "available",
+    category: "productivity",
+  },
+  {
+    id: "google_docs",
+    name: "Google Docs",
+    description: "Contratos, cotizaciones y documentos",
+    icon: FileText,
+    color: "text-blue-600",
+    bgColor: "bg-blue-500/10",
+    status: "available",
+    category: "productivity",
+  },
+  // Other free tools
+  {
+    id: "canva",
+    name: "Canva",
+    description: "Diseña posts, logos y materiales gratis",
+    icon: Palette,
+    color: "text-cyan-500",
+    bgColor: "bg-cyan-500/10",
     status: "available",
     category: "productivity",
   },
