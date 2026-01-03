@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BadgeIcon, BadgeCard } from "@/components/badges/BadgeDisplay";
 import { LevelDisplay } from "@/components/badges/LevelDisplay";
+import { ProfileQRCode } from "@/components/profile/ProfileQRCode";
 import { useBadges } from "@/hooks/useBadges";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -211,6 +212,12 @@ export default function Profile() {
                 )}
                 {language === "es" ? "Copiar enlace" : "Copy Link"}
               </Button>
+              <ProfileQRCode 
+                url={publicProfileUrl}
+                businessName={profile?.business_name || "My Business"}
+                logoUrl={profile?.logo_url}
+                language={language}
+              />
               <Button 
                 variant="secondary" 
                 size="sm"
