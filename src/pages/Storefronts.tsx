@@ -267,7 +267,7 @@ export default function Storefronts() {
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
             <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">{t.storefrontsDesc}</p>
           </div>
-          <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1.5 shrink-0 hidden md:flex">
+          <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1 shrink-0">
             <Plus className="w-4 h-4" />
             <span>{t.new}</span>
           </Button>
