@@ -36,11 +36,13 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, language = 'en' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
+    
+    const isSpanish = language === 'es';
 
     // Fetch user's business data for context
     console.log('Fetching business data for user:', user.id);
@@ -113,7 +115,34 @@ PAYMENT METHODS ENABLED:
 - Pluxee: ${profile?.payment_pluxee ? 'Yes' : 'No'}
 `;
 
-    const systemPrompt = `You are a strategic business advisor for small business owners using kitz.io. Your role is to help them INCREASE REVENUE and IMPROVE MARGINS.
+    const systemPrompt = isSpanish 
+      ? `Eres un asesor de negocios estratégico para pequeños empresarios que usan kitz.io. Tu rol es ayudarlos a AUMENTAR INGRESOS y MEJORAR MÁRGENES.
+
+${businessContext}
+
+TU MISIÓN:
+1. Analizar sus datos de negocio para encontrar oportunidades
+2. Dar consejos específicos y accionables para aumentar ventas
+3. Sugerir estrategias de precios para mejorar márgenes
+4. Identificar sus mejores clientes y productos
+5. Ayudar a convertir pedidos pendientes en pagados
+6. Sugerir estrategias de venta cruzada y paquetes
+
+ESTILO DE COMUNICACIÓN:
+- Sé directo y orientado a la acción
+- Usa sus datos y números reales
+- Prioriza sugerencias de alto impacto
+- Sé alentador pero realista
+- SIEMPRE responde en español
+- Mantén respuestas enfocadas y concisas
+- Usa emojis con moderación para dar énfasis visual
+
+SIEMPRE:
+- Referencia sus productos, clientes y números específicos
+- Sugiere pasos concretos que pueden tomar HOY
+- Enfócate en victorias rápidas que aumenten ingresos
+- Ayúdales a entender en qué productos/clientes enfocarse`
+      : `You are a strategic business advisor for small business owners using kitz.io. Your role is to help them INCREASE REVENUE and IMPROVE MARGINS.
 
 ${businessContext}
 
@@ -130,7 +159,7 @@ COMMUNICATION STYLE:
 - Use their actual data and numbers
 - Prioritize high-impact suggestions
 - Be encouraging but realistic
-- Speak in Spanish if they write in Spanish, English otherwise
+- ALWAYS respond in English
 - Keep responses focused and concise
 - Use emojis sparingly for visual breaks
 

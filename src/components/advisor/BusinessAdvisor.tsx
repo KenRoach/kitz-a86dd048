@@ -13,13 +13,14 @@ import { Sparkles, Send, X, Loader2, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-const SUGGESTIONS = [
+const SUGGESTIONS_EN = [
   "How can I increase my revenue this month?",
   "Which products should I promote more?",
   "Who are my best customers?",
@@ -27,13 +28,24 @@ const SUGGESTIONS = [
   "What pricing changes would improve my margins?",
 ];
 
+const SUGGESTIONS_ES = [
+  "¿Cómo puedo aumentar mis ingresos este mes?",
+  "¿Qué productos debería promocionar más?",
+  "¿Quiénes son mis mejores clientes?",
+  "¿Cómo puedo convertir mis pedidos pendientes?",
+  "¿Qué cambios de precio mejorarían mis márgenes?",
+];
+
 export function BusinessAdvisor() {
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const suggestions = language === "es" ? SUGGESTIONS_ES : SUGGESTIONS_EN;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -68,7 +80,8 @@ export function BusinessAdvisor() {
             "Authorization": `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ 
-            messages: [...messages, userMessage] 
+            messages: [...messages, userMessage],
+            language
           }),
         }
       );
@@ -171,8 +184,12 @@ export function BusinessAdvisor() {
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <SheetTitle className="text-left">Business Advisor</SheetTitle>
-              <p className="text-xs text-muted-foreground">AI-powered insights for your business</p>
+              <SheetTitle className="text-left">
+                {language === "es" ? "Asesor de Negocios" : "Business Advisor"}
+              </SheetTitle>
+              <p className="text-xs text-muted-foreground">
+                {language === "es" ? "Insights de IA para tu negocio" : "AI-powered insights for your business"}
+              </p>
             </div>
           </div>
         </SheetHeader>
@@ -184,17 +201,21 @@ export function BusinessAdvisor() {
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Your AI Business Advisor</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  {language === "es" ? "Tu Asesor de IA" : "Your AI Business Advisor"}
+                </h3>
                 <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                  I have access to your products, orders, and customers. Ask me anything about growing your revenue!
+                  {language === "es" 
+                    ? "Tengo acceso a tus productos, pedidos y clientes. ¡Pregúntame cómo aumentar tus ingresos!" 
+                    : "I have access to your products, orders, and customers. Ask me anything about growing your revenue!"}
                 </p>
               </div>
               
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Quick questions
+                  {language === "es" ? "Preguntas rápidas" : "Quick questions"}
                 </p>
-                {SUGGESTIONS.map((suggestion, i) => (
+                {suggestions.map((suggestion, i) => (
                   <button
                     key={i}
                     onClick={() => sendMessage(suggestion)}
@@ -227,7 +248,7 @@ export function BusinessAdvisor() {
                       {message.content || (
                         <span className="flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Analyzing your data...
+                          {language === "es" ? "Analizando tus datos..." : "Analyzing your data..."}
                         </span>
                       )}
                     </p>
@@ -245,7 +266,7 @@ export function BusinessAdvisor() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about your business..."
+              placeholder={language === "es" ? "Pregunta sobre tu negocio..." : "Ask about your business..."}
               className="min-h-[44px] max-h-32 resize-none"
               rows={1}
               disabled={isLoading}
