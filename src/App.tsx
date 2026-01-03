@@ -13,6 +13,7 @@ import Storefronts from "./pages/Storefronts";
 import OrderHistory from "./pages/OrderHistory";
 import Admin from "./pages/Admin";
 import Products from "./pages/Products";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import PublicStorefront from "./pages/PublicStorefront";
 import PublicProfile from "./pages/PublicProfile";
@@ -84,6 +85,7 @@ function AppRoutes() {
       <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
       <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/s/:slug" element={<PublicStorefront />} />
       <Route path="/p/:profileId" element={<PublicProfile />} />
       <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
