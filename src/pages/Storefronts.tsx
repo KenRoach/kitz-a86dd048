@@ -5,8 +5,7 @@ import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
 import { QuickCreate } from "@/components/storefront/QuickCreate";
 import { ShareDialog } from "@/components/storefront/ShareDialog";
-import { Plus, Store } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -14,6 +13,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StorefrontsSkeleton } from "@/components/ui/dashboard-skeleton";
+import { AnimatedCreateButton } from "@/components/ui/AnimatedCreateButton";
 
 interface Storefront {
   id: string;
@@ -266,10 +266,10 @@ export default function Storefronts() {
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
             <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">{t.storefrontsDesc}</p>
           </div>
-          <Button onClick={() => setWizardOpen(true)} size="sm" className="gap-1 shrink-0">
-            <Plus className="w-4 h-4" />
-            <span>{t.new}</span>
-          </Button>
+          <AnimatedCreateButton 
+            onClick={() => setWizardOpen(true)} 
+            label={t.new} 
+          />
         </div>
 
         {/* Quick Create */}

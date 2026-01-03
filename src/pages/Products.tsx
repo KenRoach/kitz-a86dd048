@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProductsSkeleton } from "@/components/ui/dashboard-skeleton";
+import { AnimatedCreateButton } from "@/components/ui/AnimatedCreateButton";
 
 interface Product {
   id: string;
@@ -317,10 +318,10 @@ export default function Products() {
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openNewDialog} size="sm" className="gap-1 shrink-0">
-                <Plus className="w-4 h-4" />
-                <span>{language === "es" ? "Nuevo" : "New"}</span>
-              </Button>
+              <AnimatedCreateButton 
+                onClick={openNewDialog} 
+                label={language === "es" ? "Nuevo" : "New"} 
+              />
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
