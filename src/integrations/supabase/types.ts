@@ -220,6 +220,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_bundle: boolean
+          order_key: string | null
           ordered_at: string | null
           payment_cards: boolean | null
           payment_cash: boolean | null
@@ -248,6 +249,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_bundle?: boolean
+          order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
@@ -276,6 +278,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_bundle?: boolean
+          order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
