@@ -11,6 +11,7 @@ interface Translations {
   // Navigation
   dashboard: string;
   storefronts: string;
+  products: string;
   orderHistory: string;
   admin: string;
   home: string;
@@ -123,6 +124,7 @@ const translations: Record<Language, Translations> = {
     
     dashboard: "Dashboard",
     storefronts: "Storefronts",
+    products: "Products",
     orderHistory: "Order History",
     admin: "Admin",
     home: "Home",
@@ -226,6 +228,7 @@ const translations: Record<Language, Translations> = {
     
     dashboard: "Inicio",
     storefronts: "Vitrinas",
+    products: "Productos",
     orderHistory: "Historial",
     admin: "Admin",
     home: "Inicio",
