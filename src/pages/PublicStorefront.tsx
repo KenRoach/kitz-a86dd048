@@ -76,6 +76,7 @@ interface Storefront {
   payment_pluxee: boolean;
   ordered_at: string | null;
   is_bundle: boolean;
+  user_id: string | null;
 }
 
 export default function PublicStorefront() {
@@ -83,6 +84,7 @@ export default function PublicStorefront() {
   const effectiveSlug = storefrontSlug || slug;
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [bundleItems, setBundleItems] = useState<StorefrontItem[]>([]);
+  const [businessName, setBusinessName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -121,7 +123,7 @@ export default function PublicStorefront() {
       // Use public view that excludes sensitive data (buyer info, seller phone)
       const { data, error } = await supabase
         .from("public_storefronts" as any)
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id")
         .eq("slug", effectiveSlug)
         .maybeSingle();
 
@@ -130,6 +132,20 @@ export default function PublicStorefront() {
       } else {
         const storefrontData = data as unknown as Storefront;
         setStorefront(storefrontData);
+        
+        // Fetch business name from the seller's profile
+        if (storefrontData.user_id) {
+          const { data: profileData } = await supabase
+            .from("public_profiles" as any)
+            .select("business_name")
+            .eq("user_id", storefrontData.user_id)
+            .maybeSingle();
+          
+          const profile = profileData as unknown as { business_name: string | null } | null;
+          if (profile?.business_name) {
+            setBusinessName(profile.business_name);
+          }
+        }
         
         // If already ordered, show that
         if (storefrontData.ordered_at) {
@@ -257,7 +273,7 @@ export default function PublicStorefront() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">kitz.io</span>
+          <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
           {isPaid && (
             <span className="flex items-center gap-1 text-sm font-medium text-success">
               <CheckCircle className="w-4 h-4" />
