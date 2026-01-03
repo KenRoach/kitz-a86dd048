@@ -26,7 +26,8 @@ import {
   Pencil, 
   Loader2,
   Package,
-  Wand2
+  Wand2,
+  Zap
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,6 +66,7 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [enhancingImage, setEnhancingImage] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -152,6 +154,44 @@ export default function Products() {
       toast.error("Failed to generate description");
     } finally {
       setGeneratingDescription(false);
+    }
+  };
+
+  const enhanceImage = async () => {
+    if (!imagePreview) {
+      toast.error(language === "es" ? "Primero sube una imagen" : "Please upload an image first");
+      return;
+    }
+
+    setEnhancingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enhance-image", {
+        body: {
+          imageUrl: imagePreview,
+          enhancementType: "general"
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.enhancedImageUrl) {
+        setImagePreview(data.enhancedImageUrl);
+        // Convert base64 to file for upload
+        const response = await fetch(data.enhancedImageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "enhanced-image.png", { type: "image/png" });
+        setImageFile(file);
+        toast.success(language === "es" ? "¡Imagen mejorada!" : "Image enhanced!");
+      }
+    } catch (error) {
+      console.error("Error enhancing image:", error);
+      toast.error(language === "es" ? "Error al mejorar imagen" : "Failed to enhance image");
+    } finally {
+      setEnhancingImage(false);
     }
   };
 
@@ -295,9 +335,28 @@ export default function Products() {
               <div className="space-y-5 py-4">
                 {/* Image Upload */}
                 <div>
-                  <Label className="text-muted-foreground mb-2 block">
-                    {language === "es" ? "Imagen" : "Image"}
-                  </Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-muted-foreground">
+                      {language === "es" ? "Imagen" : "Image"}
+                    </Label>
+                    {imagePreview && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={enhanceImage}
+                        disabled={enhancingImage}
+                        className="gap-1.5 text-xs h-7"
+                      >
+                        {enhancingImage ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Zap className="w-3 h-3" />
+                        )}
+                        {language === "es" ? "Mejorar con IA" : "Enhance with AI"}
+                      </Button>
+                    )}
+                  </div>
                   <input
                     ref={imageInputRef}
                     type="file"
@@ -306,11 +365,23 @@ export default function Products() {
                     className="hidden"
                   />
                   <div
-                    onClick={() => imageInputRef.current?.click()}
-                    className="w-full aspect-video rounded-xl border-2 border-dashed border-border hover:border-primary/50 cursor-pointer flex items-center justify-center overflow-hidden bg-muted/50 transition-all"
+                    onClick={() => !enhancingImage && imageInputRef.current?.click()}
+                    className="w-full aspect-video rounded-xl border-2 border-dashed border-border hover:border-primary/50 cursor-pointer flex items-center justify-center overflow-hidden bg-muted/50 transition-all relative"
                   >
                     {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <>
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        {enhancingImage && (
+                          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                            <div className="text-center">
+                              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-2" />
+                              <p className="text-sm text-muted-foreground">
+                                {language === "es" ? "Mejorando imagen..." : "Enhancing image..."}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="text-center p-6">
                         <ImagePlus className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
