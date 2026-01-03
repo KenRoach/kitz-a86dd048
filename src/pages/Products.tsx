@@ -302,24 +302,24 @@ export default function Products() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-3 md:space-y-6 max-w-4xl">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {language === "es" ? "Productos y Servicios" : "Products & Services"}
+        <div className="flex items-center justify-between gap-2 animate-fade-in">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">
+              {language === "es" ? "Productos" : "Products"}
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">
               {language === "es" 
-                ? "Tu catálogo reutilizable. Usa IA para crear descripciones." 
-                : "Your reusable catalog. Use AI to craft descriptions."}
+                ? "Tu catálogo reutilizable con IA." 
+                : "Your reusable catalog with AI."}
             </p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openNewDialog} className="gap-2">
+              <Button onClick={openNewDialog} size="sm" className="gap-1 shrink-0">
                 <Plus className="w-4 h-4" />
-                {language === "es" ? "Nuevo" : "New"}
+                <span>{language === "es" ? "Nuevo" : "New"}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
