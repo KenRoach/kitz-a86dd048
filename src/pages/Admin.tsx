@@ -231,6 +231,25 @@ export default function Admin() {
 
   const handleSave = async () => {
     if (!user) return;
+    
+    // Validate required fields
+    if (!profile.business_name.trim()) {
+      toast.error(language === "es" ? "El nombre del negocio es requerido" : "Business name is required");
+      return;
+    }
+    if (!profile.business_type) {
+      toast.error(language === "es" ? "El tipo de negocio es requerido" : "Business type is required");
+      return;
+    }
+    if (!profile.phone?.trim()) {
+      toast.error(language === "es" ? "El teléfono es requerido" : "Phone number is required");
+      return;
+    }
+    if (!profile.country) {
+      toast.error(language === "es" ? "El país es requerido" : "Country is required");
+      return;
+    }
+    
     setSaving(true);
     
     try {
@@ -470,23 +489,28 @@ export default function Admin() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="businessName" className="text-muted-foreground">Business name</Label>
+              <Label htmlFor="businessName" className="text-muted-foreground">
+                {language === "es" ? "Nombre del negocio" : "Business name"} <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="businessName"
                 value={profile.business_name}
                 onChange={(e) => updateProfile("business_name", e.target.value)}
-                placeholder="My Business"
+                placeholder={language === "es" ? "Mi Negocio" : "My Business"}
                 className="mt-1.5"
+                required
               />
             </div>
             <div>
-              <Label className="text-muted-foreground">Business type</Label>
+              <Label className="text-muted-foreground">
+                {language === "es" ? "Tipo de negocio" : "Business type"} <span className="text-destructive">*</span>
+              </Label>
               <Select
                 value={profile.business_type || ""}
                 onValueChange={(value) => updateProfile("business_type", value)}
               >
                 <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Select type..." />
+                  <SelectValue placeholder={language === "es" ? "Seleccionar..." : "Select type..."} />
                 </SelectTrigger>
                 <SelectContent>
                   {BUSINESS_TYPES.map((type) => (
@@ -498,7 +522,9 @@ export default function Admin() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="ruc" className="text-muted-foreground">Tax ID (RUC)</Label>
+              <Label htmlFor="ruc" className="text-muted-foreground">
+                {language === "es" ? "RUC" : "Tax ID (RUC)"} <span className="text-xs text-muted-foreground/70">({language === "es" ? "opcional" : "optional"})</span>
+              </Label>
               <Input
                 id="ruc"
                 value={profile.ruc || ""}
@@ -508,13 +534,15 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Label className="text-muted-foreground">Country</Label>
+              <Label className="text-muted-foreground">
+                {language === "es" ? "País" : "Country"} <span className="text-destructive">*</span>
+              </Label>
               <Select
                 value={profile.country || "PA"}
                 onValueChange={(value) => updateProfile("country", value)}
               >
                 <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Select country..." />
+                  <SelectValue placeholder={language === "es" ? "Seleccionar país..." : "Select country..."} />
                 </SelectTrigger>
                 <SelectContent>
                   {COUNTRIES.map((country) => (
@@ -535,7 +563,9 @@ export default function Admin() {
           <div className="space-y-4">
             {/* Phone with country */}
             <div>
-              <Label className="text-muted-foreground">WhatsApp / Phone</Label>
+              <Label className="text-muted-foreground">
+                WhatsApp / {language === "es" ? "Teléfono" : "Phone"} <span className="text-destructive">*</span>
+              </Label>
               <div className="flex gap-2 mt-1.5">
                 <Select
                   value={profile.phone_country || "PA"}
@@ -563,7 +593,9 @@ export default function Admin() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="website" className="text-muted-foreground">Website</Label>
+                <Label htmlFor="website" className="text-muted-foreground">
+                  {language === "es" ? "Sitio web" : "Website"} <span className="text-xs text-muted-foreground/70">({language === "es" ? "opcional" : "optional"})</span>
+                </Label>
                 <Input
                   id="website"
                   value={profile.website || ""}
@@ -573,7 +605,9 @@ export default function Admin() {
                 />
               </div>
               <div>
-                <Label htmlFor="instagram" className="text-muted-foreground">Instagram</Label>
+                <Label htmlFor="instagram" className="text-muted-foreground">
+                  Instagram <span className="text-xs text-muted-foreground/70">({language === "es" ? "opcional" : "optional"})</span>
+                </Label>
                 <div className="relative mt-1.5">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
                   <Input
