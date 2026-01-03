@@ -203,6 +203,13 @@ export type Database = {
             foreignKeyName: "storefront_items_storefront_id_fkey"
             columns: ["storefront_id"]
             isOneToOne: false
+            referencedRelation: "public_storefronts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefront_items_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
             referencedRelation: "storefronts"
             referencedColumns: ["id"]
           },
@@ -300,7 +307,129 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          address: string | null
+          business_name: string | null
+          business_type: string | null
+          city: string | null
+          country: string | null
+          id: string | null
+          instagram: string | null
+          logo_url: string | null
+          payment_cards: boolean | null
+          payment_cash: boolean | null
+          payment_pluxee: boolean | null
+          payment_yappy: boolean | null
+          photo_url: string | null
+          storefront_image_url: string | null
+          user_id: string | null
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
+          photo_url?: string | null
+          storefront_image_url?: string | null
+          user_id?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
+          photo_url?: string | null
+          storefront_image_url?: string | null
+          user_id?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      public_storefronts: {
+        Row: {
+          customer_name: string | null
+          description: string | null
+          fulfillment_note: string | null
+          id: string | null
+          image_url: string | null
+          is_bundle: boolean | null
+          order_key: string | null
+          ordered_at: string | null
+          payment_cards: boolean | null
+          payment_cash: boolean | null
+          payment_pluxee: boolean | null
+          payment_yappy: boolean | null
+          price: number | null
+          quantity: number | null
+          slug: string | null
+          status: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          customer_name?: string | null
+          description?: string | null
+          fulfillment_note?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_bundle?: boolean | null
+          order_key?: string | null
+          ordered_at?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
+          price?: number | null
+          quantity?: number | null
+          slug?: string | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          customer_name?: string | null
+          description?: string | null
+          fulfillment_note?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_bundle?: boolean | null
+          order_key?: string | null
+          ordered_at?: string | null
+          payment_cards?: boolean | null
+          payment_cash?: boolean | null
+          payment_pluxee?: boolean | null
+          payment_yappy?: boolean | null
+          price?: number | null
+          quantity?: number | null
+          slug?: string | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
