@@ -9,6 +9,21 @@ interface Profile {
   business_type: string | null;
   phone: string | null;
   address: string | null;
+  city: string | null;
+  country: string | null;
+  logo_url: string | null;
+  photo_url: string | null;
+  website: string | null;
+  instagram: string | null;
+  username: string | null;
+  ruc: string | null;
+  storefront_image_url: string | null;
+  payment_cash: boolean | null;
+  payment_cards: boolean | null;
+  payment_yappy: boolean | null;
+  payment_pluxee: boolean | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface AuthContextType {

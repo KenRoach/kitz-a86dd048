@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -67,6 +67,20 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4 space-y-2">
+        {/* Profile link */}
+        <Link
+          to="/profile"
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200",
+            location.pathname === "/profile" 
+              ? "bg-primary text-primary-foreground shadow-md" 
+              : "hover:bg-muted hover:text-foreground"
+          )}
+        >
+          <Award className="w-5 h-5" />
+          <span className="font-medium">{language === "es" ? "Mi Perfil" : "My Profile"}</span>
+        </Link>
+        
         {/* Admin link */}
         <Link
           to="/admin"
