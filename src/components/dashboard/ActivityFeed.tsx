@@ -21,11 +21,11 @@ const iconMap: Record<Activity["type"], typeof DollarSign> = {
 };
 
 const colorMap: Record<Activity["type"], string> = {
-  payment: "bg-success/10 text-success",
-  message: "bg-primary/10 text-primary",
-  order: "bg-attention/10 text-attention",
-  customer: "bg-muted text-muted-foreground",
-  storefront: "bg-primary/10 text-primary",
+  payment: "bg-orange-500/10 text-orange-500",
+  message: "bg-orange-500/10 text-orange-500",
+  order: "bg-orange-500/10 text-orange-500",
+  customer: "bg-orange-500/10 text-orange-500",
+  storefront: "bg-orange-500/10 text-orange-500",
 };
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
