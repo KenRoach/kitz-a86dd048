@@ -35,7 +35,7 @@ interface Activity {
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
-  const { t, getGreeting } = useLanguage();
+  const { t, getGreeting, language } = useLanguage();
   const navigate = useNavigate();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -216,17 +216,14 @@ export default function Dashboard() {
       <div className="space-y-3 md:space-y-6">
         {/* Header with Share */}
         <div className="flex items-center justify-between animate-fade-in">
-          {/* Desktop: show greeting */}
-          <div className="hidden md:block">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              {getGreeting()}
-            </p>
-            <h1 className="text-lg font-semibold text-foreground mt-0.5">
-              {profile?.business_name || "My Business"}
+          <div>
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">
+              {t.dashboard}
             </h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+              {language === "es" ? "Tu negocio en un vistazo. Monitorea y crece." : "Your business at a glance. Monitor and grow."}
+            </p>
           </div>
-          {/* Mobile: empty space for alignment */}
-          <div className="md:hidden" />
           <ProfileShareButton />
         </div>
 
