@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -8,31 +8,25 @@ interface PageTransitionProps {
 
 export function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [displayChildren, setDisplayChildren] = useState(children);
+  const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
-    // Start exit animation and show loading
-    setIsVisible(false);
-    setIsLoading(true);
-    
-    // After exit animation, update children and start enter animation
-    const timer = setTimeout(() => {
-      setDisplayChildren(children);
-      setIsVisible(true);
+    // Only animate on route changes
+    if (prevPathRef.current !== location.pathname) {
+      setIsVisible(false);
+      setIsLoading(true);
       
-      // Hide loading after content is visible
-      setTimeout(() => setIsLoading(false), 100);
-    }, 150);
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+        setTimeout(() => setIsLoading(false), 100);
+      }, 150);
 
-    return () => clearTimeout(timer);
+      prevPathRef.current = location.pathname;
+      return () => clearTimeout(timer);
+    }
   }, [location.pathname]);
-
-  useEffect(() => {
-    // Initial mount
-    setIsVisible(true);
-  }, []);
 
   return (
     <div className="relative">
@@ -44,14 +38,7 @@ export function PageTransition({ children }: PageTransitionProps) {
             ? "opacity-100 animate-pulse" 
             : "opacity-0"
         )}
-      >
-        <div 
-          className={cn(
-            "h-full bg-primary/50 transition-all duration-500",
-            isLoading ? "w-full" : "w-0"
-          )}
-        />
-      </div>
+      />
 
       {/* Page content */}
       <div
@@ -62,7 +49,7 @@ export function PageTransition({ children }: PageTransitionProps) {
             : "opacity-0 translate-y-2"
         )}
       >
-        {displayChildren}
+        {children}
       </div>
     </div>
   );
