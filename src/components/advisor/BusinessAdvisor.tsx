@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useVoice } from "@/hooks/useVoice";
+import { AiFloatingButton } from "./AiFloatingButton";
 
 type Message = {
   role: "user" | "assistant";
@@ -197,12 +198,9 @@ export function BusinessAdvisor() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          size="lg"
-          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999] h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-primary/80 hover:scale-110 transition-all duration-200 animate-pulse hover:animate-none"
-        >
-          <Sparkles className="h-6 w-6" />
-        </Button>
+        <div>
+          <AiFloatingButton onClick={() => setOpen(true)} />
+        </div>
       </SheetTrigger>
       
       <SheetContent 
