@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram } from "lucide-react";
+import { Building2, MapPin, CreditCard, Banknote, Smartphone, Globe, Image, Instagram, Link2 } from "lucide-react";
+import { IntegrationsSection } from "@/components/admin/IntegrationsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -518,8 +519,19 @@ export default function Admin() {
           </div>
         </section>
 
-        {/* Location & Discovery */}
+        {/* Integrations */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "200ms" }}>
+          <div className="flex items-center gap-2">
+            <Link2 className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Integrations</h2>
+          </div>
+          <p className="text-sm text-muted-foreground -mt-2">Connect your favorite tools for a seamless workflow</p>
+          
+          <IntegrationsSection />
+        </section>
+
+        {/* Location & Discovery */}
+        <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "250ms" }}>
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Location & Discovery</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
