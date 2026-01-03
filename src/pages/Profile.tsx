@@ -12,10 +12,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Store, Package, ShoppingCart, Users, DollarSign, 
   Calendar, MapPin, Globe, Instagram, Phone, Mail,
-  Edit, Flame, Award, TrendingUp, Share2, Check
+  Edit, Flame, Award, TrendingUp, Share2, Check, ExternalLink, Copy, Link2
 } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -93,6 +93,19 @@ export default function Profile() {
     : "";
 
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Generate public profile URL
+  const publicProfileUrl = profile?.username 
+    ? `${window.location.origin}/p/@${profile.username}`
+    : user ? `${window.location.origin}/p/${user.id}` : "";
+
+  const handleCopyProfileLink = async () => {
+    await navigator.clipboard.writeText(publicProfileUrl);
+    setLinkCopied(true);
+    toast.success(language === "es" ? "Enlace copiado!" : "Link copied!");
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
   const handleShareAccomplishments = async () => {
     const level = userStats?.level || 1;
@@ -184,20 +197,30 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
               <Button 
                 variant="secondary" 
                 size="sm"
-                onClick={handleShareAccomplishments}
+                onClick={handleCopyProfileLink}
                 className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
               >
-                {shareSuccess ? (
+                {linkCopied ? (
                   <Check className="w-4 h-4 mr-1" />
                 ) : (
-                  <Share2 className="w-4 h-4 mr-1" />
+                  <Link2 className="w-4 h-4 mr-1" />
                 )}
-                {language === "es" ? "Compartir" : "Share"}
+                {language === "es" ? "Copiar enlace" : "Copy Link"}
               </Button>
+              <Link to={publicProfileUrl.replace(window.location.origin, "")} target="_blank">
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
+                >
+                  <ExternalLink className="w-4 h-4 mr-1" />
+                  {language === "es" ? "Ver perfil" : "View Profile"}
+                </Button>
+              </Link>
               <Button 
                 variant="secondary" 
                 size="sm"
@@ -210,8 +233,26 @@ export default function Profile() {
             </div>
           </div>
 
+          {/* Public Profile Link Banner */}
+          <div className="relative mt-4 p-3 bg-white/10 rounded-xl flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Globe className="w-4 h-4 flex-shrink-0 opacity-70" />
+              <span className="text-sm truncate font-mono opacity-80">
+                {profile?.username ? `/p/@${profile.username}` : `/p/${user?.id?.slice(0, 8)}...`}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyProfileLink}
+              className="flex-shrink-0 h-8 px-3 bg-white/10 hover:bg-white/20 text-primary-foreground"
+            >
+              {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+
           {/* Quick Stats */}
-          <div className="relative grid grid-cols-4 gap-2 mt-6">
+          <div className="relative grid grid-cols-4 gap-2 mt-4">
             {[
               { value: stats.storefronts, label: language === "es" ? "Vitrinas" : "Storefronts", icon: Store },
               { value: stats.products, label: language === "es" ? "Productos" : "Products", icon: Package },
