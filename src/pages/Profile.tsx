@@ -12,8 +12,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Store, Package, ShoppingCart, Users, DollarSign, 
   Calendar, MapPin, Globe, Instagram, Phone, Mail,
-  Edit, Flame, Award, TrendingUp
+  Edit, Flame, Award, TrendingUp, Share2, Check
 } from "lucide-react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,52 @@ export default function Profile() {
       })
     : "";
 
+  const [shareSuccess, setShareSuccess] = useState(false);
+
+  const handleShareAccomplishments = async () => {
+    const level = userStats?.level || 1;
+    const badgeCount = earnedBadges.length;
+    const businessName = profile?.business_name || "My Business";
+    
+    const badgeNames = earnedBadges
+      .slice(0, 3)
+      .map(b => language === "es" ? b.name_es : b.name)
+      .join(", ");
+
+    const shareText = language === "es"
+      ? `🏆 ${businessName} - Nivel ${level} en kitz!\n\n` +
+        `📊 ${stats.orders} pedidos completados\n` +
+        `🎖️ ${badgeCount} insignias ganadas${badgeNames ? `: ${badgeNames}` : ""}\n` +
+        `💰 $${stats.revenue.toFixed(2)} en ventas\n\n` +
+        `¡Únete a kitz y haz crecer tu negocio! 🚀`
+      : `🏆 ${businessName} - Level ${level} on kitz!\n\n` +
+        `📊 ${stats.orders} orders completed\n` +
+        `🎖️ ${badgeCount} badges earned${badgeNames ? `: ${badgeNames}` : ""}\n` +
+        `💰 $${stats.revenue.toFixed(2)} in sales\n\n` +
+        `Join kitz and grow your business! 🚀`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: language === "es" ? "Mis logros en kitz" : "My kitz accomplishments",
+          text: shareText,
+        });
+        toast.success(language === "es" ? "¡Compartido!" : "Shared!");
+      } catch (err) {
+        // User cancelled or error - try clipboard
+        await navigator.clipboard.writeText(shareText);
+        setShareSuccess(true);
+        toast.success(language === "es" ? "Copiado al portapapeles" : "Copied to clipboard");
+        setTimeout(() => setShareSuccess(false), 2000);
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      setShareSuccess(true);
+      toast.success(language === "es" ? "Copiado al portapapeles" : "Copied to clipboard");
+      setTimeout(() => setShareSuccess(false), 2000);
+    }
+  };
+
   if (badgesLoading) {
     return (
       <AppLayout>
@@ -137,15 +184,30 @@ export default function Profile() {
               </div>
             </div>
 
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={() => navigate("/admin")}
-              className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
-            >
-              <Edit className="w-4 h-4 mr-1" />
-              {language === "es" ? "Editar" : "Edit"}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={handleShareAccomplishments}
+                className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
+              >
+                {shareSuccess ? (
+                  <Check className="w-4 h-4 mr-1" />
+                ) : (
+                  <Share2 className="w-4 h-4 mr-1" />
+                )}
+                {language === "es" ? "Compartir" : "Share"}
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0"
+              >
+                <Edit className="w-4 h-4 mr-1" />
+                {language === "es" ? "Editar" : "Edit"}
+              </Button>
+            </div>
           </div>
 
           {/* Quick Stats */}
