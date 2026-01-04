@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Products from "./pages/Products";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import PublicStorefront from "./pages/PublicStorefront";
 import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
@@ -80,6 +81,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
       <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />

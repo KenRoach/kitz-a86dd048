@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft } from "lucide-react";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -19,13 +21,20 @@ const signInSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+});
+
+type AuthMode = "signin" | "signup" | "forgot";
+
 export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [mode, setMode] = useState<AuthMode>("signin");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -34,7 +43,25 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (mode === "forgot") {
+        const validation = forgotPasswordSchema.safeParse({ email });
+        if (!validation.success) {
+          toast.error(validation.error.errors[0].message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+
+        if (error) {
+          toast.error(error.message);
+        } else {
+          setResetEmailSent(true);
+          toast.success("Check your email for the reset link");
+        }
+      } else if (mode === "signup") {
         const validation = signUpSchema.safeParse({ email, password, businessName, businessType });
         if (!validation.success) {
           toast.error(validation.error.errors[0].message);
@@ -76,6 +103,43 @@ export default function Auth() {
     }
   };
 
+  const handleModeChange = (newMode: AuthMode) => {
+    setMode(newMode);
+    setResetEmailSent(false);
+  };
+
+  if (mode === "forgot" && resetEmailSent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in text-center" style={{ animationDelay: "100ms" }}>
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-medium text-foreground mb-2">Check your email</h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              We sent a password reset link to <span className="font-medium text-foreground">{email}</span>
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => handleModeChange("signin")}
+              className="w-full"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to sign in
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -84,12 +148,29 @@ export default function Auth() {
         </div>
 
         <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <h2 className="text-xl font-medium text-foreground mb-6">
-            {isSignUp ? "Create your account" : "Welcome back"}
+          {mode === "forgot" && (
+            <button
+              type="button"
+              onClick={() => handleModeChange("signin")}
+              className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </button>
+          )}
+          
+          <h2 className="text-xl font-medium text-foreground mb-2">
+            {mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset password" : "Welcome back"}
           </h2>
+          
+          {mode === "forgot" && (
+            <p className="text-sm text-muted-foreground mb-6">
+              Enter your email and we'll send you a reset link
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignUp && (
+            {mode === "signup" && (
               <>
                 <div>
                   <Label htmlFor="businessName">Business name</Label>
@@ -130,33 +211,55 @@ export default function Auth() {
               />
             </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="mt-1.5"
-                required
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={() => handleModeChange("forgot")}
+                      className="text-xs text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="mt-1.5"
+                  required
+                />
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Loading..." : isSignUp ? "Create account" : "Sign in"}
+              {loading 
+                ? "Loading..." 
+                : mode === "signup" 
+                  ? "Create account" 
+                  : mode === "forgot" 
+                    ? "Send reset link" 
+                    : "Sign in"
+              }
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Create one"}
-            </button>
-          </div>
+          {mode !== "forgot" && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => handleModeChange(mode === "signup" ? "signin" : "signup")}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {mode === "signup" ? "Already have an account? Sign in" : "Don't have an account? Create one"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
