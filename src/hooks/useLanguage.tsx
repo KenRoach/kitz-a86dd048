@@ -115,6 +115,31 @@ interface Translations {
   
   // Status
   loading: string;
+  
+  // Auth
+  welcomeBack: string;
+  createAccount: string;
+  signIn: string;
+  forgotPassword: string;
+  resetPassword: string;
+  sendResetLink: string;
+  enterEmailForReset: string;
+  checkEmail: string;
+  resetLinkSent: string;
+  backToSignIn: string;
+  noAccount: string;
+  alreadyHaveAccount: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  newPassword: string;
+  setNewPassword: string;
+  enterNewPassword: string;
+  passwordUpdated: string;
+  passwordResetSuccess: string;
+  goToDashboard: string;
+  invalidResetLink: string;
+  linkExpired: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -222,6 +247,30 @@ const translations: Record<Language, Translations> = {
     basedOnActivity: "Based on activity & conversions",
     
     loading: "Loading...",
+    
+    welcomeBack: "Welcome back",
+    createAccount: "Create your account",
+    signIn: "Sign in",
+    forgotPassword: "Forgot password?",
+    resetPassword: "Reset password",
+    sendResetLink: "Send reset link",
+    enterEmailForReset: "Enter your email and we'll send you a reset link",
+    checkEmail: "Check your email",
+    resetLinkSent: "We sent a password reset link to",
+    backToSignIn: "Back to sign in",
+    noAccount: "Don't have an account? Create one",
+    alreadyHaveAccount: "Already have an account? Sign in",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm password",
+    newPassword: "New password",
+    setNewPassword: "Set new password",
+    enterNewPassword: "Enter your new password below",
+    passwordUpdated: "Password updated",
+    passwordResetSuccess: "Your password has been successfully reset",
+    goToDashboard: "Go to dashboard",
+    invalidResetLink: "Invalid or expired link",
+    linkExpired: "This password reset link is no longer valid. Please request a new one.",
   },
   es: {
     goodMorning: "Buenos días",
@@ -327,6 +376,30 @@ const translations: Record<Language, Translations> = {
     basedOnActivity: "Basado en actividad y conversiones",
     
     loading: "Cargando...",
+    
+    welcomeBack: "Bienvenido",
+    createAccount: "Crea tu cuenta",
+    signIn: "Iniciar sesión",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    resetPassword: "Restablecer contraseña",
+    sendResetLink: "Enviar enlace",
+    enterEmailForReset: "Ingresa tu email y te enviaremos un enlace para restablecer",
+    checkEmail: "Revisa tu email",
+    resetLinkSent: "Enviamos un enlace de restablecimiento a",
+    backToSignIn: "Volver a iniciar sesión",
+    noAccount: "¿No tienes cuenta? Crea una",
+    alreadyHaveAccount: "¿Ya tienes cuenta? Inicia sesión",
+    email: "Email",
+    password: "Contraseña",
+    confirmPassword: "Confirmar contraseña",
+    newPassword: "Nueva contraseña",
+    setNewPassword: "Establecer nueva contraseña",
+    enterNewPassword: "Ingresa tu nueva contraseña abajo",
+    passwordUpdated: "Contraseña actualizada",
+    passwordResetSuccess: "Tu contraseña ha sido restablecida exitosamente",
+    goToDashboard: "Ir al dashboard",
+    invalidResetLink: "Enlace inválido o expirado",
+    linkExpired: "Este enlace ya no es válido. Por favor solicita uno nuevo.",
   },
 };
 
