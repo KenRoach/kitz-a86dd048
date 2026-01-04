@@ -6,6 +6,7 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
+import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,14 +42,31 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
-  // Check if user has seen onboarding
+  // Check if user needs profile setup or feature tour
   useEffect(() => {
+    const hasCompletedProfileSetup = localStorage.getItem("kitz_profile_setup_complete");
+    const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
+    
+    // Check if profile is incomplete (missing phone or username)
+    const isProfileIncomplete = profile && (!profile.phone || !profile.username);
+    
+    if (!hasCompletedProfileSetup && isProfileIncomplete) {
+      setShowProfileSetup(true);
+    } else if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [profile]);
+
+  const handleProfileSetupComplete = () => {
+    setShowProfileSetup(false);
+    // Show feature tour after profile setup
     const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
     if (!hasSeenOnboarding) {
       setShowOnboarding(true);
     }
-  }, []);
+  };
 
   const handleOnboardingComplete = () => {
     localStorage.setItem("kitz_onboarding_complete", "true");
@@ -197,6 +215,7 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      <ProfileSetupWizard open={showProfileSetup} onComplete={handleProfileSetupComplete} />
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
       <div className="space-y-6">
