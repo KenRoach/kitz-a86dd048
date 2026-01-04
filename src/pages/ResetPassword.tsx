@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Globe } from "lucide-react";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -22,17 +23,16 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [success, setSuccess] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for the PASSWORD_RECOVERY event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setSessionReady(true);
       }
     });
 
-    // Check if we already have a session (user clicked link)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setSessionReady(true);
@@ -60,7 +60,7 @@ export default function ResetPassword() {
         toast.error(error.message);
       } else {
         setSuccess(true);
-        toast.success("Password updated successfully");
+        toast.success(t.passwordUpdated);
       }
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
@@ -69,24 +69,35 @@ export default function ResetPassword() {
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8 animate-fade-in">
+          <div className="flex items-center justify-between mb-8 animate-fade-in">
             <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
+            >
+              <Globe className="w-4 h-4" />
+              {language === "en" ? "ES" : "EN"}
+            </button>
           </div>
 
           <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in text-center" style={{ animationDelay: "100ms" }}>
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-6 h-6 text-green-600" />
             </div>
-            <h2 className="text-xl font-medium text-foreground mb-2">Password updated</h2>
+            <h2 className="text-xl font-medium text-foreground mb-2">{t.passwordUpdated}</h2>
             <p className="text-muted-foreground text-sm mb-6">
-              Your password has been successfully reset
+              {t.passwordResetSuccess}
             </p>
             <Button onClick={() => navigate("/dashboard")} className="w-full">
-              Go to dashboard
+              {t.goToDashboard}
             </Button>
           </div>
         </div>
@@ -98,17 +109,24 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8 animate-fade-in">
+          <div className="flex items-center justify-between mb-8 animate-fade-in">
             <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
+            >
+              <Globe className="w-4 h-4" />
+              {language === "en" ? "ES" : "EN"}
+            </button>
           </div>
 
           <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in text-center" style={{ animationDelay: "100ms" }}>
-            <h2 className="text-xl font-medium text-foreground mb-2">Invalid or expired link</h2>
+            <h2 className="text-xl font-medium text-foreground mb-2">{t.invalidResetLink}</h2>
             <p className="text-muted-foreground text-sm mb-6">
-              This password reset link is no longer valid. Please request a new one.
+              {t.linkExpired}
             </p>
             <Button onClick={() => navigate("/auth")} className="w-full">
-              Back to sign in
+              {t.backToSignIn}
             </Button>
           </div>
         </div>
@@ -119,19 +137,26 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8 animate-fade-in">
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
           <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
+          >
+            <Globe className="w-4 h-4" />
+            {language === "en" ? "ES" : "EN"}
+          </button>
         </div>
 
         <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <h2 className="text-xl font-medium text-foreground mb-2">Set new password</h2>
+          <h2 className="text-xl font-medium text-foreground mb-2">{t.setNewPassword}</h2>
           <p className="text-sm text-muted-foreground mb-6">
-            Enter your new password below
+            {t.enterNewPassword}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="password">New password</Label>
+              <Label htmlFor="password">{t.newPassword}</Label>
               <Input
                 id="password"
                 type="password"
@@ -145,7 +170,7 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t.confirmPassword}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -159,7 +184,7 @@ export default function ResetPassword() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Updating..." : "Update password"}
+              {loading ? t.loading : t.setNewPassword}
             </Button>
           </form>
         </div>

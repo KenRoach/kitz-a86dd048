@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -36,6 +37,7 @@ export default function Auth() {
   const [businessType, setBusinessType] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const { signUp, signIn } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +61,7 @@ export default function Auth() {
           toast.error(error.message);
         } else {
           setResetEmailSent(true);
-          toast.success("Check your email for the reset link");
+          toast.success(t.checkEmail);
         }
       } else if (mode === "signup") {
         const validation = signUpSchema.safeParse({ email, password, businessName, businessType });
@@ -92,7 +94,7 @@ export default function Auth() {
         if (error) {
           toast.error("Invalid email or password");
         } else {
-          toast.success("Welcome back!");
+          toast.success(t.welcomeBack + "!");
           navigate("/dashboard");
         }
       }
@@ -108,12 +110,23 @@ export default function Auth() {
     setResetEmailSent(false);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
   if (mode === "forgot" && resetEmailSent) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8 animate-fade-in">
+          <div className="flex items-center justify-between mb-8 animate-fade-in">
             <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
+            >
+              <Globe className="w-4 h-4" />
+              {language === "en" ? "ES" : "EN"}
+            </button>
           </div>
 
           <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in text-center" style={{ animationDelay: "100ms" }}>
@@ -122,9 +135,9 @@ export default function Auth() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-xl font-medium text-foreground mb-2">Check your email</h2>
+            <h2 className="text-xl font-medium text-foreground mb-2">{t.checkEmail}</h2>
             <p className="text-muted-foreground text-sm mb-6">
-              We sent a password reset link to <span className="font-medium text-foreground">{email}</span>
+              {t.resetLinkSent} <span className="font-medium text-foreground">{email}</span>
             </p>
             <Button
               variant="outline"
@@ -132,7 +145,7 @@ export default function Auth() {
               className="w-full"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to sign in
+              {t.backToSignIn}
             </Button>
           </div>
         </div>
@@ -143,8 +156,15 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8 animate-fade-in">
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
           <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
+          >
+            <Globe className="w-4 h-4" />
+            {language === "en" ? "ES" : "EN"}
+          </button>
         </div>
 
         <div className="bg-card rounded-2xl border border-border p-8 shadow-sm animate-fade-in" style={{ animationDelay: "100ms" }}>
@@ -155,17 +175,17 @@ export default function Auth() {
               className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
+              {t.backToSignIn}
             </button>
           )}
           
           <h2 className="text-xl font-medium text-foreground mb-2">
-            {mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset password" : "Welcome back"}
+            {mode === "signup" ? t.createAccount : mode === "forgot" ? t.resetPassword : t.welcomeBack}
           </h2>
           
           {mode === "forgot" && (
             <p className="text-sm text-muted-foreground mb-6">
-              Enter your email and we'll send you a reset link
+              {t.enterEmailForReset}
             </p>
           )}
 
@@ -173,7 +193,7 @@ export default function Auth() {
             {mode === "signup" && (
               <>
                 <div>
-                  <Label htmlFor="businessName">Business name</Label>
+                  <Label htmlFor="businessName">{t.businessName}</Label>
                   <Input
                     id="businessName"
                     type="text"
@@ -185,7 +205,7 @@ export default function Auth() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="businessType">Business type (optional)</Label>
+                  <Label htmlFor="businessType">{t.businessType} (optional)</Label>
                   <Input
                     id="businessType"
                     type="text"
@@ -199,7 +219,7 @@ export default function Auth() {
             )}
 
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -214,14 +234,14 @@ export default function Auth() {
             {mode !== "forgot" && (
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t.password}</Label>
                   {mode === "signin" && (
                     <button
                       type="button"
                       onClick={() => handleModeChange("forgot")}
                       className="text-xs text-primary hover:text-primary/80 transition-colors"
                     >
-                      Forgot password?
+                      {t.forgotPassword}
                     </button>
                   )}
                 </div>
@@ -239,12 +259,12 @@ export default function Auth() {
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading 
-                ? "Loading..." 
+                ? t.loading
                 : mode === "signup" 
-                  ? "Create account" 
+                  ? t.createAccount
                   : mode === "forgot" 
-                    ? "Send reset link" 
-                    : "Sign in"
+                    ? t.sendResetLink
+                    : t.signIn
               }
             </Button>
           </form>
@@ -256,7 +276,7 @@ export default function Auth() {
                 onClick={() => handleModeChange(mode === "signup" ? "signin" : "signup")}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                {mode === "signup" ? "Already have an account? Sign in" : "Don't have an account? Create one"}
+                {mode === "signup" ? t.alreadyHaveAccount : t.noAccount}
               </button>
             </div>
           )}
