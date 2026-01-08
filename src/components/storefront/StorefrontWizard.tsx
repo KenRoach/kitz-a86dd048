@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library, Wand2, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library, Wand2, Loader2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,6 +50,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   
   const [loading, setLoading] = useState(false);
   const [sendNow, setSendNow] = useState(true);
+  const [mode, setMode] = useState<"invoice" | "quote">("invoice");
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
   const [suggestedPriceRange, setSuggestedPriceRange] = useState<{ min: number; max: number } | null>(null);
   const [existingProducts, setExistingProducts] = useState<Array<{ title: string; price: number }>>([]);
@@ -214,12 +215,13 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
           slug,
           status: sendNow ? "sent" : "draft",
           is_bundle: isBundle,
+          mode: mode,
           seller_phone: profile?.phone || null,
           payment_cards: (profile as any)?.payment_cards ?? false,
           payment_yappy: (profile as any)?.payment_yappy ?? false,
           payment_cash: (profile as any)?.payment_cash ?? true,
           payment_pluxee: (profile as any)?.payment_pluxee ?? false,
-        })
+        } as any)
         .select("id")
         .single();
 
@@ -283,6 +285,7 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
     setBundleTitle("");
     setBundleItems([createEmptyItem()]);
     setSendNow(true);
+    setMode("invoice");
     onClose();
   };
 
@@ -599,6 +602,42 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Mode selection */}
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground mb-2">Type</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMode("invoice")}
+                  className={cn(
+                    "flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-1.5",
+                    mode === "invoice"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  Invoice
+                </button>
+                <button
+                  onClick={() => setMode("quote")}
+                  className={cn(
+                    "flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-1.5",
+                    mode === "quote"
+                      ? "border-attention bg-attention/10 text-attention"
+                      : "border-border text-muted-foreground hover:border-attention/50"
+                  )}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Quote
+                </button>
+              </div>
+              {mode === "quote" && (
+                <p className="text-[10px] text-muted-foreground mt-1.5">
+                  Client reviews quote first, then accepts to convert to invoice
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2">

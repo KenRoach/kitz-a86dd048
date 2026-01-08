@@ -33,6 +33,9 @@ interface Storefront {
   is_bundle: boolean;
   order_key: string | null;
   payment_proof_url: string | null;
+  mode: "invoice" | "quote";
+  valid_until: string | null;
+  accepted_at: string | null;
 }
 
 type FilterStatus = "all" | "draft" | "sent" | "paid";
@@ -92,6 +95,7 @@ export default function Storefronts() {
           quantity: s.quantity || 1,
           status: s.status as "draft" | "sent" | "paid",
           is_bundle: s.is_bundle || false,
+          mode: (s.mode || "invoice") as "invoice" | "quote",
         }))
       );
     }
@@ -344,6 +348,8 @@ export default function Storefronts() {
                 isBundle={sf.is_bundle}
                 orderKey={sf.order_key}
                 paymentProofUrl={sf.payment_proof_url}
+                mode={sf.mode}
+                acceptedAt={sf.accepted_at}
                 delay={index * 50}
                 onEdit={() => setEditingStorefront(sf)}
                 onDelete={() => handleDelete(sf.id)}
