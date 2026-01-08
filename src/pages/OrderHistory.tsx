@@ -109,7 +109,7 @@ export default function OrderHistory() {
   const filterTabs: { key: FilterType; label: string; icon: typeof FileText }[] = [
     { key: "all", label: language === "es" ? "Todo" : "All", icon: Clock },
     { key: "sent", label: language === "es" ? "Enviadas" : "Sent", icon: FileText },
-    { key: "quotes", label: language === "es" ? "Cotización aceptada" : "Accepted Quotes", icon: FileText },
+    { key: "quotes", label: language === "es" ? "Aceptadas" : "Accepted", icon: FileText },
     { key: "orders", label: language === "es" ? "Pedidos" : "Orders", icon: ShoppingBag },
     { key: "cancelled", label: language === "es" ? "Cancelados" : "Cancelled", icon: XCircle },
   ];
