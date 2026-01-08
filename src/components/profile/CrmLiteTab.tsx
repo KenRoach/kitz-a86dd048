@@ -478,23 +478,19 @@ export function CrmLiteTab() {
                     className="bg-background"
                   />
                   <Button 
-                    asChild 
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                     disabled={!whatsappMessage.trim()}
+                    onClick={() => {
+                      if (!whatsappMessage.trim()) return;
+                      const phone = selectedCustomer.phone.replace(/\D/g, '');
+                      const url = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`;
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                      // Update last interaction
+                      updateMutation.mutate({ id: selectedCustomer.id, last_interaction: new Date().toISOString() });
+                    }}
                   >
-                    <a 
-                      href={`https://wa.me/${selectedCustomer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      onClick={() => {
-                        if (!whatsappMessage.trim()) return;
-                        // Update last interaction
-                        updateMutation.mutate({ id: selectedCustomer.id, last_interaction: new Date().toISOString() });
-                      }}
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      {language === "es" ? "Abrir en WhatsApp" : "Open in WhatsApp"}
-                    </a>
+                    <Send className="w-4 h-4 mr-2" />
+                    {language === "es" ? "Abrir en WhatsApp" : "Open in WhatsApp"}
                   </Button>
                 </div>
               )}
