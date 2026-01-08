@@ -172,6 +172,107 @@ interface Translations {
   createAndShare: string;
   creating: string;
   back: string;
+  
+  // Share Dialog
+  shareYourStorefront: string;
+  quickShare: string;
+  copied: string;
+  showQrCode: string;
+  backToShareOptions: string;
+  share: string;
+  qr: string;
+  done: string;
+  scanToViewOrder: string;
+  
+  // Storefront Card
+  for: string;
+  qty: string;
+  viewProof: string;
+  paymentProof: string;
+  from: string;
+  close: string;
+  verifyMarkPaid: string;
+  reorder: string;
+  showQr: string;
+  preparing: string;
+  ready: string;
+  complete: string;
+  
+  // Bundle Items
+  item: string;
+  itemName: string;
+  addAnotherItem: string;
+  bundleTotal: string;
+  
+  // Product Selector
+  noProductsInCatalog: string;
+  addProductsFirst: string;
+  
+  // Products Page
+  newProduct: string;
+  editProduct: string;
+  noProductsYet: string;
+  buildCatalogOnce: string;
+  createProduct: string;
+  aiGeneratesDesc: string;
+  addImagesForSales: string;
+  organizeByCategories: string;
+  productName: string;
+  category: string;
+  selectCategory: string;
+  food: string;
+  drinks: string;
+  clothing: string;
+  accessories: string;
+  services: string;
+  digital: string;
+  other: string;
+  uploadImage: string;
+  active: string;
+  generateDesc: string;
+  saveChanges: string;
+  
+  // Admin Page
+  saveAllChanges: string;
+  instagram: string;
+  city: string;
+  address: string;
+  gettingLocation: string;
+  integrations: string;
+  
+  // Public Pages
+  sendMessage: string;
+  sending: string;
+  orderNow: string;
+  orderDetails: string;
+  yourName: string;
+  yourPhone: string;
+  noteOptional: string;
+  placeOrder: string;
+  placingOrder: string;
+  orderPlaced: string;
+  orderPlacedDesc: string;
+  backToStore: string;
+  
+  // Empty States
+  noOrdersYet: string;
+  ordersAppearHere: string;
+  
+  // Misc
+  total: string;
+  optional: string;
+  viewAll: string;
+  seeAll: string;
+  linkCopied: string;
+  error: string;
+  success: string;
+  confirm: string;
+  
+  // Fulfillment
+  fulfillmentPending: string;
+  fulfillmentPreparing: string;
+  fulfillmentReady: string;
+  fulfillmentComplete: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -335,6 +436,107 @@ const translations: Record<Language, Translations> = {
     createAndShare: "Create & Share",
     creating: "Creating...",
     back: "Back",
+    
+    // Share Dialog
+    shareYourStorefront: "Share your storefront",
+    quickShare: "Quick share",
+    copied: "Copied!",
+    showQrCode: "Show QR Code",
+    backToShareOptions: "Back to share options",
+    share: "Share",
+    qr: "QR",
+    done: "Done",
+    scanToViewOrder: "Scan to view and order",
+    
+    // Storefront Card
+    for: "For",
+    qty: "Qty",
+    viewProof: "View proof",
+    paymentProof: "Payment Proof",
+    from: "From",
+    close: "Close",
+    verifyMarkPaid: "Verify & Mark Paid",
+    reorder: "Reorder",
+    showQr: "Show QR code",
+    preparing: "Preparing",
+    ready: "Ready",
+    complete: "Complete",
+    
+    // Bundle Items
+    item: "Item",
+    itemName: "Item name",
+    addAnotherItem: "Add another item",
+    bundleTotal: "Bundle total",
+    
+    // Product Selector
+    noProductsInCatalog: "No products in catalog",
+    addProductsFirst: "Add products first or enter details manually",
+    
+    // Products Page
+    newProduct: "New Product",
+    editProduct: "Edit Product",
+    noProductsYet: "No products yet",
+    buildCatalogOnce: "Build your product catalog once, reuse across all your storefronts.",
+    createProduct: "Create product",
+    aiGeneratesDesc: "AI generates descriptions for you",
+    addImagesForSales: "Add images for better sales",
+    organizeByCategories: "Organize by categories",
+    productName: "Product name",
+    category: "Category",
+    selectCategory: "Select category",
+    food: "Food",
+    drinks: "Drinks",
+    clothing: "Clothing",
+    accessories: "Accessories",
+    services: "Services",
+    digital: "Digital",
+    other: "Other",
+    uploadImage: "Upload image",
+    active: "Active",
+    generateDesc: "Generate",
+    saveChanges: "Save changes",
+    
+    // Admin Page
+    saveAllChanges: "Save all changes",
+    instagram: "Instagram",
+    city: "City",
+    address: "Address",
+    gettingLocation: "Getting location...",
+    integrations: "Integrations",
+    
+    // Public Pages
+    sendMessage: "Send Message",
+    sending: "Sending...",
+    orderNow: "Order Now",
+    orderDetails: "Order Details",
+    yourName: "Your name",
+    yourPhone: "Your phone",
+    noteOptional: "Note (optional)",
+    placeOrder: "Place Order",
+    placingOrder: "Placing order...",
+    orderPlaced: "Order Placed!",
+    orderPlacedDesc: "The seller will contact you shortly.",
+    backToStore: "Back to store",
+    
+    // Empty States
+    noOrdersYet: "No orders yet",
+    ordersAppearHere: "Orders will appear here",
+    
+    // Misc
+    total: "Total",
+    optional: "optional",
+    viewAll: "View all",
+    seeAll: "See all",
+    linkCopied: "Link copied!",
+    error: "Error",
+    success: "Success",
+    confirm: "Confirm",
+    
+    // Fulfillment
+    fulfillmentPending: "Pending",
+    fulfillmentPreparing: "Preparing",
+    fulfillmentReady: "Ready",
+    fulfillmentComplete: "Complete",
   },
   es: {
     goodMorning: "Buenos días",
@@ -496,6 +698,107 @@ const translations: Record<Language, Translations> = {
     createAndShare: "Crear y compartir",
     creating: "Creando...",
     back: "Volver",
+    
+    // Share Dialog
+    shareYourStorefront: "Comparte tu vitrina",
+    quickShare: "Compartir rápido",
+    copied: "¡Copiado!",
+    showQrCode: "Mostrar código QR",
+    backToShareOptions: "Volver a opciones",
+    share: "Compartir",
+    qr: "QR",
+    done: "Listo",
+    scanToViewOrder: "Escanea para ver y ordenar",
+    
+    // Storefront Card
+    for: "Para",
+    qty: "Cant",
+    viewProof: "Ver comprobante",
+    paymentProof: "Comprobante de Pago",
+    from: "De",
+    close: "Cerrar",
+    verifyMarkPaid: "Verificar y Marcar Pagado",
+    reorder: "Reordenar",
+    showQr: "Mostrar código QR",
+    preparing: "Preparando",
+    ready: "Listo",
+    complete: "Completado",
+    
+    // Bundle Items
+    item: "Artículo",
+    itemName: "Nombre del artículo",
+    addAnotherItem: "Agregar otro artículo",
+    bundleTotal: "Total del paquete",
+    
+    // Product Selector
+    noProductsInCatalog: "Sin productos en catálogo",
+    addProductsFirst: "Agrega productos primero o ingresa detalles manualmente",
+    
+    // Products Page
+    newProduct: "Nuevo Producto",
+    editProduct: "Editar Producto",
+    noProductsYet: "Sin productos aún",
+    buildCatalogOnce: "Crea tu catálogo una vez, reutilízalo en todas tus vitrinas.",
+    createProduct: "Crear producto",
+    aiGeneratesDesc: "La IA genera descripciones por ti",
+    addImagesForSales: "Añade imágenes para mejores ventas",
+    organizeByCategories: "Organiza por categorías",
+    productName: "Nombre del producto",
+    category: "Categoría",
+    selectCategory: "Seleccionar categoría",
+    food: "Comida",
+    drinks: "Bebidas",
+    clothing: "Ropa",
+    accessories: "Accesorios",
+    services: "Servicios",
+    digital: "Digital",
+    other: "Otro",
+    uploadImage: "Subir imagen",
+    active: "Activo",
+    generateDesc: "Generar",
+    saveChanges: "Guardar cambios",
+    
+    // Admin Page
+    saveAllChanges: "Guardar todos los cambios",
+    instagram: "Instagram",
+    city: "Ciudad",
+    address: "Dirección",
+    gettingLocation: "Obteniendo ubicación...",
+    integrations: "Integraciones",
+    
+    // Public Pages
+    sendMessage: "Enviar Mensaje",
+    sending: "Enviando...",
+    orderNow: "Ordenar Ahora",
+    orderDetails: "Detalles del Pedido",
+    yourName: "Tu nombre",
+    yourPhone: "Tu teléfono",
+    noteOptional: "Nota (opcional)",
+    placeOrder: "Hacer Pedido",
+    placingOrder: "Procesando pedido...",
+    orderPlaced: "¡Pedido Realizado!",
+    orderPlacedDesc: "El vendedor te contactará pronto.",
+    backToStore: "Volver a la tienda",
+    
+    // Empty States
+    noOrdersYet: "Sin pedidos aún",
+    ordersAppearHere: "Los pedidos aparecerán aquí",
+    
+    // Misc
+    total: "Total",
+    optional: "opcional",
+    viewAll: "Ver todo",
+    seeAll: "Ver todo",
+    linkCopied: "¡Enlace copiado!",
+    error: "Error",
+    success: "Éxito",
+    confirm: "Confirmar",
+    
+    // Fulfillment
+    fulfillmentPending: "Pendiente",
+    fulfillmentPreparing: "Preparando",
+    fulfillmentReady: "Listo",
+    fulfillmentComplete: "Completado",
   },
 };
 

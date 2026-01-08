@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Upload, X, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export interface BundleItem {
   id: string;
@@ -29,6 +30,7 @@ const createEmptyItem = (): BundleItem => ({
 });
 
 export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
+  const { t } = useLanguage();
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const addItem = () => {
@@ -76,7 +78,7 @@ export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <GripVertical className="w-4 h-4" />
-              <span>Item {index + 1}</span>
+              <span>{t.item} {index + 1}</span>
             </div>
             {items.length > 1 && (
               <Button
@@ -94,13 +96,13 @@ export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
           <Input
             value={item.title}
             onChange={(e) => updateItem(item.id, { title: e.target.value })}
-            placeholder="Item name"
+            placeholder={t.itemName}
             className="bg-background"
           />
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Price</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t.price}</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                 <Input
@@ -115,7 +117,7 @@ export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
               </div>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Qty</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t.qty}</label>
               <Input
                 type="number"
                 min="1"
@@ -155,7 +157,7 @@ export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
               className="w-full py-2 border border-dashed border-border rounded-lg flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
             >
               <Upload className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Add photo</span>
+              <span className="text-xs text-muted-foreground">{t.addPhoto}</span>
             </button>
           )}
         </div>
@@ -168,12 +170,12 @@ export function BundleItemsInput({ items, onChange }: BundleItemsInputProps) {
         className="w-full gap-2"
       >
         <Plus className="w-4 h-4" />
-        Add another item
+        {t.addAnotherItem}
       </Button>
 
       {items.length > 0 && total > 0 && (
         <div className="flex justify-between items-center pt-3 border-t border-border">
-          <span className="text-sm text-muted-foreground">Bundle total</span>
+          <span className="text-sm text-muted-foreground">{t.bundleTotal}</span>
           <span className="text-xl font-bold text-foreground">${total.toFixed(2)}</span>
         </div>
       )}
