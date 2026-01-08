@@ -401,7 +401,7 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="autopilot" className="gap-2">
               <Bot className="w-4 h-4" />
-              {language === "es" ? "Autopilot" : "Autopilot"}
+              {language === "es" ? "Modo IA" : "AI Mode"}
             </TabsTrigger>
           </TabsList>
 
