@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,9 +19,15 @@ interface HistoryItem {
   status: string;
   mode: string;
   customer_name: string | null;
+  customer_phone: string | null;
+  buyer_email: string | null;
+  description: string | null;
+  image_url: string | null;
+  slug: string;
   created_at: string;
   paid_at: string | null;
   ordered_at: string | null;
+  accepted_at: string | null;
   is_bundle: boolean;
   quantity: number;
 }
@@ -34,6 +40,7 @@ export default function OrderHistory() {
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
 
   useEffect(() => {
     if (user) fetchHistory();
@@ -44,7 +51,7 @@ export default function OrderHistory() {
     
     const { data, error } = await supabase
       .from("storefronts")
-      .select("id, title, price, status, mode, customer_name, created_at, paid_at, ordered_at, is_bundle, quantity")
+      .select("id, title, price, status, mode, customer_name, customer_phone, buyer_email, description, image_url, slug, created_at, paid_at, ordered_at, accepted_at, is_bundle, quantity")
       .in("status", ["sent", "paid", "cancelled"])
       .order("created_at", { ascending: false });
 
@@ -283,7 +290,8 @@ export default function OrderHistory() {
             {filteredItems.map((item, index) => (
               <div
                 key={item.id}
-                className="bg-card border border-border rounded-xl p-4 animate-fade-in"
+                onClick={() => setSelectedItem(item)}
+                className="bg-card border border-border rounded-xl p-4 animate-fade-in cursor-pointer hover:border-primary/50 transition-colors"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -302,11 +310,14 @@ export default function OrderHistory() {
                       {item.quantity > 1 && ` · ${item.quantity} items`}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold text-foreground">${item.price.toFixed(2)}</p>
-                    {item.is_bundle && (
-                      <p className="text-xs text-muted-foreground">Bundle</p>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-foreground">${item.price.toFixed(2)}</p>
+                      {item.is_bundle && (
+                        <p className="text-xs text-muted-foreground">Bundle</p>
+                      )}
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
               </div>
@@ -321,6 +332,121 @@ export default function OrderHistory() {
               ? `No hay resultados para "${search || filter}"` 
               : `No results for "${search || filter}"`}
           </div>
+        )}
+        {/* Detail Panel */}
+        {selectedItem && (
+          <>
+            <div 
+              className="fixed inset-0 bg-foreground/20 z-40" 
+              onClick={() => setSelectedItem(null)} 
+            />
+            <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-background border-l border-border z-50 overflow-y-auto animate-fade-in">
+              <div className="sticky top-0 bg-background border-b border-border p-4 flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">{language === "es" ? "Detalles" : "Details"}</h2>
+                <Button variant="ghost" size="icon" onClick={() => setSelectedItem(null)}>
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+              
+              <div className="p-4 space-y-4">
+                {/* Image */}
+                {selectedItem.image_url && (
+                  <div className="aspect-video rounded-xl overflow-hidden bg-muted">
+                    <img 
+                      src={selectedItem.image_url} 
+                      alt={selectedItem.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Title & Status */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-semibold text-foreground">{selectedItem.title}</h3>
+                    {getStatusBadge(selectedItem)}
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">${selectedItem.price.toFixed(2)}</p>
+                </div>
+
+                {/* Description */}
+                {selectedItem.description && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{selectedItem.description}</p>
+                  </div>
+                )}
+
+                {/* Customer Info */}
+                {(selectedItem.customer_name || selectedItem.customer_phone || selectedItem.buyer_email) && (
+                  <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+                    <h4 className="font-medium text-foreground text-sm">{language === "es" ? "Cliente" : "Customer"}</h4>
+                    {selectedItem.customer_name && (
+                      <p className="text-foreground">{selectedItem.customer_name}</p>
+                    )}
+                    {selectedItem.customer_phone && (
+                      <a href={`tel:${selectedItem.customer_phone}`} className="flex items-center gap-2 text-sm text-primary">
+                        <Phone className="w-4 h-4" />
+                        {selectedItem.customer_phone}
+                      </a>
+                    )}
+                    {selectedItem.buyer_email && (
+                      <a href={`mailto:${selectedItem.buyer_email}`} className="flex items-center gap-2 text-sm text-primary">
+                        <Mail className="w-4 h-4" />
+                        {selectedItem.buyer_email}
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Dates */}
+                <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+                  <h4 className="font-medium text-foreground text-sm">{language === "es" ? "Fechas" : "Dates"}</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">{language === "es" ? "Creado" : "Created"}</p>
+                      <p className="text-foreground">{format(new Date(selectedItem.created_at), "MMM d, yyyy")}</p>
+                    </div>
+                    {selectedItem.ordered_at && (
+                      <div>
+                        <p className="text-muted-foreground">{language === "es" ? "Ordenado" : "Ordered"}</p>
+                        <p className="text-foreground">{format(new Date(selectedItem.ordered_at), "MMM d, yyyy")}</p>
+                      </div>
+                    )}
+                    {selectedItem.accepted_at && (
+                      <div>
+                        <p className="text-muted-foreground">{language === "es" ? "Aceptado" : "Accepted"}</p>
+                        <p className="text-foreground">{format(new Date(selectedItem.accepted_at), "MMM d, yyyy")}</p>
+                      </div>
+                    )}
+                    {selectedItem.paid_at && (
+                      <div>
+                        <p className="text-muted-foreground">{language === "es" ? "Pagado" : "Paid"}</p>
+                        <p className="text-foreground">{format(new Date(selectedItem.paid_at), "MMM d, yyyy")}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-muted-foreground">{language === "es" ? "Tipo" : "Type"}</p>
+                    <p className="text-foreground capitalize">{selectedItem.mode}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-muted-foreground">{language === "es" ? "Cantidad" : "Quantity"}</p>
+                    <p className="text-foreground">{selectedItem.quantity}</p>
+                  </div>
+                  {selectedItem.is_bundle && (
+                    <div className="bg-muted/50 rounded-lg p-3 col-span-2">
+                      <p className="text-muted-foreground">Bundle</p>
+                      <p className="text-foreground">{language === "es" ? "Sí" : "Yes"}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </AppLayout>
