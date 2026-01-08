@@ -60,21 +60,21 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-5 animate-fade-in">
         {/* Compact Profile Header */}
         <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 rounded-2xl p-4 sm:p-6 text-primary-foreground overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
           
           <div className="relative flex items-center gap-4">
-            <Avatar className="w-16 h-16 border-4 border-white/20 shadow-xl">
+            <Avatar className="w-14 h-14 sm:w-16 sm:h-16 border-4 border-white/20 shadow-xl">
               <AvatarImage src={profile?.logo_url || profile?.photo_url || ""} />
-              <AvatarFallback className="bg-white/20 text-primary-foreground text-xl font-bold">
+              <AvatarFallback className="bg-white/20 text-primary-foreground text-lg sm:text-xl font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold truncate">{profile?.business_name || "My Business"}</h1>
+              <h1 className="text-lg sm:text-xl font-bold truncate">{profile?.business_name || "My Business"}</h1>
               {profile?.business_type && (
                 <p className="text-primary-foreground/70 text-sm">{profile.business_type}</p>
               )}
@@ -96,40 +96,40 @@ export default function Profile() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full h-auto grid grid-cols-3 sm:grid-cols-6 gap-2 bg-muted/30 backdrop-blur-sm p-2 rounded-2xl border border-border/50">
+          <TabsList className="w-full h-auto grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 bg-muted/40 backdrop-blur-sm p-1.5 sm:p-2 rounded-2xl border border-border/40">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm py-3 px-2 rounded-xl transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary hover:bg-background/50"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1.5 sm:flex-row text-xs sm:text-sm py-2.5 sm:py-3 px-1.5 sm:px-3 rounded-xl transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary hover:bg-background/50 active:scale-95"
               >
-                <tab.icon className="w-5 h-5" />
-                <span className="text-[10px] sm:text-sm font-medium">{tab.label}</span>
+                <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-[9px] sm:text-sm font-medium leading-tight">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6 animate-fade-in">
+          <TabsContent value="dashboard" className="mt-5 animate-fade-in">
             <DashboardTab />
           </TabsContent>
 
-          <TabsContent value="crm" className="mt-6 animate-fade-in">
+          <TabsContent value="crm" className="mt-5 animate-fade-in">
             <CrmLiteTab />
           </TabsContent>
 
-          <TabsContent value="productivity" className="mt-6 animate-fade-in">
+          <TabsContent value="productivity" className="mt-5 animate-fade-in">
             <ProductivityTab />
           </TabsContent>
 
-          <TabsContent value="marketing" className="mt-6 animate-fade-in">
+          <TabsContent value="marketing" className="mt-5 animate-fade-in">
             <MarketingTab />
           </TabsContent>
 
-          <TabsContent value="share" className="mt-6 animate-fade-in">
+          <TabsContent value="share" className="mt-5 animate-fade-in">
             <ShareLinksTab />
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-6 animate-fade-in">
+          <TabsContent value="settings" className="mt-5 animate-fade-in">
             <ProfileSettingsTab />
           </TabsContent>
         </Tabs>

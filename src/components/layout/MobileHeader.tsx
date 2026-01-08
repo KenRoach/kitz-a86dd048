@@ -3,6 +3,7 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export function MobileHeader() {
   const { theme, setTheme } = useTheme();
@@ -18,41 +19,41 @@ export function MobileHeader() {
   };
 
   return (
-    <header className="md:hidden shrink-0 bg-background border-b border-border/50">
-      <div className="flex items-center justify-between px-3 py-2.5">
+    <header className="md:hidden shrink-0 bg-background/95 backdrop-blur-lg border-b border-border/30 shadow-sm">
+      <div className="flex items-center justify-between px-4 py-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
+          <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
             {getGreeting()}
           </p>
-          <p className="text-base font-bold text-foreground truncate -mt-0.5">
+          <p className="text-lg font-bold text-foreground truncate leading-tight">
             {profile?.business_name || "My Business"}
           </p>
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1">
           <Link
             to="/profile"
-            className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all active:scale-95"
           >
-            <Award className="w-3.5 h-3.5" />
+            <Award className="w-4 h-4" />
           </Link>
           <button
             onClick={toggleLanguage}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-95"
             title={language === "en" ? "Español" : "English"}
           >
-            <span className="text-[9px] font-bold">{language === "en" ? "ES" : "EN"}</span>
+            <span className="text-[10px] font-bold">{language === "en" ? "ES" : "EN"}</span>
           </button>
           <button
             onClick={toggleTheme}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-95"
           >
-            {theme === "dark" ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           <button
             onClick={() => signOut()}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all active:scale-95"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
