@@ -11,14 +11,14 @@ import { toast } from "sonner";
 import {
   Plus,
   Trash2,
-  AlertTriangle,
-  Calendar,
-  Users,
+  Zap,
+  TrendingUp,
+  TrendingDown,
   XCircle,
   Grid3X3,
 } from "lucide-react";
 
-type Quadrant = "do" | "schedule" | "delegate" | "eliminate";
+type Quadrant = "high_value_low_effort" | "high_value_high_effort" | "low_value_low_effort" | "low_value_high_effort";
 
 interface EisenhowerTask {
   id: string;
@@ -27,34 +27,42 @@ interface EisenhowerTask {
   completed: boolean;
 }
 
-const quadrantConfig: Record<Quadrant, { label: string; labelEs: string; icon: React.ReactNode; color: string; bgColor: string }> = {
-  do: {
-    label: "Do First",
-    labelEs: "Hacer Primero",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    color: "text-red-600 dark:text-red-400",
-    bgColor: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800",
+const quadrantConfig: Record<Quadrant, { label: string; labelEs: string; tag: string; tagEs: string; icon: React.ReactNode; color: string; bgColor: string }> = {
+  high_value_low_effort: {
+    label: "Quick Wins",
+    labelEs: "Victorias Rápidas",
+    tag: "High Value / Low Effort",
+    tagEs: "Alto Valor / Bajo Esfuerzo",
+    icon: <Zap className="h-4 w-4" />,
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800",
   },
-  schedule: {
-    label: "Schedule",
-    labelEs: "Programar",
-    icon: <Calendar className="h-4 w-4" />,
+  high_value_high_effort: {
+    label: "Big Projects",
+    labelEs: "Proyectos Grandes",
+    tag: "High Value / High Effort",
+    tagEs: "Alto Valor / Alto Esfuerzo",
+    icon: <TrendingUp className="h-4 w-4" />,
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
   },
-  delegate: {
-    label: "Delegate",
-    labelEs: "Delegar",
-    icon: <Users className="h-4 w-4" />,
+  low_value_low_effort: {
+    label: "Fill-ins",
+    labelEs: "Relleno",
+    tag: "Low Value / Low Effort",
+    tagEs: "Bajo Valor / Bajo Esfuerzo",
+    icon: <TrendingDown className="h-4 w-4" />,
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800",
   },
-  eliminate: {
-    label: "Eliminate",
-    labelEs: "Eliminar",
+  low_value_high_effort: {
+    label: "Avoid",
+    labelEs: "Evitar",
+    tag: "Low Value / High Effort",
+    tagEs: "Bajo Valor / Alto Esfuerzo",
     icon: <XCircle className="h-4 w-4" />,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted/50 border-muted",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800",
   },
 };
 
@@ -63,7 +71,7 @@ export function EisenhowerMatrix() {
   const { language } = useLanguage();
   const [tasks, setTasks] = useState<EisenhowerTask[]>([]);
   const [newTask, setNewTask] = useState("");
-  const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant>("do");
+  const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant>("high_value_low_effort");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -200,10 +208,15 @@ export function EisenhowerMatrix() {
                 key={quadrant}
                 className={`rounded-lg border p-3 ${config.bgColor} min-h-[120px]`}
               >
-                <div className={`flex items-center gap-1.5 mb-2 ${config.color}`}>
-                  {config.icon}
-                  <span className="text-xs font-medium">
-                    {language === "es" ? config.labelEs : config.label}
+                <div className={`mb-2 ${config.color}`}>
+                  <div className="flex items-center gap-1.5">
+                    {config.icon}
+                    <span className="text-xs font-medium">
+                      {language === "es" ? config.labelEs : config.label}
+                    </span>
+                  </div>
+                  <span className="text-[10px] opacity-70">
+                    {language === "es" ? config.tagEs : config.tag}
                   </span>
                   {quadrantTasks.length > 0 && (
                     <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1">
@@ -244,8 +257,8 @@ export function EisenhowerMatrix() {
 
         {/* Legend */}
         <div className="text-[10px] text-muted-foreground grid grid-cols-2 gap-1 pt-2 border-t">
-          <div>⬆️ {language === "es" ? "Urgente" : "Urgent"} → ⬇️ {language === "es" ? "No urgente" : "Not urgent"}</div>
-          <div>⬅️ {language === "es" ? "Importante" : "Important"} → ➡️ {language === "es" ? "No importante" : "Not important"}</div>
+          <div>⬆️ {language === "es" ? "Alto Valor" : "High Value"} → ⬇️ {language === "es" ? "Bajo Valor" : "Low Value"}</div>
+          <div>⬅️ {language === "es" ? "Bajo Esfuerzo" : "Low Effort"} → ➡️ {language === "es" ? "Alto Esfuerzo" : "High Effort"}</div>
         </div>
       </CardContent>
     </Card>
