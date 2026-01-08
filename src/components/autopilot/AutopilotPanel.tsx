@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAutopilot, AutopilotOpportunity } from "@/hooks/useAutopilot";
 import { use4DX } from "@/hooks/use4DX";
 import { useLanguage } from "@/hooks/useLanguage";
+import { EisenhowerMatrix } from "./EisenhowerMatrix";
 import { 
   Bot, Zap, Store, Users, Play, Loader2, 
   CheckCircle, Clock, AlertCircle, Sparkles,
@@ -581,6 +582,9 @@ export function AutopilotPanel() {
               )}
             </CardContent>
           </Card>
+
+          {/* Eisenhower Matrix */}
+          <EisenhowerMatrix />
 
           {/* Recent Actions */}
           {actions.length > 0 && (
