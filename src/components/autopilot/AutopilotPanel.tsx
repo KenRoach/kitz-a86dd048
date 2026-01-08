@@ -115,7 +115,7 @@ export function AutopilotPanel() {
               </div>
               <div>
                 <h3 className="font-bold text-lg flex items-center gap-2">
-                  AI Autopilot
+                  AI Mode
                   {isEnabled && (
                     <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                       <Zap className="w-3 h-3 mr-1" />
