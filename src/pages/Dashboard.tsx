@@ -5,6 +5,7 @@ import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
+import { FourDXWidget } from "@/components/dashboard/FourDXWidget";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
@@ -318,8 +319,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Momentum + Earnings */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* 4DX Goals + Momentum + Earnings */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <FourDXWidget />
           <MomentumScore score={calculateMomentum()} />
           <EarningsToday earnings={todaysEarnings} total={totalToday} />
         </div>
