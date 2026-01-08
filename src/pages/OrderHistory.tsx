@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, startOfWeek, startOfMonth } from "date-fns";
 
 type FilterType = "all" | "sent" | "quotes" | "orders" | "cancelled";
 
@@ -122,7 +122,30 @@ export default function OrderHistory() {
     cancelled: items.filter(i => i.status === "cancelled").length,
   });
 
+  const getStats = () => {
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const monthStart = startOfMonth(now);
+
+    const paidItems = items.filter(i => i.status === "paid");
+    const totalRevenue = paidItems.reduce((sum, i) => sum + i.price, 0);
+    
+    const weekRevenue = paidItems
+      .filter(i => i.paid_at && new Date(i.paid_at) >= weekStart)
+      .reduce((sum, i) => sum + i.price, 0);
+    
+    const monthRevenue = paidItems
+      .filter(i => i.paid_at && new Date(i.paid_at) >= monthStart)
+      .reduce((sum, i) => sum + i.price, 0);
+
+    const weekOrders = paidItems.filter(i => i.paid_at && new Date(i.paid_at) >= weekStart).length;
+    const monthOrders = paidItems.filter(i => i.paid_at && new Date(i.paid_at) >= monthStart).length;
+
+    return { totalRevenue, weekRevenue, monthRevenue, weekOrders, monthOrders, totalOrders: paidItems.length };
+  };
+
   const counts = getCounts();
+  const stats = getStats();
 
   return (
     <AppLayout>
@@ -147,6 +170,44 @@ export default function OrderHistory() {
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
+
+        {/* Summary Stats */}
+        {!loading && items.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "20ms" }}>
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <DollarSign className="w-4 h-4" />
+                <span className="text-xs">{language === "es" ? "Esta semana" : "This week"}</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">${stats.weekRevenue.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">{stats.weekOrders} {language === "es" ? "pedidos" : "orders"}</p>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-xs">{language === "es" ? "Este mes" : "This month"}</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">${stats.monthRevenue.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">{stats.monthOrders} {language === "es" ? "pedidos" : "orders"}</p>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <ShoppingBag className="w-4 h-4" />
+                <span className="text-xs">{language === "es" ? "Total ventas" : "Total sales"}</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">${stats.totalRevenue.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">{stats.totalOrders} {language === "es" ? "pedidos" : "orders"}</p>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Clock className="w-4 h-4" />
+                <span className="text-xs">{language === "es" ? "Pendientes" : "Pending"}</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">{counts.sent}</p>
+              <p className="text-xs text-muted-foreground">{language === "es" ? "por cobrar" : "awaiting payment"}</p>
+            </div>
+          </div>
+        )}
 
         {/* Filter Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-1 animate-fade-in" style={{ animationDelay: "30ms" }}>
