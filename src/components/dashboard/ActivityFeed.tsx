@@ -31,7 +31,7 @@ const colorMap: Record<Activity["type"], string> = {
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
     <div className="neu-card-flat p-6 animate-fade-in">
-      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Recent Activity</h3>
+      <h3 className="text-sm font-semibold text-action uppercase tracking-wider mb-4">Recent Activity</h3>
       <div className="space-y-3">
         {activities.map((activity, index) => {
           const Icon = iconMap[activity.type];
