@@ -5,13 +5,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, ChevronUp, MessageSquare, Loader2 } from "lucide-react";
+import { Plus, ChevronUp, MessageSquare, Loader2, MessageCircle, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
+
+interface Comment {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
 
 interface Suggestion {
   id: string;
@@ -22,6 +30,7 @@ interface Suggestion {
   created_at: string;
   vote_count: number;
   has_voted: boolean;
+  comments: Comment[];
 }
 
 export default function Suggestions() {
@@ -33,6 +42,9 @@ export default function Suggestions() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [expandedSuggestions, setExpandedSuggestions] = useState<Set<string>>(new Set());
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [submittingComment, setSubmittingComment] = useState<string | null>(null);
 
   const t = {
     en: {
@@ -48,6 +60,10 @@ export default function Suggestions() {
       beFirst: "Be the first to suggest a feature!",
       votes: "votes",
       vote: "vote",
+      comments: "comments",
+      comment: "comment",
+      addComment: "Add a comment...",
+      noComments: "No comments yet. Be the first to share your thoughts!",
     },
     es: {
       title: "Sugerencias",
@@ -62,6 +78,10 @@ export default function Suggestions() {
       beFirst: "¡Sé el primero en sugerir una función!",
       votes: "votos",
       vote: "voto",
+      comments: "comentarios",
+      comment: "comentario",
+      addComment: "Añade un comentario...",
+      noComments: "Sin comentarios aún. ¡Sé el primero en compartir tus ideas!",
     },
   };
 
@@ -86,13 +106,23 @@ export default function Suggestions() {
 
       if (votesError) throw votesError;
 
-      // Process suggestions with vote counts
+      // Fetch all comments
+      const { data: commentsData, error: commentsError } = await supabase
+        .from("suggestion_comments")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (commentsError) throw commentsError;
+
+      // Process suggestions with vote counts and comments
       const processedSuggestions: Suggestion[] = (suggestionsData || []).map((suggestion) => {
         const suggestionVotes = (votesData || []).filter(v => v.suggestion_id === suggestion.id);
+        const suggestionComments = (commentsData || []).filter(c => c.suggestion_id === suggestion.id);
         return {
           ...suggestion,
           vote_count: suggestionVotes.length,
           has_voted: suggestionVotes.some(v => v.user_id === user.id),
+          comments: suggestionComments,
         };
       });
 
@@ -142,7 +172,6 @@ export default function Suggestions() {
 
     try {
       if (hasVoted) {
-        // Remove vote
         const { error } = await supabase
           .from("suggestion_votes")
           .delete()
@@ -151,7 +180,6 @@ export default function Suggestions() {
 
         if (error) throw error;
       } else {
-        // Add vote
         const { error } = await supabase.from("suggestion_votes").insert({
           suggestion_id: suggestionId,
           user_id: user.id,
@@ -160,7 +188,6 @@ export default function Suggestions() {
         if (error) throw error;
       }
 
-      // Update local state optimistically
       setSuggestions(prev =>
         prev.map(s =>
           s.id === suggestionId
@@ -176,6 +203,55 @@ export default function Suggestions() {
       console.error("Error voting:", error);
       toast.error(language === "es" ? "Error al votar" : "Failed to vote");
     }
+  };
+
+  const handleAddComment = async (suggestionId: string) => {
+    if (!user) return;
+    
+    const content = commentInputs[suggestionId]?.trim();
+    if (!content) return;
+
+    setSubmittingComment(suggestionId);
+    try {
+      const { data, error } = await supabase
+        .from("suggestion_comments")
+        .insert({
+          suggestion_id: suggestionId,
+          user_id: user.id,
+          content,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      setSuggestions(prev =>
+        prev.map(s =>
+          s.id === suggestionId
+            ? { ...s, comments: [...s.comments, data] }
+            : s
+        )
+      );
+      setCommentInputs(prev => ({ ...prev, [suggestionId]: "" }));
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error(language === "es" ? "Error al comentar" : "Failed to add comment");
+    } finally {
+      setSubmittingComment(null);
+    }
+  };
+
+  const toggleExpanded = (suggestionId: string) => {
+    setExpandedSuggestions(prev => {
+      const next = new Set(prev);
+      if (next.has(suggestionId)) {
+        next.delete(suggestionId);
+      } else {
+        next.add(suggestionId);
+      }
+      return next;
+    });
   };
 
   return (
@@ -249,42 +325,121 @@ export default function Suggestions() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {suggestions.map((suggestion) => (
-              <Card key={suggestion.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    {/* Vote button */}
-                    <button
-                      onClick={() => handleVote(suggestion.id, suggestion.has_voted)}
-                      className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[60px] ${
-                        suggestion.has_voted
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                      }`}
-                    >
-                      <ChevronUp className="w-5 h-5" />
-                      <span className="text-sm font-semibold">{suggestion.vote_count}</span>
-                    </button>
+            {suggestions.map((suggestion) => {
+              const isExpanded = expandedSuggestions.has(suggestion.id);
+              const commentCount = suggestion.comments.length;
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground">{suggestion.title}</h3>
-                      {suggestion.description && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {suggestion.description}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatDistanceToNow(new Date(suggestion.created_at), {
-                          addSuffix: true,
-                          locale: language === "es" ? es : enUS,
-                        })}
-                      </p>
+              return (
+                <Card key={suggestion.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      {/* Vote button */}
+                      <button
+                        onClick={() => handleVote(suggestion.id, suggestion.has_voted)}
+                        className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[60px] shrink-0 ${
+                          suggestion.has_voted
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                        }`}
+                      >
+                        <ChevronUp className="w-5 h-5" />
+                        <span className="text-sm font-semibold">{suggestion.vote_count}</span>
+                      </button>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground">{suggestion.title}</h3>
+                        {suggestion.description && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {suggestion.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 mt-2">
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(suggestion.created_at), {
+                              addSuffix: true,
+                              locale: language === "es" ? es : enUS,
+                            })}
+                          </p>
+                          <Collapsible open={isExpanded} onOpenChange={() => toggleExpanded(suggestion.id)}>
+                            <CollapsibleTrigger asChild>
+                              <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>
+                                  {commentCount} {commentCount === 1 ? texts.comment : texts.comments}
+                                </span>
+                              </button>
+                            </CollapsibleTrigger>
+                          </Collapsible>
+                        </div>
+
+                        {/* Comments Section */}
+                        <Collapsible open={isExpanded}>
+                          <CollapsibleContent className="mt-4 space-y-3">
+                            <div className="border-t pt-3 space-y-3">
+                              {suggestion.comments.length === 0 ? (
+                                <p className="text-xs text-muted-foreground italic">
+                                  {texts.noComments}
+                                </p>
+                              ) : (
+                                suggestion.comments.map((comment) => (
+                                  <div key={comment.id} className="bg-muted/50 rounded-lg p-3">
+                                    <p className="text-sm text-foreground">{comment.content}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {formatDistanceToNow(new Date(comment.created_at), {
+                                        addSuffix: true,
+                                        locale: language === "es" ? es : enUS,
+                                      })}
+                                    </p>
+                                  </div>
+                                ))
+                              )}
+
+                              {/* Add comment input */}
+                              <div className="flex gap-2">
+                                <Input
+                                  value={commentInputs[suggestion.id] || ""}
+                                  onChange={(e) =>
+                                    setCommentInputs(prev => ({
+                                      ...prev,
+                                      [suggestion.id]: e.target.value,
+                                    }))
+                                  }
+                                  placeholder={texts.addComment}
+                                  maxLength={500}
+                                  className="text-sm"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleAddComment(suggestion.id);
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => handleAddComment(suggestion.id)}
+                                  disabled={
+                                    !commentInputs[suggestion.id]?.trim() ||
+                                    submittingComment === suggestion.id
+                                  }
+                                >
+                                  {submittingComment === suggestion.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Send className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
