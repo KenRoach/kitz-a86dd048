@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
 import { ProductSelector } from "./ProductSelector";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ProductData {
   id: string;
@@ -38,8 +39,9 @@ const generateSlug = (title: string) => {
 
 export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: StorefrontWizardProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>("type");
-  
+
   // Type selection
   const [isBundle, setIsBundle] = useState(false);
   
@@ -321,8 +323,8 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-medium text-foreground">What type of order?</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Choose how you want to sell</p>
+                <h3 className="text-base sm:text-lg font-medium text-foreground">{t.whatTypeOfOrder}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t.chooseHowToSell}</p>
               </div>
             </div>
 
@@ -337,8 +339,8 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 )}
               >
                 <ShoppingBag className={cn("w-6 h-6 mb-2", !isBundle ? "text-primary" : "text-muted-foreground")} />
-                <p className="font-medium text-foreground text-sm">Single item</p>
-                <p className="text-xs text-muted-foreground mt-1">One product or service</p>
+                <p className="font-medium text-foreground text-sm">{t.singleItem}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.oneProductOrService}</p>
               </button>
               
               <button
@@ -351,8 +353,8 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 )}
               >
                 <Package className={cn("w-6 h-6 mb-2", isBundle ? "text-primary" : "text-muted-foreground")} />
-                <p className="font-medium text-foreground text-sm">Bundle</p>
-                <p className="text-xs text-muted-foreground mt-1">Multiple items together</p>
+                <p className="font-medium text-foreground text-sm">{t.bundle}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.multipleItemsTogether}</p>
               </button>
             </div>
           </div>
@@ -367,13 +369,13 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                   <Package className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-medium text-foreground">Create your bundle</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Add items to your package</p>
+                  <h3 className="text-base sm:text-lg font-medium text-foreground">{t.createYourBundle}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t.addItemsToPackage}</p>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Bundle name</label>
+                <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.bundleName}</label>
                 <Input
                   value={bundleTitle}
                   onChange={(e) => setBundleTitle(e.target.value)}
@@ -395,8 +397,8 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-medium text-foreground">What are you selling?</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Pick from catalog or enter manually</p>
+                <h3 className="text-base sm:text-lg font-medium text-foreground">{t.whatAreYouSelling}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t.pickFromCatalog}</p>
               </div>
             </div>
 
@@ -413,7 +415,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 )}
               >
                 <Library className="w-3.5 h-3.5" />
-                From catalog
+                {t.fromCatalog}
               </button>
               <button
                 type="button"
@@ -429,7 +431,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 )}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                Manual entry
+                {t.manualEntry}
               </button>
             </div>
 
@@ -479,7 +481,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Price</label>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.price}</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">$</span>
                       <Input
@@ -499,7 +501,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                     )}
                   </div>
                   <div>
-                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Quantity</label>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.quantity}</label>
                     <Input
                       type="number"
                       min="1"
@@ -519,7 +521,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 {/* Description from AI */}
                 {description && (
                   <div>
-                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">Description</label>
+                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.description}</label>
                     <Textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
@@ -545,7 +547,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                     className="w-full py-3 sm:py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 hover:border-primary/50 transition-colors"
                   >
                     <Upload className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs sm:text-sm text-muted-foreground">Add photo (optional)</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">{t.addPhoto} (optional)</span>
                   </button>
                 )}
               </>
@@ -564,7 +566,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Quantity</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">{t.quantity}</label>
                   <Input
                     type="number"
                     min="1"
@@ -590,7 +592,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
         return (
           <div className="space-y-4 animate-fade-in">
             <div className="mb-3">
-              <h3 className="text-base sm:text-lg font-medium text-foreground">Ready to share?</h3>
+              <h3 className="text-base sm:text-lg font-medium text-foreground">{t.readyToCreate}</h3>
             </div>
 
             <div className="bg-muted/50 rounded-xl overflow-hidden">
@@ -706,16 +708,16 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
         <div className="flex items-center justify-between p-4 sm:p-6 pt-0 sticky bottom-0 bg-background">
           <Button variant="ghost" size="sm" onClick={handleBack} disabled={currentIndex === 0} className={cn(currentIndex === 0 && "invisible")}>
             <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{t.back}</span>
           </Button>
 
           {step === "confirm" ? (
             <Button onClick={handleCreate} disabled={loading} size="sm">
-              {loading ? "Creating..." : <><Check className="w-4 h-4 mr-1 sm:mr-2" />{sendNow ? "Create & Share" : "Save Draft"}</>}
+              {loading ? t.creating : <><Check className="w-4 h-4 mr-1 sm:mr-2" />{sendNow ? t.createAndShare : t.saveAsDraft}</>}
             </Button>
           ) : (
             <Button onClick={handleNext} disabled={!canProceed()} size="sm">
-              Continue
+              {t.continueBtn}
               <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
             </Button>
           )}
