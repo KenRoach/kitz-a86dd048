@@ -384,6 +384,21 @@ interface Translations {
   period: string;
   predictLeadMeasures: string;
   activitiesThatDriveResults: string;
+  
+  // 4DX Cadence
+  weeklyCommitments: string;
+  thisWeeksCommitments: string;
+  whatWillYouCommit: string;
+  addCommitment: string;
+  noCommitmentsYet: string;
+  commitToActions: string;
+  completedOf: string;
+  markComplete: string;
+  weekOf: string;
+  newWeekPrompt: string;
+  reviewLastWeek: string;
+  lastWeekResults: string;
+  commitmentPlaceholder: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -759,6 +774,21 @@ const translations: Record<Language, Translations> = {
     period: "Period",
     predictLeadMeasures: "Predictive activities",
     activitiesThatDriveResults: "Activities that drive results",
+    
+    // 4DX Cadence
+    weeklyCommitments: "Weekly Commitments",
+    thisWeeksCommitments: "This week's commitments",
+    whatWillYouCommit: "What will you commit to this week?",
+    addCommitment: "Add commitment",
+    noCommitmentsYet: "No commitments yet",
+    commitToActions: "Commit to specific actions that drive your lead measures",
+    completedOf: "completed",
+    markComplete: "Mark complete",
+    weekOf: "Week of",
+    newWeekPrompt: "It's a new week! Set your commitments.",
+    reviewLastWeek: "Review last week",
+    lastWeekResults: "Last week's results",
+    commitmentPlaceholder: "e.g., Create 3 storefronts for top products",
   },
   es: {
     goodMorning: "Buenos días",
@@ -1132,6 +1162,21 @@ const translations: Record<Language, Translations> = {
     period: "Período",
     predictLeadMeasures: "Actividades predictivas",
     activitiesThatDriveResults: "Actividades que impulsan resultados",
+    
+    // 4DX Cadence
+    weeklyCommitments: "Compromisos Semanales",
+    thisWeeksCommitments: "Compromisos de esta semana",
+    whatWillYouCommit: "¿A qué te comprometes esta semana?",
+    addCommitment: "Agregar compromiso",
+    noCommitmentsYet: "Sin compromisos aún",
+    commitToActions: "Comprométete a acciones específicas que impulsen tus medidas",
+    completedOf: "completados",
+    markComplete: "Marcar completo",
+    weekOf: "Semana del",
+    newWeekPrompt: "¡Es una nueva semana! Define tus compromisos.",
+    reviewLastWeek: "Revisar semana pasada",
+    lastWeekResults: "Resultados de la semana pasada",
+    commitmentPlaceholder: "ej., Crear 3 vitrinas para productos top",
   },
 };
 

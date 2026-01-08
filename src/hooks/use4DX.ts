@@ -28,6 +28,16 @@ export interface WIGProgress {
   type: string;
 }
 
+export interface Commitment {
+  id: string;
+  user_id: string;
+  commitment: string;
+  week_start: string;
+  completed: boolean;
+  completed_at: string | null;
+  created_at: string;
+}
+
 const defaultGoals: Omit<UserGoals, 'id' | 'user_id' | 'period_start'> = {
   wig_type: 'revenue',
   wig_target: 500,
@@ -41,7 +51,17 @@ export function use4DX() {
   const [goals, setGoals] = useState<UserGoals | null>(null);
   const [leadMeasures, setLeadMeasures] = useState<LeadMeasures | null>(null);
   const [wigProgress, setWigProgress] = useState<WIGProgress | null>(null);
+  const [commitments, setCommitments] = useState<Commitment[]>([]);
+  const [lastWeekCommitments, setLastWeekCommitments] = useState<Commitment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getWeekStart = useCallback((weeksAgo: number = 0) => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1) - (weeksAgo * 7);
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), diff);
+    return weekStart.toISOString().split('T')[0];
+  }, []);
 
   const getPeriodStart = useCallback((period: string) => {
     const now = new Date();
@@ -169,11 +189,39 @@ export function use4DX() {
     });
   }, [user, goals, getPeriodStart]);
 
+  const fetchCommitments = useCallback(async () => {
+    if (!user) return;
+
+    const thisWeekStart = getWeekStart(0);
+    const lastWeekStart = getWeekStart(1);
+
+    // This week's commitments
+    const { data: thisWeek } = await supabase
+      .from('user_commitments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('week_start', thisWeekStart)
+      .order('created_at', { ascending: true });
+
+    setCommitments((thisWeek as Commitment[]) || []);
+
+    // Last week's commitments
+    const { data: lastWeek } = await supabase
+      .from('user_commitments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('week_start', lastWeekStart)
+      .order('created_at', { ascending: true });
+
+    setLastWeekCommitments((lastWeek as Commitment[]) || []);
+  }, [user, getWeekStart]);
+
   useEffect(() => {
     if (user) {
       fetchGoals();
+      fetchCommitments();
     }
-  }, [user, fetchGoals]);
+  }, [user, fetchGoals, fetchCommitments]);
 
   useEffect(() => {
     if (goals) {
@@ -218,17 +266,79 @@ export function use4DX() {
     fetchWIGProgress();
   };
 
+  const addCommitment = async (text: string) => {
+    if (!user || !text.trim()) return;
+
+    const weekStart = getWeekStart(0);
+
+    const { data, error } = await supabase
+      .from('user_commitments')
+      .insert({
+        user_id: user.id,
+        commitment: text.trim(),
+        week_start: weekStart,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error('Failed to add commitment');
+      return;
+    }
+
+    setCommitments(prev => [...prev, data as Commitment]);
+  };
+
+  const toggleCommitment = async (id: string, completed: boolean) => {
+    const { error } = await supabase
+      .from('user_commitments')
+      .update({ 
+        completed, 
+        completed_at: completed ? new Date().toISOString() : null 
+      })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to update commitment');
+      return;
+    }
+
+    setCommitments(prev => 
+      prev.map(c => c.id === id ? { ...c, completed, completed_at: completed ? new Date().toISOString() : null } : c)
+    );
+  };
+
+  const deleteCommitment = async (id: string) => {
+    const { error } = await supabase
+      .from('user_commitments')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to delete commitment');
+      return;
+    }
+
+    setCommitments(prev => prev.filter(c => c.id !== id));
+  };
+
   return {
     goals,
     leadMeasures,
     wigProgress,
+    commitments,
+    lastWeekCommitments,
     loading,
     updateGoals,
     resetPeriod,
+    addCommitment,
+    toggleCommitment,
+    deleteCommitment,
     refetch: () => {
       fetchGoals();
       fetchLeadMeasures();
       fetchWIGProgress();
+      fetchCommitments();
     },
   };
 }
