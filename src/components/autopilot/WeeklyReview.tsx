@@ -14,10 +14,9 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 
 interface WeeklyReviewData {
-  wins: string;
-  lessons: string;
-  next_week: string;
-  gratitude: string;
+  highlights: string;
+  lowlights: string;
+  next_step: string;
 }
 
 export function WeeklyReview() {
@@ -27,10 +26,9 @@ export function WeeklyReview() {
   
   const [selectedWeek, setSelectedWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [formData, setFormData] = useState<WeeklyReviewData>({
-    wins: "",
-    lessons: "",
-    next_week: "",
-    gratitude: "",
+    highlights: "",
+    lowlights: "",
+    next_step: "",
   });
 
   const weekKey = format(selectedWeek, "yyyy-MM-dd");
@@ -45,7 +43,7 @@ export function WeeklyReview() {
         setFormData(parsed);
         return parsed as WeeklyReviewData;
       }
-      setFormData({ wins: "", lessons: "", next_week: "", gratitude: "" });
+      setFormData({ highlights: "", lowlights: "", next_step: "" });
       return null;
     },
     enabled: !!user,
@@ -111,56 +109,42 @@ export function WeeklyReview() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center gap-2">
-              🏆 {language === "es" ? "Victorias de la Semana" : "Wins This Week"}
+              ✨ {language === "es" ? "Highlights" : "Highlights"}
             </Label>
             <Textarea
               placeholder={language === "es" 
-                ? "¿Qué lograste? ¿Qué salió bien?" 
-                : "What did you accomplish? What went well?"}
-              value={formData.wins}
-              onChange={(e) => setFormData({ ...formData, wins: e.target.value })}
+                ? "¿Qué salió bien esta semana?" 
+                : "What went well this week?"}
+              value={formData.highlights}
+              onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
               rows={2}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center gap-2">
-              📚 {language === "es" ? "Lecciones Aprendidas" : "Lessons Learned"}
+              ⚠️ {language === "es" ? "Lowlights" : "Lowlights"}
             </Label>
             <Textarea
               placeholder={language === "es" 
-                ? "¿Qué aprendiste? ¿Qué harías diferente?" 
-                : "What did you learn? What would you do differently?"}
-              value={formData.lessons}
-              onChange={(e) => setFormData({ ...formData, lessons: e.target.value })}
+                ? "¿Qué no salió como esperabas?" 
+                : "What didn't go as expected?"}
+              value={formData.lowlights}
+              onChange={(e) => setFormData({ ...formData, lowlights: e.target.value })}
               rows={2}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center gap-2">
-              🎯 {language === "es" ? "Enfoque de la Próxima Semana" : "Next Week Focus"}
+              🎯 {language === "es" ? "Próximo Paso" : "Next Step"}
             </Label>
             <Textarea
               placeholder={language === "es" 
-                ? "¿Cuáles son tus 3 prioridades principales?" 
-                : "What are your top 3 priorities?"}
-              value={formData.next_week}
-              onChange={(e) => setFormData({ ...formData, next_week: e.target.value })}
-              rows={2}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              🙏 {language === "es" ? "Gratitud" : "Gratitude"}
-            </Label>
-            <Textarea
-              placeholder={language === "es" 
-                ? "¿Por qué estás agradecido esta semana?" 
-                : "What are you grateful for this week?"}
-              value={formData.gratitude}
-              onChange={(e) => setFormData({ ...formData, gratitude: e.target.value })}
+                ? "¿Cuál es tu próximo paso más importante?" 
+                : "What's your most important next step?"}
+              value={formData.next_step}
+              onChange={(e) => setFormData({ ...formData, next_step: e.target.value })}
               rows={2}
             />
           </div>
