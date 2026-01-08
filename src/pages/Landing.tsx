@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 
 type FormState = "idle" | "form" | "success";
+
+// Memoized decorative circles to prevent re-renders
+const DecorativeCircles = memo(function DecorativeCircles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/10 animate-float-slow" />
+      <div className="absolute top-20 right-10 w-60 h-60 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1s' }} />
+      <div className="absolute bottom-40 -left-10 w-40 h-40 rounded-full border border-white/10 animate-float-fast" style={{ animationDelay: '0.5s' }} />
+      <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full border border-white/10 animate-float-slow" style={{ animationDelay: '2s' }} />
+      <div className="absolute -bottom-20 right-20 w-56 h-56 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1.5s' }} />
+      <div className="absolute top-10 left-1/2 w-48 h-48 rounded-full border border-white/8 animate-float-fast" style={{ animationDelay: '0.8s' }} />
+      {/* Glowing orbs */}
+      <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow" />
+      <div className="absolute bottom-1/3 left-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+    </div>
+  );
+});
 
 export default function Landing() {
   const { language, setLanguage } = useLanguage();
@@ -37,11 +54,11 @@ export default function Landing() {
     setShowLanguageModal(false);
   };
 
-  const handleGetStarted = () => {
+  const handleGetStarted = useCallback(() => {
     setFormState("form");
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -57,12 +74,12 @@ export default function Landing() {
 
     setIsSubmitting(false);
     setFormState("success");
-  };
+  }, [firstName, contactMethod, whatsapp, email]);
 
-  const handleWhatsAppContinue = () => {
+  const handleWhatsAppContinue = useCallback(() => {
     const message = encodeURIComponent(`Hi! I just signed up for kitz. My name is ${firstName}.`);
     window.open(`https://wa.me/50760001234?text=${message}`, "_blank");
-  };
+  }, [firstName]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-primary-soft relative overflow-hidden">
@@ -109,18 +126,7 @@ export default function Landing() {
         </div>
       )}
 
-      {/* Decorative animated circles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/10 animate-float-slow" />
-        <div className="absolute top-20 right-10 w-60 h-60 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-40 -left-10 w-40 h-40 rounded-full border border-white/10 animate-float-fast" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full border border-white/10 animate-float-slow" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-20 right-20 w-56 h-56 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-10 left-1/2 w-48 h-48 rounded-full border border-white/8 animate-float-fast" style={{ animationDelay: '0.8s' }} />
-        {/* Glowing orbs */}
-        <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow" />
-        <div className="absolute bottom-1/3 left-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
-      </div>
+      <DecorativeCircles />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">

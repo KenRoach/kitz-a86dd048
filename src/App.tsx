@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,31 +8,50 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Index from "./pages/Index";
-import Landing from "./pages/Landing";
-import Storefronts from "./pages/Storefronts";
-import OrderHistory from "./pages/OrderHistory";
-import Admin from "./pages/Admin";
-import Products from "./pages/Products";
-import Profile from "./pages/Profile";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import PublicStorefront from "./pages/PublicStorefront";
-import PublicProfile from "./pages/PublicProfile";
-import Suggestions from "./pages/Suggestions";
-import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Eager load critical routes
+import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
+
+// Lazy load protected routes for code splitting
+const Index = lazy(() => import("./pages/Index"));
+const Storefronts = lazy(() => import("./pages/Storefronts"));
+const Products = lazy(() => import("./pages/Products"));
+const OrderHistory = lazy(() => import("./pages/OrderHistory"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Suggestions = lazy(() => import("./pages/Suggestions"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PublicStorefront = lazy(() => import("./pages/PublicStorefront"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Optimized QueryClient with caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Lightweight loading fallback
+function PageLoader() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
@@ -45,11 +65,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (user) {
@@ -63,11 +79,7 @@ function LandingRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (user) {
@@ -79,22 +91,24 @@ function LandingRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
-      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-      <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
-      <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-      <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
-      <Route path="/s/:slug" element={<PublicStorefront />} />
-      <Route path="/p/:profileId" element={<PublicProfile />} />
-      <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
+        <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
+        <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+        <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+        <Route path="/s/:slug" element={<PublicStorefront />} />
+        <Route path="/p/:profileId" element={<PublicProfile />} />
+        <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -103,7 +117,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <LanguageProvider>
-          <TooltipProvider>
+          <TooltipProvider delayDuration={300}>
             <Toaster />
             <Sonner position="top-center" />
             <BrowserRouter>
