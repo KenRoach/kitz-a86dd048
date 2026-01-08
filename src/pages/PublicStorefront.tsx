@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save, Upload } from "lucide-react";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save, Upload, FileText, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -79,6 +79,9 @@ interface Storefront {
   ordered_at: string | null;
   is_bundle: boolean;
   user_id: string | null;
+  mode: string;
+  valid_until: string | null;
+  accepted_at: string | null;
 }
 
 export default function PublicStorefront() {
@@ -95,6 +98,8 @@ export default function PublicStorefront() {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
+  const [quoteAccepted, setQuoteAccepted] = useState(false);
+  const [acceptingQuote, setAcceptingQuote] = useState(false);
 
   // Buyer form
   const [buyerName, setBuyerName] = useState("");
@@ -126,7 +131,7 @@ export default function PublicStorefront() {
       // Use public view that excludes sensitive data (buyer info, seller phone)
       const { data, error } = await supabase
         .from("public_storefronts" as any)
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id, mode, valid_until, accepted_at")
         .eq("slug", effectiveSlug)
         .maybeSingle();
 
@@ -158,6 +163,11 @@ export default function PublicStorefront() {
         // If already ordered, show that
         if (storefrontData.ordered_at) {
           setOrderPlaced(true);
+        }
+        
+        // Check if quote was already accepted
+        if (storefrontData.accepted_at) {
+          setQuoteAccepted(true);
         }
 
         // Fetch bundle items if it's a bundle
@@ -235,6 +245,28 @@ export default function PublicStorefront() {
     toast.success("Order placed! The seller will contact you soon.");
   };
 
+  const handleAcceptQuote = async () => {
+    if (!storefront) return;
+    
+    setAcceptingQuote(true);
+    try {
+      const { error } = await supabase
+        .from("storefronts")
+        .update({ accepted_at: new Date().toISOString() } as any)
+        .eq("id", storefront.id);
+      
+      if (error) throw error;
+      
+      setQuoteAccepted(true);
+      toast.success("Quote accepted! You can now proceed to order.");
+    } catch (error) {
+      console.error("Error accepting quote:", error);
+      toast.error("Failed to accept quote");
+    } finally {
+      setAcceptingQuote(false);
+    }
+  };
+
   // WhatsApp contact is no longer available on public storefront - seller phone is hidden for security
 
   if (loading) {
@@ -267,6 +299,8 @@ export default function PublicStorefront() {
 
   const isPaid = storefront?.status === "paid";
   const isBundle = storefront?.is_bundle && bundleItems.length > 0;
+  const isQuote = storefront?.mode === "quote";
+  const needsQuoteAcceptance = isQuote && !quoteAccepted && !orderPlaced && !isPaid;
 
   // Collect enabled payment methods
   const paymentMethods = [
@@ -288,6 +322,18 @@ export default function PublicStorefront() {
           ) : (
             <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
           )}
+          {isQuote && !quoteAccepted && !orderPlaced && !isPaid && (
+            <span className="flex items-center gap-1 text-sm font-medium text-attention">
+              <FileText className="w-4 h-4" />
+              Quote
+            </span>
+          )}
+          {isQuote && quoteAccepted && !orderPlaced && !isPaid && (
+            <span className="flex items-center gap-1 text-sm font-medium text-success">
+              <ThumbsUp className="w-4 h-4" />
+              Accepted
+            </span>
+          )}
           {isPaid && (
             <span className="flex items-center gap-1 text-sm font-medium text-success">
               <CheckCircle className="w-4 h-4" />
@@ -305,6 +351,31 @@ export default function PublicStorefront() {
 
       {/* Main content */}
       <main className="max-w-lg mx-auto p-4 pb-48">
+        {/* Quote banner */}
+        {isQuote && !quoteAccepted && !orderPlaced && !isPaid && (
+          <div className="bg-attention/10 border border-attention/30 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <FileText className="w-5 h-5 text-attention flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-foreground">This is a quote</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Review the details and accept this quote to proceed with your order.
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {isQuote && quoteAccepted && !orderPlaced && !isPaid && (
+          <div className="bg-success/10 border border-success/30 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <ThumbsUp className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-foreground">Quote accepted!</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                You can now proceed to place your order.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Hero section - different for bundles */}
         {isBundle ? (
           <div className="mb-6">
@@ -609,6 +680,16 @@ export default function PublicStorefront() {
               <ShoppingBag className="w-5 h-5" />
               Awaiting payment
             </div>
+          ) : needsQuoteAcceptance ? (
+            <Button
+              onClick={handleAcceptQuote}
+              disabled={acceptingQuote}
+              className="w-full py-6 text-lg gap-2 bg-attention hover:bg-attention/90"
+              size="lg"
+            >
+              <ThumbsUp className="w-5 h-5" />
+              {acceptingQuote ? "Accepting..." : "Accept Quote"}
+            </Button>
           ) : showCheckout ? (
             <div className="flex gap-2">
               <Button

@@ -43,6 +43,8 @@ interface StorefrontCardProps {
   isBundle?: boolean;
   orderKey?: string | null;
   paymentProofUrl?: string | null;
+  mode?: "invoice" | "quote";
+  acceptedAt?: string | null;
   delay?: number;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -70,6 +72,8 @@ export function StorefrontCard({
   isBundle = false,
   orderKey,
   paymentProofUrl,
+  mode = "invoice",
+  acceptedAt,
   delay = 0,
   onEdit,
   onDelete,
@@ -145,6 +149,11 @@ export function StorefrontCard({
             {isBundle && (
               <div className="absolute bottom-1 left-1 p-1 rounded-md bg-primary/90 text-primary-foreground">
                 <Package className="w-3 h-3" />
+              </div>
+            )}
+            {mode === "quote" && (
+              <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-attention/90 text-white">
+                Quote
               </div>
             )}
           </div>
