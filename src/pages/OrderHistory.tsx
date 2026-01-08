@@ -549,6 +549,31 @@ export default function OrderHistory() {
                         {item.customer_name}
                       </p>
                     )}
+                    {/* Quick contact info */}
+                    {(item.customer_phone || item.buyer_email) && (
+                      <div className="flex items-center gap-3 mt-1">
+                        {item.customer_phone && (
+                          <a
+                            href={`tel:${item.customer_phone}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span className="truncate max-w-[100px]">{item.customer_phone}</span>
+                          </a>
+                        )}
+                        {item.buyer_email && (
+                          <a
+                            href={`mailto:${item.buyer_email}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Mail className="w-3 h-3" />
+                            <span className="truncate max-w-[100px]">{item.buyer_email}</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1">
                       {getRelativeTime(item.created_at)}
                       {item.quantity > 1 && ` · ${item.quantity} items`}
