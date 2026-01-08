@@ -96,15 +96,15 @@ export default function Profile() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full h-auto flex-wrap gap-1 bg-muted/50 p-1">
+          <TabsList className="w-full h-auto grid grid-cols-3 sm:grid-cols-6 gap-2 bg-muted/30 backdrop-blur-sm p-2 rounded-2xl border border-border/50">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="flex-1 min-w-[80px] gap-1.5 text-xs sm:text-sm py-2"
+                className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm py-3 px-2 rounded-xl transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary hover:bg-background/50"
               >
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <tab.icon className="w-5 h-5" />
+                <span className="text-[10px] sm:text-sm font-medium">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
