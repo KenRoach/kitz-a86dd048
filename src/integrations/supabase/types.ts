@@ -246,6 +246,7 @@ export type Database = {
           is_active: boolean
           price: number
           title: string
+          type: string
           updated_at: string
           user_id: string
         }
@@ -258,6 +259,7 @@ export type Database = {
           is_active?: boolean
           price?: number
           title: string
+          type?: string
           updated_at?: string
           user_id: string
         }
@@ -270,6 +272,7 @@ export type Database = {
           is_active?: boolean
           price?: number
           title?: string
+          type?: string
           updated_at?: string
           user_id?: string
         }

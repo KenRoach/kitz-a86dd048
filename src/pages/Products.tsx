@@ -27,7 +27,9 @@ import {
   Loader2,
   Package,
   Wand2,
-  Zap
+  Zap,
+  Briefcase,
+  Calendar
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,9 +46,16 @@ interface Product {
   price: number;
   image_url: string | null;
   category: string | null;
+  type: string;
   is_active: boolean;
   created_at: string;
 }
+
+const PRODUCT_TYPES = [
+  { value: "product", label: "Product", labelEs: "Producto" },
+  { value: "service", label: "Service", labelEs: "Servicio" },
+  { value: "session", label: "Session/Workshop", labelEs: "Sesión/Taller" }
+];
 
 const CATEGORIES = [
   "Food & Beverages",
@@ -76,6 +85,7 @@ export default function Products() {
     description: "",
     price: "",
     category: "",
+    type: "product",
     keywords: ""
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -218,6 +228,7 @@ export default function Products() {
         description: formData.description.trim() || null,
         price: parseFloat(formData.price) || 0,
         category: formData.category || null,
+        type: formData.type || "product",
         image_url: imageUrl,
         user_id: user.id
       };
@@ -274,6 +285,7 @@ export default function Products() {
       description: product.description || "",
       price: product.price.toString(),
       category: product.category || "",
+      type: product.type || "product",
       keywords: ""
     });
     setImagePreview(product.image_url);
@@ -282,10 +294,23 @@ export default function Products() {
   };
 
   const resetForm = () => {
-    setFormData({ title: "", description: "", price: "", category: "", keywords: "" });
+    setFormData({ title: "", description: "", price: "", category: "", type: "product", keywords: "" });
     setImageFile(null);
     setImagePreview(null);
     setEditingProduct(null);
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "service": return Briefcase;
+      case "session": return Calendar;
+      default: return Package;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    const typeConfig = PRODUCT_TYPES.find(t => t.value === type);
+    return language === "es" ? typeConfig?.labelEs : typeConfig?.label;
   };
 
   const openNewDialog = () => {
@@ -403,9 +428,31 @@ export default function Products() {
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder={language === "es" ? "Nombre del producto" : "Product name"}
+                    placeholder={language === "es" ? "Nombre del producto o servicio" : "Product or service name"}
                     className="mt-1.5"
                   />
+                </div>
+
+                {/* Type */}
+                <div>
+                  <Label className="text-muted-foreground">
+                    {language === "es" ? "Tipo" : "Type"}
+                  </Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {language === "es" ? type.labelEs : type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Category */}
@@ -549,12 +596,20 @@ export default function Products() {
                       <Package className="w-12 h-12 text-muted-foreground/30" />
                     </div>
                   )}
-                  {/* Category badge */}
-                  {product.category && (
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur text-white text-xs rounded-full">
-                      {product.category}
-                    </span>
-                  )}
+                  {/* Type & Category badges */}
+                  <div className="absolute top-2 left-2 flex gap-1.5">
+                    {product.type && product.type !== "product" && (
+                      <span className="px-2 py-0.5 bg-primary/90 backdrop-blur text-primary-foreground text-xs rounded-full flex items-center gap-1">
+                        {product.type === "service" ? <Briefcase className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
+                        {getTypeLabel(product.type)}
+                      </span>
+                    )}
+                    {product.category && (
+                      <span className="px-2 py-0.5 bg-black/60 backdrop-blur text-white text-xs rounded-full">
+                        {product.category}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Content */}
