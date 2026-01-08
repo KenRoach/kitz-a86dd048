@@ -152,10 +152,24 @@
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
+  }
+
+  /* Better touch targets for mobile */
+  @media (max-width: 768px) {
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    input, textarea, select {
+      font-size: 16px !important; /* Prevents iOS zoom on focus */
+    }
   }
 }
 
@@ -338,6 +352,10 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -347,6 +365,11 @@
     display: none;
   }
 
+  /* Prevent overscroll bounce on iOS */
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
   /* Primary tint background utility */
   .bg-primary-tint {
     background-color: hsl(var(--primary-tint));
@@ -354,5 +377,20 @@
 
   .text-secondary-foreground {
     color: hsl(var(--secondary-foreground));
+  }
+
+  /* Mobile-optimized touch feedback */
+  .touch-feedback {
+    @apply transition-all duration-150 active:scale-[0.97] active:opacity-80;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-border/30;
+  }
+
+  /* Better focus states for mobile */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none;
   }
 }
