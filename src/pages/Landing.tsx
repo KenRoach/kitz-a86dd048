@@ -319,11 +319,37 @@ export default function Landing() {
         </div>
       </section>
 
-
-      <footer className="fixed bottom-0 left-0 right-0 py-4 px-4 text-center z-10">
-        <p className="text-xs text-white/60">
-          © 2025 kitz
-        </p>
+      {/* Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/20 to-transparent backdrop-blur-sm">
+        <div className="max-w-5xl mx-auto px-4 py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-4">
+              <span className="font-medium text-white/90 text-sm">kitz</span>
+              <span className="text-white/40 hidden sm:inline">·</span>
+              <span className="text-xs text-white/50">
+                {language === "en" ? "Simple tools for smart sellers" : "Herramientas simples para vendedores inteligentes"}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <a 
+                href="mailto:hello@kitz.app" 
+                className="text-xs text-white/50 hover:text-white/80 transition-colors"
+              >
+                {language === "en" ? "Contact" : "Contacto"}
+              </a>
+              <span className="text-white/30">·</span>
+              <Link 
+                to="/auth" 
+                className="text-xs text-white/50 hover:text-white/80 transition-colors"
+              >
+                {language === "en" ? "Sign in" : "Ingresar"}
+              </Link>
+              <span className="text-white/30">·</span>
+              <span className="text-xs text-white/40">© 2025</span>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
