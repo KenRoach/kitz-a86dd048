@@ -745,13 +745,13 @@ const translations: Record<Language, Translations> = {
     speaking: "Speaking...",
     askAboutBusiness: "Ask about your business...",
     
-    // 4DX Methodology
-    fourDxTitle: "4DX Goals",
-    wig: "WIG",
-    wigFull: "Wildly Important Goal",
-    leadMeasures: "Lead Measures",
+    // Goal Methodology
+    fourDxTitle: "Goals & Targets",
+    wig: "Main Goal",
+    wigFull: "Your Most Important Goal",
+    leadMeasures: "Key Activities",
     scoreboard: "Scoreboard",
-    cadence: "Cadence",
+    cadence: "Weekly Rhythm",
     setYourWig: "Set your goal",
     weeklyGoal: "Weekly goal",
     dailyGoal: "Daily goal",
@@ -1133,13 +1133,13 @@ const translations: Record<Language, Translations> = {
     speaking: "Hablando...",
     askAboutBusiness: "Pregunta sobre tu negocio...",
     
-    // 4DX Methodology
-    fourDxTitle: "Metas 4DX",
-    wig: "MCI",
-    wigFull: "Meta Crucialmente Importante",
-    leadMeasures: "Medidas de Predicción",
+    // Goal Methodology
+    fourDxTitle: "Metas y Objetivos",
+    wig: "Meta Principal",
+    wigFull: "Tu Meta Más Importante",
+    leadMeasures: "Actividades Clave",
     scoreboard: "Marcador",
-    cadence: "Cadencia",
+    cadence: "Ritmo Semanal",
     setYourWig: "Define tu meta",
     weeklyGoal: "Meta semanal",
     dailyGoal: "Meta diaria",

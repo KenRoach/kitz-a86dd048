@@ -138,7 +138,7 @@ export function AutopilotPanel() {
 
       {isEnabled && (
         <>
-          {/* 4DX Scoreboard */}
+          {/* Goals Scoreboard */}
           <Card className="border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
