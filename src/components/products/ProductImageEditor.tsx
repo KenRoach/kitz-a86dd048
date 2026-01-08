@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { Camera, X, Loader2, RotateCw, Check, ImagePlus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import ReactCrop, { type Crop as CropType, centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface ProductImageEditorProps {
   imagePreview: string | null;
@@ -13,6 +14,86 @@ interface ProductImageEditorProps {
   enhancing?: boolean;
   language?: "en" | "es";
 }
+
+interface ImageFilter {
+  id: string;
+  name: string;
+  nameEs: string;
+  css: string;
+  // Canvas filter values for final processing
+  brightness: number;
+  contrast: number;
+  saturate: number;
+  sepia: number;
+  grayscale: number;
+  hueRotate: number;
+}
+
+const IMAGE_FILTERS: ImageFilter[] = [
+  { 
+    id: "original", 
+    name: "Original", 
+    nameEs: "Original", 
+    css: "none",
+    brightness: 1, contrast: 1, saturate: 1, sepia: 0, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "vivid", 
+    name: "Vivid", 
+    nameEs: "Vívido", 
+    css: "saturate(1.4) contrast(1.1)",
+    brightness: 1, contrast: 1.1, saturate: 1.4, sepia: 0, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "warm", 
+    name: "Warm", 
+    nameEs: "Cálido", 
+    css: "sepia(0.3) saturate(1.2) brightness(1.05)",
+    brightness: 1.05, contrast: 1, saturate: 1.2, sepia: 0.3, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "cool", 
+    name: "Cool", 
+    nameEs: "Frío", 
+    css: "saturate(0.9) hue-rotate(15deg) brightness(1.05)",
+    brightness: 1.05, contrast: 1, saturate: 0.9, sepia: 0, grayscale: 0, hueRotate: 15
+  },
+  { 
+    id: "dramatic", 
+    name: "Dramatic", 
+    nameEs: "Dramático", 
+    css: "contrast(1.3) saturate(1.2) brightness(0.95)",
+    brightness: 0.95, contrast: 1.3, saturate: 1.2, sepia: 0, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "soft", 
+    name: "Soft", 
+    nameEs: "Suave", 
+    css: "contrast(0.9) brightness(1.1) saturate(0.9)",
+    brightness: 1.1, contrast: 0.9, saturate: 0.9, sepia: 0, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "bw", 
+    name: "B&W", 
+    nameEs: "B/N", 
+    css: "grayscale(1) contrast(1.1)",
+    brightness: 1, contrast: 1.1, saturate: 1, sepia: 0, grayscale: 1, hueRotate: 0
+  },
+  { 
+    id: "sepia", 
+    name: "Sepia", 
+    nameEs: "Sepia", 
+    css: "sepia(0.8) contrast(1.1)",
+    brightness: 1, contrast: 1.1, saturate: 1, sepia: 0.8, grayscale: 0, hueRotate: 0
+  },
+  { 
+    id: "fade", 
+    name: "Fade", 
+    nameEs: "Desvanecido", 
+    css: "saturate(0.7) contrast(0.85) brightness(1.1)",
+    brightness: 1.1, contrast: 0.85, saturate: 0.7, sepia: 0, grayscale: 0, hueRotate: 0
+  },
+];
 
 const COMPRESSION_MAX_DIMENSION = 1920;
 const COMPRESSION_QUALITY = 0.85;
@@ -30,10 +111,11 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
   );
 }
 
-async function getCroppedImage(
+async function getCroppedAndFilteredImage(
   imageSrc: string,
   crop: CropType,
-  rotation: number
+  rotation: number,
+  filter: ImageFilter
 ): Promise<Blob> {
   const image = new Image();
   image.src = imageSrc;
@@ -60,34 +142,23 @@ async function getCroppedImage(
     canvas.height = cropHeight;
   }
 
+  // Apply filter using canvas filter property
+  ctx.filter = `brightness(${filter.brightness}) contrast(${filter.contrast}) saturate(${filter.saturate}) sepia(${filter.sepia}) grayscale(${filter.grayscale}) hue-rotate(${filter.hueRotate}deg)`;
+
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate(radians);
   
-  if (isRotated90or270) {
-    ctx.drawImage(
-      image,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      -cropWidth / 2,
-      -cropHeight / 2,
-      cropWidth,
-      cropHeight
-    );
-  } else {
-    ctx.drawImage(
-      image,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      -cropWidth / 2,
-      -cropHeight / 2,
-      cropWidth,
-      cropHeight
-    );
-  }
+  ctx.drawImage(
+    image,
+    cropX,
+    cropY,
+    cropWidth,
+    cropHeight,
+    -cropWidth / 2,
+    -cropHeight / 2,
+    cropWidth,
+    cropHeight
+  );
 
   return new Promise((resolve) => {
     canvas.toBlob(
@@ -150,6 +221,7 @@ export function ProductImageEditor({
   const [editingImage, setEditingImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<CropType>();
   const [rotation, setRotation] = useState(0);
+  const [selectedFilter, setSelectedFilter] = useState<ImageFilter>(IMAGE_FILTERS[0]);
   const [processing, setProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -174,6 +246,7 @@ export function ProductImageEditor({
       setIsEditing(true);
       setRotation(0);
       setCrop(undefined);
+      setSelectedFilter(IMAGE_FILTERS[0]);
     };
     reader.readAsDataURL(file);
   };
@@ -193,7 +266,7 @@ export function ProductImageEditor({
     setProcessing(true);
 
     try {
-      const croppedBlob = await getCroppedImage(editingImage, crop, rotation);
+      const croppedBlob = await getCroppedAndFilteredImage(editingImage, crop, rotation, selectedFilter);
       const compressedBlob = await compressImage(croppedBlob);
       
       const reader = new FileReader();
@@ -208,6 +281,7 @@ export function ProductImageEditor({
       setEditingImage(null);
       setRotation(0);
       setCrop(undefined);
+      setSelectedFilter(IMAGE_FILTERS[0]);
       toast.success(language === "es" ? "¡Imagen lista!" : "Image ready!");
     } catch (error) {
       console.error("Processing error:", error);
@@ -222,6 +296,7 @@ export function ProductImageEditor({
     setEditingImage(null);
     setRotation(0);
     setCrop(undefined);
+    setSelectedFilter(IMAGE_FILTERS[0]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -230,7 +305,7 @@ export function ProductImageEditor({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Editing mode with crop and rotate
+  // Editing mode with crop, rotate, and filters
   if (isEditing && editingImage) {
     return (
       <div className="space-y-3 animate-fade-in">
@@ -254,21 +329,24 @@ export function ProductImageEditor({
         <div className="relative bg-muted rounded-xl overflow-hidden">
           <div 
             className="flex items-center justify-center p-2"
-            style={{ maxHeight: "300px" }}
+            style={{ maxHeight: "240px" }}
           >
             <ReactCrop
               crop={crop}
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               aspect={16 / 9}
-              className="max-h-[280px]"
+              className="max-h-[220px]"
             >
               <img
                 ref={imgRef}
                 src={editingImage}
                 alt="Edit preview"
                 onLoad={onImageLoad}
-                className="max-h-[280px] w-auto"
-                style={{ transform: `rotate(${rotation}deg)` }}
+                className="max-h-[220px] w-auto"
+                style={{ 
+                  transform: `rotate(${rotation}deg)`,
+                  filter: selectedFilter.css
+                }}
               />
             </ReactCrop>
           </div>
@@ -283,6 +361,42 @@ export function ProductImageEditor({
               </div>
             </div>
           )}
+        </div>
+
+        {/* Filter Gallery */}
+        <div className="space-y-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            {language === "es" ? "Filtros" : "Filters"}
+          </span>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-2 pb-2">
+              {IMAGE_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter)}
+                  disabled={processing}
+                  className={cn(
+                    "flex-shrink-0 flex flex-col items-center gap-1 p-1 rounded-lg transition-all",
+                    "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+                    selectedFilter.id === filter.id && "ring-2 ring-primary bg-primary/5"
+                  )}
+                >
+                  <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={editingImage}
+                      alt={filter.name}
+                      className="w-full h-full object-cover"
+                      style={{ filter: filter.css }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    {language === "es" ? filter.nameEs : filter.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
 
         <div className="flex gap-2">
@@ -307,8 +421,8 @@ export function ProductImageEditor({
 
         <p className="text-xs text-muted-foreground text-center">
           {language === "es" 
-            ? "Arrastra para recortar • Toca rotar para ajustar" 
-            : "Drag to crop • Tap rotate to adjust orientation"}
+            ? "Arrastra para recortar • Elige un filtro" 
+            : "Drag to crop • Choose a filter"}
         </p>
       </div>
     );
@@ -406,7 +520,7 @@ export function ProductImageEditor({
               {language === "es" ? "Clic para subir imagen" : "Click to upload image"}
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              {language === "es" ? "Podrás recortar y rotar" : "You can crop and rotate"}
+              {language === "es" ? "Recortar, rotar y filtros" : "Crop, rotate & filters"}
             </p>
           </div>
         )}
