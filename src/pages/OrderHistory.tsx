@@ -1,79 +1,124 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CustomerCard } from "@/components/crm/CustomerCard";
-import { CustomerProfile } from "@/components/crm/CustomerProfile";
-import { Search, Users, ShoppingBag, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { CustomersSkeleton } from "@/components/ui/dashboard-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
-interface Customer {
+type FilterType = "all" | "quotes" | "orders" | "cancelled";
+
+interface HistoryItem {
   id: string;
-  name: string;
-  phone: string | null;
-  email: string | null;
-  lifecycle: "lead" | "active" | "repeat";
-  tags: string[];
-  total_spent: number;
-  order_count: number;
-  last_interaction: string;
+  title: string;
+  price: number;
+  status: string;
+  mode: string;
+  customer_name: string | null;
   created_at: string;
+  paid_at: string | null;
+  ordered_at: string | null;
+  is_bundle: boolean;
+  quantity: number;
 }
 
 export default function OrderHistory() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<FilterType>("all");
 
   useEffect(() => {
-    if (user) fetchCustomers();
+    if (user) fetchHistory();
   }, [user]);
 
-  const fetchCustomers = async (isRefresh = false) => {
+  const fetchHistory = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     
     const { data, error } = await supabase
-      .from("customers")
-      .select("*")
-      .order("last_interaction", { ascending: false });
+      .from("storefronts")
+      .select("id, title, price, status, mode, customer_name, created_at, paid_at, ordered_at, is_bundle, quantity")
+      .in("status", ["sent", "paid", "cancelled"])
+      .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setCustomers(data.map(c => ({
-        ...c,
-        lifecycle: c.lifecycle as "lead" | "active" | "repeat",
-        tags: c.tags || []
-      })));
+      setItems(data);
     }
     setLoading(false);
     setRefreshing(false);
   };
 
   const handleRefresh = () => {
-    fetchCustomers(true);
+    fetchHistory(true);
   };
 
-  const filteredCustomers = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = items.filter((item) => {
+    // Apply search filter
+    const matchesSearch = 
+      item.title.toLowerCase().includes(search.toLowerCase()) ||
+      (item.customer_name?.toLowerCase().includes(search.toLowerCase()) ?? false);
+    
+    if (!matchesSearch) return false;
+
+    // Apply status filter
+    switch (filter) {
+      case "quotes":
+        return item.mode === "quote";
+      case "orders":
+        return item.status === "paid" || item.ordered_at !== null;
+      case "cancelled":
+        return item.status === "cancelled";
+      default:
+        return true;
+    }
+  });
+
+  const getStatusBadge = (item: HistoryItem) => {
+    if (item.status === "cancelled") {
+      return <Badge variant="destructive" className="text-xs">Cancelled</Badge>;
+    }
+    if (item.status === "paid") {
+      return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs">Paid</Badge>;
+    }
+    if (item.mode === "quote") {
+      return <Badge variant="secondary" className="text-xs">Quote</Badge>;
+    }
+    return <Badge variant="outline" className="text-xs">Sent</Badge>;
+  };
 
   const getRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} week${days >= 14 ? "s" : ""} ago`;
-    return `${Math.floor(days / 30)} month${days >= 60 ? "s" : ""} ago`;
+    if (days === 0) return language === "es" ? "Hoy" : "Today";
+    if (days === 1) return language === "es" ? "Ayer" : "Yesterday";
+    if (days < 7) return language === "es" ? `Hace ${days} días` : `${days} days ago`;
+    return format(date, "MMM d");
   };
+
+  const filterTabs: { key: FilterType; label: string; icon: typeof FileText }[] = [
+    { key: "all", label: language === "es" ? "Todo" : "All", icon: Clock },
+    { key: "quotes", label: language === "es" ? "Cotizaciones" : "Quotes", icon: FileText },
+    { key: "orders", label: language === "es" ? "Pedidos" : "Orders", icon: ShoppingBag },
+    { key: "cancelled", label: language === "es" ? "Cancelados" : "Cancelled", icon: XCircle },
+  ];
+
+  const getCounts = () => ({
+    all: items.length,
+    quotes: items.filter(i => i.mode === "quote").length,
+    orders: items.filter(i => i.status === "paid" || i.ordered_at !== null).length,
+    cancelled: items.filter(i => i.status === "cancelled").length,
+  });
+
+  const counts = getCounts();
 
   return (
     <AppLayout>
@@ -81,8 +126,12 @@ export default function OrderHistory() {
         {/* Header */}
         <div className="flex items-start justify-between animate-fade-in">
           <div>
-            <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
-            <p className="text-xs md:text-base text-muted-foreground mt-0.5">{t.orderHistoryDesc}</p>
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">
+              {language === "es" ? "Historial" : "History"}
+            </h1>
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5">
+              {language === "es" ? "Cotizaciones, pedidos y cancelaciones" : "Quotes, orders and cancellations"}
+            </p>
           </div>
           <Button
             variant="outline"
@@ -95,13 +144,34 @@ export default function OrderHistory() {
           </Button>
         </div>
 
+        {/* Filter Tabs */}
+        <div className="flex gap-2 overflow-x-auto pb-1 animate-fade-in" style={{ animationDelay: "30ms" }}>
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                filter === tab.key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+              <span className={`ml-1 text-xs ${filter === tab.key ? "opacity-80" : "opacity-60"}`}>
+                ({counts[tab.key]})
+              </span>
+            </button>
+          ))}
+        </div>
+
         {/* Search */}
-        {customers.length > 0 && (
+        {items.length > 0 && (
           <div className="relative animate-fade-in" style={{ animationDelay: "50ms" }}>
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder={t.searchCustomers}
+              placeholder={language === "es" ? "Buscar por título o cliente..." : "Search by title or customer..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -110,68 +180,82 @@ export default function OrderHistory() {
         )}
 
         {/* Loading */}
-        {loading && <CustomersSkeleton />}
+        {loading && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
+            ))}
+          </div>
+        )}
 
-        {!loading && customers.length === 0 && (
+        {/* Empty State */}
+        {!loading && items.length === 0 && (
           <EmptyState
             icon={ShoppingBag}
-            title={t.noCustomersYet}
-            description={t.customersAppearAuto}
+            title={language === "es" ? "Sin historial aún" : "No history yet"}
+            description={language === "es" 
+              ? "Aquí aparecerán tus cotizaciones y pedidos" 
+              : "Your quotes and orders will appear here"}
             tips={
               language === "es" 
                 ? [
-                    "Crea y comparte una vitrina para empezar",
-                    "Los clientes se agregan cuando llegan pedidos",
-                    "Rastrea gastos, pedidos e interacciones"
+                    "Crea y envía vitrinas para empezar",
+                    "Los pedidos pagados aparecen automáticamente",
+                    "Las cotizaciones se registran aquí"
                   ]
                 : [
-                    "Create and share a storefront to get started",
-                    "Customers are added when orders come in",
-                    "Track spending, orders, and engagement"
+                    "Create and send storefronts to get started",
+                    "Paid orders appear automatically",
+                    "Quotes are tracked here"
                   ]
             }
           />
         )}
 
-        {/* Customer list */}
-        {!loading && filteredCustomers.length > 0 && (
+        {/* History List */}
+        {!loading && filteredItems.length > 0 && (
           <div className="space-y-3">
-            {filteredCustomers.map((customer, index) => (
-              <CustomerCard
-                key={customer.id}
-                id={customer.id}
-                name={customer.name}
-                lastInteraction={getRelativeTime(customer.last_interaction)}
-                totalSpent={`$${customer.total_spent.toFixed(2)}`}
-                lifecycle={customer.lifecycle}
-                tags={customer.tags}
-                delay={index * 50}
-                onClick={() => setSelectedCustomer(customer)}
-              />
+            {filteredItems.map((item, index) => (
+              <div
+                key={item.id}
+                className="bg-card border border-border rounded-xl p-4 animate-fade-in"
+                style={{ animationDelay: `${index * 30}ms` }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-foreground truncate">{item.title}</h3>
+                      {getStatusBadge(item)}
+                    </div>
+                    {item.customer_name && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        {item.customer_name}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {getRelativeTime(item.created_at)}
+                      {item.quantity > 1 && ` · ${item.quantity} items`}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-semibold text-foreground">${item.price.toFixed(2)}</p>
+                    {item.is_bundle && (
+                      <p className="text-xs text-muted-foreground">Bundle</p>
+                    )}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
 
         {/* No search results */}
-        {!loading && customers.length > 0 && filteredCustomers.length === 0 && (
+        {!loading && items.length > 0 && filteredItems.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            No customers match "{search}"
+            {language === "es" 
+              ? `No hay resultados para "${search || filter}"` 
+              : `No results for "${search || filter}"`}
           </div>
-        )}
-
-        {/* Customer profile drawer */}
-        {selectedCustomer && (
-          <>
-            <div className="fixed inset-0 bg-foreground/20 z-40" onClick={() => setSelectedCustomer(null)} />
-            <CustomerProfile
-              customer={{
-                ...selectedCustomer,
-                orders: selectedCustomer.order_count,
-                history: [] // Will be populated from activity_log in future
-              }}
-              onClose={() => setSelectedCustomer(null)}
-            />
-          </>
         )}
       </div>
     </AppLayout>
