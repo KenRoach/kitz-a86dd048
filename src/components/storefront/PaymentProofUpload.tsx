@@ -190,7 +190,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture
         onChange={handleFileSelect}
         className="hidden"
       />
