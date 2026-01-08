@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -5,28 +6,42 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useAutopilot, AutopilotOpportunity } from "@/hooks/useAutopilot";
+import { use4DX } from "@/hooks/use4DX";
 import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Bot, Zap, Store, Users, Play, Loader2, 
   CheckCircle, Clock, AlertCircle, Sparkles,
-  RefreshCw
+  RefreshCw, Target, TrendingUp, Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AutopilotPanel() {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     settings,
     actions,
     opportunities,
-    loading,
+    loading: autopilotLoading,
     analyzing,
     updateSettings,
     analyzeOpportunities,
     executeAction,
   } = useAutopilot();
+
+  const {
+    goals,
+    leadMeasures,
+    wigProgress,
+    loading: goalsLoading,
+    updateGoals,
+  } = use4DX();
+
+  const loading = autopilotLoading || goalsLoading;
 
   if (loading) {
     return (
@@ -38,6 +53,31 @@ export function AutopilotPanel() {
   }
 
   const isEnabled = settings?.enabled || false;
+
+  const getProgressStatus = () => {
+    if (!wigProgress) return { text: t.onTrack, color: "text-muted-foreground" };
+    if (wigProgress.percentage >= 100) return { text: t.aheadOfPace, color: "text-green-600" };
+    
+    // Calculate expected progress based on period
+    const now = new Date();
+    let expectedPercent = 50; // Default to 50% for simplicity
+    
+    if (goals?.wig_period === 'weekly') {
+      const dayOfWeek = now.getDay() || 7;
+      expectedPercent = (dayOfWeek / 7) * 100;
+    } else if (goals?.wig_period === 'monthly') {
+      const dayOfMonth = now.getDate();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      expectedPercent = (dayOfMonth / daysInMonth) * 100;
+    }
+    
+    if (wigProgress.percentage >= expectedPercent) {
+      return { text: t.onTrack, color: "text-green-600" };
+    }
+    return { text: t.behindPace, color: "text-amber-600" };
+  };
+
+  const progressStatus = getProgressStatus();
 
   return (
     <div className="space-y-6">
@@ -86,6 +126,161 @@ export function AutopilotPanel() {
 
       {isEnabled && (
         <>
+          {/* 4DX Scoreboard */}
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                <CardTitle className="text-base">{t.fourDxTitle}</CardTitle>
+              </div>
+              <CardDescription>{t.wigFull}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* WIG Configuration */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">{t.target}</Label>
+                  <div className="flex gap-2">
+                    <span className="text-muted-foreground self-center">$</span>
+                    <Input
+                      type="number"
+                      value={goals?.wig_target || 500}
+                      onChange={(e) => updateGoals({ wig_target: Number(e.target.value) })}
+                      className="w-24"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">{t.period}</Label>
+                  <Select
+                    value={goals?.wig_period || 'weekly'}
+                    onValueChange={(v) => updateGoals({ wig_period: v as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">{t.daily}</SelectItem>
+                      <SelectItem value="weekly">{t.weekly}</SelectItem>
+                      <SelectItem value="monthly">{t.monthly}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">{language === "es" ? "Tipo" : "Type"}</Label>
+                  <Select
+                    value={goals?.wig_type || 'revenue'}
+                    onValueChange={(v) => updateGoals({ wig_type: v as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="revenue">{t.revenue}</SelectItem>
+                      <SelectItem value="orders">{t.newOrders}</SelectItem>
+                      <SelectItem value="customers">{t.newCustomers}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Visual Scoreboard */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">
+                      {goals?.wig_type === 'revenue' ? '$' : ''}
+                      {wigProgress?.current.toLocaleString() || 0}
+                      <span className="text-muted-foreground">
+                        {' / '}
+                        {goals?.wig_type === 'revenue' ? '$' : ''}
+                        {wigProgress?.target.toLocaleString() || 0}
+                      </span>
+                    </span>
+                  </div>
+                  <Badge variant="outline" className={progressStatus.color}>
+                    {progressStatus.text}
+                  </Badge>
+                </div>
+                <Progress 
+                  value={wigProgress?.percentage || 0} 
+                  className="h-4" 
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  {Math.round(wigProgress?.percentage || 0)}% {t.ofTarget}
+                </p>
+              </div>
+
+              {/* Lead Measures */}
+              <div className="border-t pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{t.leadMeasures}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">{t.activitiesThatDriveResults}</p>
+                
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {/* Storefronts Lead Measure */}
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Store className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium">{t.storefrontsCreated}</span>
+                      </div>
+                      <span className="text-sm font-bold">
+                        {leadMeasures?.storefrontsCreated || 0}/{goals?.storefronts_target || 5}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={((leadMeasures?.storefrontsCreated || 0) / (goals?.storefronts_target || 5)) * 100} 
+                      className="h-2" 
+                    />
+                    <div className="mt-2">
+                      <Slider
+                        value={[goals?.storefronts_target || 5]}
+                        onValueChange={([v]) => updateGoals({ storefronts_target: v })}
+                        min={1}
+                        max={20}
+                        step={1}
+                        className="mt-1"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1">{t.target}: {goals?.storefronts_target || 5}</p>
+                    </div>
+                  </div>
+
+                  {/* Follow-ups Lead Measure */}
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium">{t.followupsCompleted}</span>
+                      </div>
+                      <span className="text-sm font-bold">
+                        {leadMeasures?.followupsCompleted || 0}/{goals?.followups_target || 10}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={((leadMeasures?.followupsCompleted || 0) / (goals?.followups_target || 10)) * 100} 
+                      className="h-2" 
+                    />
+                    <div className="mt-2">
+                      <Slider
+                        value={[goals?.followups_target || 10]}
+                        onValueChange={([v]) => updateGoals({ followups_target: v })}
+                        min={1}
+                        max={30}
+                        step={1}
+                        className="mt-1"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1">{t.target}: {goals?.followups_target || 10}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Action Settings */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Storefront Creation */}
@@ -353,6 +548,3 @@ function OpportunityCard({
     </div>
   );
 }
-
-// Need to import useState for the inner component
-import { useState } from "react";

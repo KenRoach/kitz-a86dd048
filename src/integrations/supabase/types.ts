@@ -646,6 +646,45 @@ export type Database = {
           },
         ]
       }
+      user_goals: {
+        Row: {
+          created_at: string
+          followups_target: number
+          id: string
+          period_start: string
+          storefronts_target: number
+          updated_at: string
+          user_id: string
+          wig_period: string
+          wig_target: number
+          wig_type: string
+        }
+        Insert: {
+          created_at?: string
+          followups_target?: number
+          id?: string
+          period_start?: string
+          storefronts_target?: number
+          updated_at?: string
+          user_id: string
+          wig_period?: string
+          wig_target?: number
+          wig_type?: string
+        }
+        Update: {
+          created_at?: string
+          followups_target?: number
+          id?: string
+          period_start?: string
+          storefronts_target?: number
+          updated_at?: string
+          user_id?: string
+          wig_period?: string
+          wig_target?: number
+          wig_type?: string
+        }
+        Relationships: []
+      }
       user_stats: {
         Row: {
           created_at: string
