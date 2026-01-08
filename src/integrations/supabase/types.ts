@@ -409,6 +409,7 @@ export type Database = {
       }
       storefronts: {
         Row: {
+          accepted_at: string | null
           buyer_email: string | null
           buyer_name: string | null
           buyer_note: string | null
@@ -422,6 +423,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_bundle: boolean
+          mode: string
           order_key: string | null
           ordered_at: string | null
           payment_cards: boolean | null
@@ -437,8 +439,10 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          valid_until: string | null
         }
         Insert: {
+          accepted_at?: string | null
           buyer_email?: string | null
           buyer_name?: string | null
           buyer_note?: string | null
@@ -452,6 +456,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_bundle?: boolean
+          mode?: string
           order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
@@ -467,8 +472,10 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          valid_until?: string | null
         }
         Update: {
+          accepted_at?: string | null
           buyer_email?: string | null
           buyer_name?: string | null
           buyer_note?: string | null
@@ -482,6 +489,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_bundle?: boolean
+          mode?: string
           order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
@@ -497,6 +505,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -644,12 +653,14 @@ export type Database = {
       }
       public_storefronts: {
         Row: {
+          accepted_at: string | null
           customer_name: string | null
           description: string | null
           fulfillment_note: string | null
           id: string | null
           image_url: string | null
           is_bundle: boolean | null
+          mode: string | null
           order_key: string | null
           ordered_at: string | null
           payment_cards: boolean | null
@@ -662,14 +673,17 @@ export type Database = {
           status: string | null
           title: string | null
           user_id: string | null
+          valid_until: string | null
         }
         Insert: {
+          accepted_at?: string | null
           customer_name?: string | null
           description?: string | null
           fulfillment_note?: string | null
           id?: string | null
           image_url?: string | null
           is_bundle?: boolean | null
+          mode?: string | null
           order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
@@ -682,14 +696,17 @@ export type Database = {
           status?: string | null
           title?: string | null
           user_id?: string | null
+          valid_until?: string | null
         }
         Update: {
+          accepted_at?: string | null
           customer_name?: string | null
           description?: string | null
           fulfillment_note?: string | null
           id?: string | null
           image_url?: string | null
           is_bundle?: boolean | null
+          mode?: string | null
           order_key?: string | null
           ordered_at?: string | null
           payment_cards?: boolean | null
@@ -702,6 +719,7 @@ export type Database = {
           status?: string | null
           title?: string | null
           user_id?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }
