@@ -141,6 +141,37 @@ interface Translations {
   goToDashboard: string;
   invalidResetLink: string;
   linkExpired: string;
+  
+  // Storefront Wizard
+  whatTypeOfOrder: string;
+  chooseHowToSell: string;
+  singleItem: string;
+  oneProductOrService: string;
+  bundle: string;
+  multipleItemsTogether: string;
+  continueBtn: string;
+  createYourBundle: string;
+  addItemsToPackage: string;
+  bundleName: string;
+  whatAreYouSelling: string;
+  pickFromCatalog: string;
+  fromCatalog: string;
+  manualEntry: string;
+  title: string;
+  aiSuggest: string;
+  price: string;
+  quantity: string;
+  description: string;
+  addPhoto: string;
+  changePhoto: string;
+  reviewOrder: string;
+  readyToCreate: string;
+  invoice: string;
+  quote: string;
+  saveAsDraft: string;
+  createAndShare: string;
+  creating: string;
+  back: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -273,6 +304,37 @@ const translations: Record<Language, Translations> = {
     goToDashboard: "Go to dashboard",
     invalidResetLink: "Invalid or expired link",
     linkExpired: "This password reset link is no longer valid. Please request a new one.",
+    
+    // Storefront Wizard
+    whatTypeOfOrder: "What type of order?",
+    chooseHowToSell: "Choose how you want to sell",
+    singleItem: "Single item",
+    oneProductOrService: "One product or service",
+    bundle: "Bundle",
+    multipleItemsTogether: "Multiple items together",
+    continueBtn: "Continue",
+    createYourBundle: "Create your bundle",
+    addItemsToPackage: "Add items to your package",
+    bundleName: "Bundle name",
+    whatAreYouSelling: "What are you selling?",
+    pickFromCatalog: "Pick from catalog or enter manually",
+    fromCatalog: "From catalog",
+    manualEntry: "Manual entry",
+    title: "Title",
+    aiSuggest: "AI Suggest",
+    price: "Price",
+    quantity: "Quantity",
+    description: "Description",
+    addPhoto: "Add photo",
+    changePhoto: "Change",
+    reviewOrder: "Review your order",
+    readyToCreate: "Ready to create",
+    invoice: "Invoice",
+    quote: "Quote",
+    saveAsDraft: "Save as draft",
+    createAndShare: "Create & Share",
+    creating: "Creating...",
+    back: "Back",
   },
   es: {
     goodMorning: "Buenos días",
@@ -403,6 +465,37 @@ const translations: Record<Language, Translations> = {
     goToDashboard: "Ir al dashboard",
     invalidResetLink: "Enlace inválido o expirado",
     linkExpired: "Este enlace ya no es válido. Por favor solicita uno nuevo.",
+    
+    // Storefront Wizard
+    whatTypeOfOrder: "¿Qué tipo de pedido?",
+    chooseHowToSell: "Elige cómo quieres vender",
+    singleItem: "Artículo único",
+    oneProductOrService: "Un producto o servicio",
+    bundle: "Paquete",
+    multipleItemsTogether: "Varios artículos juntos",
+    continueBtn: "Continuar",
+    createYourBundle: "Crea tu paquete",
+    addItemsToPackage: "Agrega artículos a tu paquete",
+    bundleName: "Nombre del paquete",
+    whatAreYouSelling: "¿Qué estás vendiendo?",
+    pickFromCatalog: "Elige del catálogo o ingresa manualmente",
+    fromCatalog: "Del catálogo",
+    manualEntry: "Manual",
+    title: "Título",
+    aiSuggest: "Sugerir con IA",
+    price: "Precio",
+    quantity: "Cantidad",
+    description: "Descripción",
+    addPhoto: "Agregar foto",
+    changePhoto: "Cambiar",
+    reviewOrder: "Revisa tu pedido",
+    readyToCreate: "Listo para crear",
+    invoice: "Factura",
+    quote: "Cotización",
+    saveAsDraft: "Guardar borrador",
+    createAndShare: "Crear y compartir",
+    creating: "Creando...",
+    back: "Volver",
   },
 };
 
