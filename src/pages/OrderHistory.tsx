@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail, Copy, CheckCircle, MessageSquare, Copy as Duplicate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfWeek, startOfMonth } from "date-fns";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type FilterType = "all" | "sent" | "quotes" | "orders" | "cancelled";
 
@@ -35,12 +37,15 @@ interface HistoryItem {
 export default function OrderHistory() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+  const [markingPaid, setMarkingPaid] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   useEffect(() => {
     if (user) fetchHistory();
@@ -64,6 +69,73 @@ export default function OrderHistory() {
 
   const handleRefresh = () => {
     fetchHistory(true);
+  };
+
+  const getStorefrontUrl = (slug: string) => {
+    return `${window.location.origin}/s/${slug}`;
+  };
+
+  const handleCopyLink = async (item: HistoryItem) => {
+    const url = getStorefrontUrl(item.slug);
+    await navigator.clipboard.writeText(url);
+    toast.success(language === "es" ? "Enlace copiado" : "Link copied");
+  };
+
+  const handleShareWhatsApp = (item: HistoryItem) => {
+    const url = getStorefrontUrl(item.slug);
+    const text = language === "es" 
+      ? `Hola! Aquí está tu pedido: ${item.title} - $${item.price.toFixed(2)}\n${url}`
+      : `Hi! Here's your order: ${item.title} - $${item.price.toFixed(2)}\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleMarkAsPaid = async (item: HistoryItem) => {
+    setMarkingPaid(true);
+    const { error } = await supabase
+      .from("storefronts")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", item.id);
+
+    if (error) {
+      toast.error(language === "es" ? "Error al marcar como pagado" : "Failed to mark as paid");
+    } else {
+      toast.success(language === "es" ? "Marcado como pagado" : "Marked as paid");
+      setSelectedItem({ ...item, status: "paid", paid_at: new Date().toISOString() });
+      fetchHistory();
+    }
+    setMarkingPaid(false);
+  };
+
+  const handleDuplicate = async (item: HistoryItem) => {
+    if (!user) return;
+    setDuplicating(true);
+
+    const newSlug = `${item.slug.split("-")[0]}-${Date.now()}`;
+    
+    const { data, error } = await supabase
+      .from("storefronts")
+      .insert({
+        user_id: user.id,
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        image_url: item.image_url,
+        quantity: item.quantity,
+        is_bundle: item.is_bundle,
+        mode: item.mode,
+        status: "draft",
+        slug: newSlug,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      toast.error(language === "es" ? "Error al duplicar" : "Failed to duplicate");
+    } else {
+      toast.success(language === "es" ? "Vitrina duplicada como borrador" : "Storefront duplicated as draft");
+      navigate("/storefronts");
+    }
+    setDuplicating(false);
   };
 
   const filteredItems = items.filter((item) => {
@@ -443,6 +515,65 @@ export default function OrderHistory() {
                       <p className="text-foreground">{language === "es" ? "Sí" : "Yes"}</p>
                     </div>
                   )}
+                </div>
+
+                {/* Quick Actions */}
+                <div className="border-t border-border pt-4 space-y-2">
+                  <h4 className="font-medium text-foreground text-sm mb-3">{language === "es" ? "Acciones" : "Actions"}</h4>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Copy Link */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyLink(selectedItem)}
+                      className="w-full"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      {language === "es" ? "Copiar enlace" : "Copy link"}
+                    </Button>
+
+                    {/* Share WhatsApp */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShareWhatsApp(selectedItem)}
+                      className="w-full"
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      WhatsApp
+                    </Button>
+
+                    {/* Mark as Paid - only for sent items */}
+                    {selectedItem.status === "sent" && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleMarkAsPaid(selectedItem)}
+                        disabled={markingPaid}
+                        className="w-full"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {markingPaid 
+                          ? (language === "es" ? "Marcando..." : "Marking...") 
+                          : (language === "es" ? "Marcar pagado" : "Mark paid")}
+                      </Button>
+                    )}
+
+                    {/* Duplicate */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDuplicate(selectedItem)}
+                      disabled={duplicating}
+                      className="w-full"
+                    >
+                      <Duplicate className="w-4 h-4 mr-2" />
+                      {duplicating 
+                        ? (language === "es" ? "Duplicando..." : "Duplicating...") 
+                        : (language === "es" ? "Duplicar" : "Duplicate")}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
