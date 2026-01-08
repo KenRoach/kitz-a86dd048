@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import PublicStorefront from "./pages/PublicStorefront";
 import PublicProfile from "./pages/PublicProfile";
+import Suggestions from "./pages/Suggestions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +89,7 @@ function AppRoutes() {
       <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
       <Route path="/s/:slug" element={<PublicStorefront />} />
       <Route path="/p/:profileId" element={<PublicProfile />} />
       <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
