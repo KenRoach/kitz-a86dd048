@@ -21,10 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IntegrationsSection } from "@/components/admin/IntegrationsSection";
-import { AutopilotPanel } from "@/components/autopilot/AutopilotPanel";
-import { useState as useStateReact } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -393,23 +390,8 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Tabs for Settings vs Autopilot */}
-        <Tabs defaultValue="settings" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="settings">
-              {language === "es" ? "Configuración" : "Settings"}
-            </TabsTrigger>
-            <TabsTrigger value="autopilot" className="gap-2">
-              <Bot className="w-4 h-4" />
-              {language === "es" ? "Modo IA" : "AI Mode"}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="autopilot" className="mt-0">
-            <AutopilotPanel />
-          </TabsContent>
-
-          <TabsContent value="settings" className="mt-0 space-y-3 md:space-y-6">
+        {/* Settings Content */}
+        <div className="space-y-3 md:space-y-6">
             {/* Brand Section */}
             <section className="neu-card-flat p-6 space-y-5 animate-fade-in">
               <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.brand}</h2>
@@ -885,8 +867,7 @@ export default function Admin() {
             {saving ? t.saving : t.saveAllChanges}
           </Button>
         </div>
-          </TabsContent>
-        </Tabs>
+      </div>
       </div>
     </AppLayout>
   );
