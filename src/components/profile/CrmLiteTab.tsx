@@ -350,7 +350,7 @@ export function CrmLiteTab() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{language === "es" ? "Teléfono" : "Phone"}</Label>
+                <Label>WhatsApp</Label>
                 <Input
                   type="tel"
                   placeholder="+507..."
