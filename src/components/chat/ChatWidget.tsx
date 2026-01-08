@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type Message = {
   role: "user" | "assistant";
@@ -11,6 +12,7 @@ type Message = {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-support`;
 
 export function ChatWidget() {
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -105,7 +107,7 @@ export function ChatWidget() {
         ...prev,
         {
           role: "assistant",
-          content: "Lo siento, hubo un error. Por favor intente de nuevo.",
+          content: t.error + ". " + (language === "es" ? "Por favor intente de nuevo." : "Please try again."),
         },
       ]);
     } finally {
@@ -129,7 +131,7 @@ export function ChatWidget() {
           "fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 md:bottom-6",
           isOpen && "hidden"
         )}
-        aria-label="Abrir chat de soporte"
+        aria-label={t.openChat}
       >
         <MessageCircle className="h-6 w-6" />
       </button>
@@ -144,13 +146,13 @@ export function ChatWidget() {
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-primary px-4 py-3 text-primary-foreground md:rounded-t-2xl">
           <div>
-            <h3 className="font-semibold">Soporte</h3>
-            <p className="text-xs opacity-80">Respuestas instantáneas 24/7</p>
+            <h3 className="font-semibold">{t.support}</h3>
+            <p className="text-xs opacity-80">{t.instantReplies}</p>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="rounded-full p-1 hover:bg-primary-foreground/20"
-            aria-label="Cerrar chat"
+            aria-label={t.closeChat}
           >
             <X className="h-5 w-5" />
           </button>
@@ -160,9 +162,8 @@ export function ChatWidget() {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 && (
             <div className="text-center text-muted-foreground text-sm py-8">
-              <p className="mb-2">👋 ¡Hola!</p>
-              <p>¿En qué puedo ayudarle hoy?</p>
-              <p className="text-xs mt-2 opacity-70">How can I help you today?</p>
+              <p className="mb-2">👋 {t.chatGreeting}</p>
+              <p>{t.howCanIHelp}</p>
             </div>
           )}
           {messages.map((msg, i) => (
@@ -181,7 +182,7 @@ export function ChatWidget() {
           {isLoading && messages[messages.length - 1]?.role === "user" && (
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Escribiendo...</span>
+              <span>{t.typing}</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -196,7 +197,7 @@ export function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Escriba su pregunta..."
+              placeholder={t.typeQuestion}
               className="flex-1 rounded-full border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               disabled={isLoading}
             />
