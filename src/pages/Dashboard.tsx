@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MomentumScore } from "@/components/dashboard/MomentumScore";
 import { AttentionCard } from "@/components/dashboard/AttentionCard";
@@ -12,6 +12,8 @@ import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -80,7 +82,7 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const { data: sfData } = await supabase
       .from("storefronts")
       .select("*")
@@ -104,7 +106,17 @@ export default function Dashboard() {
     }
 
     setLoading(false);
-  };
+  }, []);
+
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await fetchData();
+    toast.success(language === "es" ? "Actualizado" : "Refreshed");
+  }, [fetchData, language]);
+
+  const { containerRef, isPulling, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
 
   const paidStorefronts = storefronts.filter(s => s.status === "paid");
   const draftStorefronts = storefronts.filter(s => s.status === "draft");
@@ -219,7 +231,15 @@ export default function Dashboard() {
       <ProfileSetupWizard open={showProfileSetup} onComplete={handleProfileSetupComplete} />
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
       
-      <div className="space-y-6">
+      <div ref={containerRef} className="relative">
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          progress={progress}
+          isRefreshing={isRefreshing}
+          isPulling={isPulling}
+        />
+        
+        <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -346,6 +366,7 @@ export default function Dashboard() {
             ]}
           />
         )}
+        </div>
       </div>
       
       <BusinessAdvisor />
