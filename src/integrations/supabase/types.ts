@@ -424,6 +424,7 @@ export type Database = {
           payment_cards: boolean | null
           payment_cash: boolean | null
           payment_pluxee: boolean | null
+          payment_proof_url: string | null
           payment_yappy: boolean | null
           price: number
           quantity: number | null
@@ -453,6 +454,7 @@ export type Database = {
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null
+          payment_proof_url?: string | null
           payment_yappy?: boolean | null
           price: number
           quantity?: number | null
@@ -482,6 +484,7 @@ export type Database = {
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null
+          payment_proof_url?: string | null
           payment_yappy?: boolean | null
           price?: number
           quantity?: number | null
