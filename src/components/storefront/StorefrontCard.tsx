@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash, RotateCcw } from "lucide-react";
+import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash, RotateCcw, Receipt, X, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export type StorefrontStatus = "draft" | "sent" | "paid";
 
@@ -41,6 +42,7 @@ interface StorefrontCardProps {
   buyerName?: string | null;
   isBundle?: boolean;
   orderKey?: string | null;
+  paymentProofUrl?: string | null;
   delay?: number;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -67,6 +69,7 @@ export function StorefrontCard({
   buyerName,
   isBundle = false,
   orderKey,
+  paymentProofUrl,
   delay = 0,
   onEdit,
   onDelete,
@@ -76,6 +79,7 @@ export function StorefrontCard({
 }: StorefrontCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [proofDialogOpen, setProofDialogOpen] = useState(false);
 
   const handleCopyLink = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -97,7 +101,6 @@ export function StorefrontCard({
 
   const handleInstagramShare = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    // Instagram doesn't have a direct share URL, so we copy the link and inform the user
     if (link) {
       navigator.clipboard.writeText(link);
       toast.success("Link copied! Paste it in your Instagram DM.");
@@ -114,7 +117,6 @@ export function StorefrontCard({
           url: link,
         });
       } catch (err) {
-        // User cancelled or error
         handleCopyLink();
       }
     } else {
@@ -124,6 +126,7 @@ export function StorefrontCard({
 
   const StatusIcon = statusConfig[status].icon;
   const hasOrder = !!buyerName;
+  const hasPaymentProof = !!paymentProofUrl;
 
   return (
     <>
@@ -193,6 +196,12 @@ export function StorefrontCard({
                         Mark as paid
                       </DropdownMenuItem>
                     )}
+                    {hasPaymentProof && (
+                      <DropdownMenuItem onClick={() => setProofDialogOpen(true)}>
+                        <Receipt className="w-4 h-4 mr-2 text-action" />
+                        View payment proof
+                      </DropdownMenuItem>
+                    )}
                     {link && status !== "draft" && (
                       <>
                         <DropdownMenuItem onClick={() => handleWhatsAppShare()}>
@@ -242,7 +251,7 @@ export function StorefrontCard({
                   <span className="sm:hidden">Send</span>
                 </button>
               )}
-              {status === "sent" && link && (
+              {status === "sent" && !hasPaymentProof && link && (
                 <div className="flex gap-1">
                   <button 
                     onClick={handleWhatsAppShare} 
@@ -267,6 +276,16 @@ export function StorefrontCard({
                   </button>
                 </div>
               )}
+              {/* Payment proof indicator with verify button */}
+              {status === "sent" && hasPaymentProof && (
+                <button 
+                  onClick={() => setProofDialogOpen(true)}
+                  className="flex items-center gap-1.5 text-[10px] sm:text-xs font-medium bg-action/10 hover:bg-action/20 text-action px-2 py-1 sm:px-3 sm:py-1.5 rounded-full transition-colors"
+                >
+                  <Receipt className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>View proof</span>
+                </button>
+              )}
               {status === "paid" && (
                 <button 
                   onClick={onReorder}
@@ -280,6 +299,68 @@ export function StorefrontCard({
           </div>
         </div>
       </div>
+
+      {/* Payment Proof Dialog */}
+      <Dialog open={proofDialogOpen} onOpenChange={setProofDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-action" />
+              Payment Proof
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Order info */}
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+              <div>
+                <p className="font-medium text-foreground">{title}</p>
+                {buyerName && <p className="text-sm text-muted-foreground">From: {buyerName}</p>}
+              </div>
+              <span className="text-lg font-bold text-foreground">{price}</span>
+            </div>
+            
+            {/* Proof image */}
+            {paymentProofUrl && (
+              <div className="relative group">
+                <img 
+                  src={paymentProofUrl} 
+                  alt="Payment proof" 
+                  className="w-full rounded-xl border border-border"
+                />
+                <a
+                  href={paymentProofUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-2 right-2 p-2 rounded-lg bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </a>
+              </div>
+            )}
+            
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setProofDialogOpen(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setProofDialogOpen(false);
+                  onMarkPaid?.();
+                }}
+                className="flex-1 gap-2 bg-success hover:bg-success/90 text-success-foreground"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Verify & Mark Paid
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* QR Code Dialog */}
       <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>

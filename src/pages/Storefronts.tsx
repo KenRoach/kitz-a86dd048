@@ -32,6 +32,7 @@ interface Storefront {
   created_at: string;
   is_bundle: boolean;
   order_key: string | null;
+  payment_proof_url: string | null;
 }
 
 type FilterStatus = "all" | "draft" | "sent" | "paid";
@@ -342,6 +343,7 @@ export default function Storefronts() {
                 buyerName={sf.buyer_name}
                 isBundle={sf.is_bundle}
                 orderKey={sf.order_key}
+                paymentProofUrl={sf.payment_proof_url}
                 delay={index * 50}
                 onEdit={() => setEditingStorefront(sf)}
                 onDelete={() => handleDelete(sf.id)}
