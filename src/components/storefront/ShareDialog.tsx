@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Copy, QrCode, Check, Share2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ShareDialogProps {
   open: boolean;
@@ -19,6 +19,7 @@ type ShareMethod = "whatsapp" | "copy" | "qr" | "native";
 const SHARE_PREFERENCE_KEY = "lastShareMethod";
 
 export function ShareDialog({ open, onClose, link, title, price }: ShareDialogProps) {
+  const { t } = useLanguage();
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [lastMethod, setLastMethod] = useState<ShareMethod>("whatsapp");
@@ -44,7 +45,7 @@ export function ShareDialog({ open, onClose, link, title, price }: ShareDialogPr
     savePreference("copy");
     navigator.clipboard.writeText(link);
     setCopied(true);
-    toast.success("Link copied!");
+    toast.success(t.linkCopied);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -75,7 +76,7 @@ export function ShareDialog({ open, onClose, link, title, price }: ShareDialogPr
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="w-[calc(100vw-2rem)] max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-center">Share your storefront</DialogTitle>
+          <DialogTitle className="text-center">{t.shareYourStorefront}</DialogTitle>
         </DialogHeader>
 
         {showQR ? (
@@ -86,14 +87,14 @@ export function ShareDialog({ open, onClose, link, title, price }: ShareDialogPr
             <p className="mt-3 text-sm text-muted-foreground">{title}</p>
             <p className="text-lg font-bold text-foreground">${price.toFixed(2)}</p>
             <Button variant="ghost" onClick={() => setShowQR(false)} className="mt-3">
-              Back to share options
+              {t.backToShareOptions}
             </Button>
           </div>
         ) : (
           <div className="space-y-3 py-2">
             {/* Quick action - last used method */}
             <div className="bg-muted/50 rounded-xl p-3 text-center">
-              <p className="text-xs text-muted-foreground mb-2">Quick share</p>
+              <p className="text-xs text-muted-foreground mb-2">{t.quickShare}</p>
               {lastMethod === "whatsapp" && (
                 <Button onClick={handleWhatsApp} className="w-full gap-2 bg-success hover:bg-success/90">
                   <MessageCircle className="w-4 h-4" />
@@ -103,19 +104,19 @@ export function ShareDialog({ open, onClose, link, title, price }: ShareDialogPr
               {lastMethod === "copy" && (
                 <Button onClick={handleCopy} className="w-full gap-2">
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copied ? "Copied!" : "Copy Link"}
+                  {copied ? t.copied : t.copyLink}
                 </Button>
               )}
               {lastMethod === "native" && (
                 <Button onClick={handleNativeShare} className="w-full gap-2">
                   <Share2 className="w-4 h-4" />
-                  Share
+                  {t.share}
                 </Button>
               )}
               {lastMethod === "qr" && (
                 <Button onClick={handleShowQR} className="w-full gap-2">
                   <QrCode className="w-4 h-4" />
-                  Show QR Code
+                  {t.showQrCode}
                 </Button>
               )}
             </div>
@@ -131,25 +132,25 @@ export function ShareDialog({ open, onClose, link, title, price }: ShareDialogPr
               {lastMethod !== "copy" && (
                 <Button variant="outline" onClick={handleCopy} className="gap-2">
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  Copy
+                  {t.copyLink}
                 </Button>
               )}
               {lastMethod !== "qr" && (
                 <Button variant="outline" onClick={handleShowQR} className="gap-2">
                   <QrCode className="w-4 h-4" />
-                  QR
+                  {t.qr}
                 </Button>
               )}
               {lastMethod !== "native" && navigator.share && (
                 <Button variant="outline" onClick={handleNativeShare} className="gap-2">
                   <Share2 className="w-4 h-4" />
-                  More
+                  {t.more}
                 </Button>
               )}
             </div>
 
             <Button variant="ghost" onClick={onClose} className="w-full">
-              Done
+              {t.done}
             </Button>
           </div>
         )}

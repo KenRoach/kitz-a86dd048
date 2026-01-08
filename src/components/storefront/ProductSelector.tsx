@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Package, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Product {
   id: string;
@@ -20,6 +21,7 @@ interface ProductSelectorProps {
 
 export function ProductSelector({ onSelect, selectedId }: ProductSelectorProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,8 +55,8 @@ export function ProductSelector({ onSelect, selectedId }: ProductSelectorProps) 
     return (
       <div className="text-center py-6 px-4 bg-muted/30 rounded-xl">
         <Package className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No products in catalog</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">Add products first or enter details manually</p>
+        <p className="text-sm text-muted-foreground">{t.noProductsInCatalog}</p>
+        <p className="text-xs text-muted-foreground/70 mt-1">{t.addProductsFirst}</p>
       </div>
     );
   }
