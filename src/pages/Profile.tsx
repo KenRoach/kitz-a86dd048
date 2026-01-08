@@ -7,7 +7,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   BarChart3, Brain, Megaphone, Share2, Settings,
-  MapPin, Calendar
+  MapPin, Calendar, Users
 } from "lucide-react";
 
 // Tab Components
@@ -16,6 +16,7 @@ import { DashboardTab } from "@/components/profile/DashboardTab";
 import { MarketingTab } from "@/components/profile/MarketingTab";
 import { ShareLinksTab } from "@/components/profile/ShareLinksTab";
 import { ProfileSettingsTab } from "@/components/profile/ProfileSettingsTab";
+import { CrmLiteTab } from "@/components/profile/CrmLiteTab";
 
 export default function Profile() {
   const { user, profile, loading } = useAuth();
@@ -50,6 +51,7 @@ export default function Profile() {
 
   const tabs = [
     { id: "dashboard", label: language === "es" ? "Panel" : "Dashboard", icon: BarChart3 },
+    { id: "crm", label: "CRM", icon: Users },
     { id: "productivity", label: language === "es" ? "Productividad" : "Productivity", icon: Brain },
     { id: "marketing", label: "Marketing", icon: Megaphone },
     { id: "share", label: language === "es" ? "Compartir" : "Share", icon: Share2 },
@@ -109,6 +111,10 @@ export default function Profile() {
 
           <TabsContent value="dashboard" className="mt-6">
             <DashboardTab />
+          </TabsContent>
+
+          <TabsContent value="crm" className="mt-6">
+            <CrmLiteTab />
           </TabsContent>
 
           <TabsContent value="productivity" className="mt-6">
