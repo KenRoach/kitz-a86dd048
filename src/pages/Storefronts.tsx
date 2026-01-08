@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StorefrontCard } from "@/components/storefront/StorefrontCard";
@@ -10,6 +10,8 @@ import { Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefresh";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -104,7 +106,7 @@ export default function Storefronts() {
     fetchUsername();
   }, [user]);
 
-  const fetchStorefronts = async () => {
+  const fetchStorefronts = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -127,11 +129,21 @@ export default function Storefronts() {
       );
     }
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchStorefronts();
-  }, [user]);
+  }, [fetchStorefronts]);
+
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await fetchStorefronts();
+    toast.success(t.all === "Todos" ? "Actualizado" : "Refreshed");
+  }, [fetchStorefronts, t.all]);
+
+  const { containerRef, isPulling, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
 
   const getShareableLink = (slug: string) => {
     if (username) {
@@ -295,7 +307,15 @@ export default function Storefronts() {
 
   return (
     <AppLayout>
-      <div className="space-y-3 md:space-y-6">
+      <div ref={containerRef} className="relative">
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          progress={progress}
+          isRefreshing={isRefreshing}
+          isPulling={isPulling}
+        />
+        
+        <div className="space-y-3 md:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between gap-2 animate-fade-in">
           <div className="min-w-0 flex-1">
@@ -424,6 +444,7 @@ export default function Storefronts() {
             price={shareData.price}
           />
         )}
+        </div>
       </div>
     </AppLayout>
   );
