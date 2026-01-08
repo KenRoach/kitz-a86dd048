@@ -109,27 +109,27 @@ export default function Profile() {
             ))}
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6">
+          <TabsContent value="dashboard" className="mt-6 animate-fade-in">
             <DashboardTab />
           </TabsContent>
 
-          <TabsContent value="crm" className="mt-6">
+          <TabsContent value="crm" className="mt-6 animate-fade-in">
             <CrmLiteTab />
           </TabsContent>
 
-          <TabsContent value="productivity" className="mt-6">
+          <TabsContent value="productivity" className="mt-6 animate-fade-in">
             <ProductivityTab />
           </TabsContent>
 
-          <TabsContent value="marketing" className="mt-6">
+          <TabsContent value="marketing" className="mt-6 animate-fade-in">
             <MarketingTab />
           </TabsContent>
 
-          <TabsContent value="share" className="mt-6">
+          <TabsContent value="share" className="mt-6 animate-fade-in">
             <ShareLinksTab />
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-6">
+          <TabsContent value="settings" className="mt-6 animate-fade-in">
             <ProfileSettingsTab />
           </TabsContent>
         </Tabs>
