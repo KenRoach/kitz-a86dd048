@@ -27,8 +27,10 @@ import {
   Package,
   Wand2,
   Briefcase,
-  Calendar
+  Calendar,
+  Send
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -73,6 +75,7 @@ const CATEGORIES = [
 export default function Products() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -585,6 +588,26 @@ export default function Products() {
                       {product.description}
                     </p>
                   )}
+                  {/* Create Storefront from Product */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-3 gap-2"
+                    onClick={() => navigate('/storefronts', { 
+                      state: { 
+                        createFromProduct: {
+                          id: product.id,
+                          title: product.title,
+                          description: product.description,
+                          price: product.price,
+                          image_url: product.image_url
+                        }
+                      }
+                    })}
+                  >
+                    <Send className="w-4 h-4" />
+                    {language === "es" ? "Crear vitrina" : "Create Storefront"}
+                  </Button>
                 </div>
               </div>
             ))}

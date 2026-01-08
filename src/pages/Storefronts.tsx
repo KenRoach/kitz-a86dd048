@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StorefrontCard } from "@/components/storefront/StorefrontCard";
 import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
@@ -14,6 +15,16 @@ import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StorefrontsSkeleton } from "@/components/ui/dashboard-skeleton";
 import { AnimatedCreateButton } from "@/components/ui/AnimatedCreateButton";
+
+export type FulfillmentStatus = "pending" | "preparing" | "ready" | "complete";
+
+interface ProductData {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+}
 
 interface Storefront {
   id: string;
@@ -36,6 +47,8 @@ interface Storefront {
   mode: "invoice" | "quote";
   valid_until: string | null;
   accepted_at: string | null;
+  fulfillment_status: FulfillmentStatus;
+  product_id: string | null;
 }
 
 type FilterStatus = "all" | "draft" | "sent" | "paid";
@@ -51,16 +64,29 @@ const generateSlug = (title: string) => {
 export default function Storefronts() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const location = useLocation();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [loading, setLoading] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editingStorefront, setEditingStorefront] = useState<Storefront | null>(null);
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [username, setUsername] = useState<string | null>(null);
+  const [productToCreate, setProductToCreate] = useState<ProductData | null>(null);
   
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareData, setShareData] = useState<{ link: string; title: string; price: number } | null>(null);
+
+  // Check if we came from Products page with a product to create storefront from
+  useEffect(() => {
+    const state = location.state as { createFromProduct?: ProductData } | null;
+    if (state?.createFromProduct) {
+      setProductToCreate(state.createFromProduct);
+      setWizardOpen(true);
+      // Clear the state so it doesn't re-trigger on re-render
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Fetch username on mount
   useEffect(() => {
@@ -96,6 +122,7 @@ export default function Storefronts() {
           status: s.status as "draft" | "sent" | "paid",
           is_bundle: s.is_bundle || false,
           mode: (s.mode || "invoice") as "invoice" | "quote",
+          fulfillment_status: (s.fulfillment_status || "pending") as FulfillmentStatus,
         }))
       );
     }
@@ -136,7 +163,11 @@ export default function Storefronts() {
   };
 
   const handleMarkPaid = async (sf: Storefront) => {
-    await supabase.from("storefronts").update({ status: "paid" }).eq("id", sf.id);
+    await supabase.from("storefronts").update({ 
+      status: "paid",
+      paid_at: new Date().toISOString(),
+      fulfillment_status: "pending"
+    }).eq("id", sf.id);
 
     await supabase.from("activity_log").insert({
       user_id: user?.id,
@@ -350,12 +381,17 @@ export default function Storefronts() {
                 paymentProofUrl={sf.payment_proof_url}
                 mode={sf.mode}
                 acceptedAt={sf.accepted_at}
+                fulfillmentStatus={sf.fulfillment_status}
                 delay={index * 50}
                 onEdit={() => setEditingStorefront(sf)}
                 onDelete={() => handleDelete(sf.id)}
                 onSend={() => handleSend(sf.id, sf.title, sf.slug, sf.price)}
                 onMarkPaid={() => handleMarkPaid(sf)}
                 onReorder={() => handleReorder(sf)}
+                onFulfillmentChange={async (newStatus) => {
+                  await supabase.from("storefronts").update({ fulfillment_status: newStatus }).eq("id", sf.id);
+                  fetchStorefronts();
+                }}
               />
             ))}
           </div>
@@ -368,7 +404,15 @@ export default function Storefronts() {
           </div>
         )}
 
-        <StorefrontWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onCreated={handleWizardCreated} />
+        <StorefrontWizard 
+          open={wizardOpen} 
+          onClose={() => {
+            setWizardOpen(false);
+            setProductToCreate(null);
+          }} 
+          onCreated={handleWizardCreated}
+          initialProduct={productToCreate}
+        />
         <EditStorefrontDialog storefront={editingStorefront} open={!!editingStorefront} onClose={() => setEditingStorefront(null)} onUpdated={fetchStorefronts} />
         
         {shareData && (
