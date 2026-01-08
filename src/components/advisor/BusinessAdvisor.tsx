@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useVoice } from "@/hooks/useVoice";
+import { useElevenLabs } from "@/hooks/useElevenLabs";
 import { AiFloatingButton } from "./AiFloatingButton";
 
 type Message = {
@@ -48,21 +48,22 @@ export function BusinessAdvisor() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const handleTranscript = (text: string) => {
+    setInput(text);
+    // Auto-send after voice input
+    setTimeout(() => sendMessage(text), 300);
+  };
+
   const { 
-    isListening, 
-    isSpeaking, 
-    isSupported: voiceSupported,
-    startListening, 
-    stopListening, 
+    isPlaying: isSpeaking, 
+    isRecording: isListening, 
+    isTranscribing,
     speak, 
-    stopSpeaking 
-  } = useVoice({
-    language,
-    onTranscript: (text) => {
-      setInput(text);
-      // Auto-send after voice input
-      setTimeout(() => sendMessage(text), 300);
-    }
+    stopSpeaking,
+    startRecording: startListening,
+    stopRecording: stopListening,
+  } = useElevenLabs({
+    onTranscript: handleTranscript
   });
 
   const suggestions = language === "es" ? SUGGESTIONS_ES : SUGGESTIONS_EN;
@@ -287,59 +288,62 @@ export function BusinessAdvisor() {
         </ScrollArea>
 
         <form onSubmit={handleSubmit} className="p-4 border-t bg-background">
-          {/* Voice controls */}
-          {voiceSupported && (
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={isListening ? "destructive" : "outline"}
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isLoading}
-                  className="gap-2"
-                >
-                  {isListening ? (
-                    <>
-                      <MicOff className="w-4 h-4" />
-                      {t.stop}
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="w-4 h-4" />
-                      {t.speak}
-                    </>
-                  )}
-                </Button>
-                {isListening && (
-                  <span className="text-xs text-muted-foreground animate-pulse">
-                    {t.listening}
-                  </span>
-                )}
-              </div>
+          {/* Voice controls - ElevenLabs powered */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 size="sm"
-                variant="ghost"
-                onClick={() => {
-                  if (isSpeaking) {
-                    stopSpeaking();
-                  }
-                  setAutoSpeak(!autoSpeak);
-                }}
+                variant={isListening ? "destructive" : "outline"}
+                onClick={isListening ? stopListening : startListening}
+                disabled={isLoading || isTranscribing}
                 className="gap-2"
               >
-              {autoSpeak ? (
+                {isListening ? (
                   <>
-                    <Volume2 className="w-4 h-4" />
-                    {isSpeaking && <span className="text-xs">{t.speaking}</span>}
+                    <MicOff className="w-4 h-4" />
+                    {t.stop}
+                  </>
+                ) : isTranscribing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {language === "es" ? "Transcribiendo..." : "Transcribing..."}
                   </>
                 ) : (
-                  <VolumeX className="w-4 h-4" />
+                  <>
+                    <Mic className="w-4 h-4" />
+                    {t.speak}
+                  </>
                 )}
               </Button>
+              {isListening && (
+                <span className="text-xs text-muted-foreground animate-pulse">
+                  {t.listening}
+                </span>
+              )}
             </div>
-          )}
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                if (isSpeaking) {
+                  stopSpeaking();
+                }
+                setAutoSpeak(!autoSpeak);
+              }}
+              className="gap-2"
+            >
+            {autoSpeak ? (
+                <>
+                  <Volume2 className="w-4 h-4" />
+                  {isSpeaking && <span className="text-xs">{t.speaking}</span>}
+                </>
+              ) : (
+                <VolumeX className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
           
           <div className="flex gap-2">
             <Textarea

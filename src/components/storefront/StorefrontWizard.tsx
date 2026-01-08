@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
 import { ProductSelector } from "./ProductSelector";
 import { useLanguage } from "@/hooks/useLanguage";
+import { VoiceInput } from "@/components/ui/VoiceInput";
 
 interface ProductData {
   id: string;
@@ -452,19 +453,30 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs sm:text-sm text-muted-foreground">Title</label>
-                    <button
-                      type="button"
-                      onClick={generateAISuggestions}
-                      disabled={generatingSuggestions || !title.trim()}
-                      className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {generatingSuggestions ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Wand2 className="w-3 h-3" />
-                      )}
-                      AI Suggest
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <VoiceInput 
+                        onTranscript={(text) => {
+                          setTitle(text);
+                          setSelectedProductId(null);
+                          setSuggestedPriceRange(null);
+                        }}
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                      />
+                      <button
+                        type="button"
+                        onClick={generateAISuggestions}
+                        disabled={generatingSuggestions || !title.trim()}
+                        className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {generatingSuggestions ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Wand2 className="w-3 h-3" />
+                        )}
+                        AI Suggest
+                      </button>
+                    </div>
                   </div>
                   <Input
                     value={title}
