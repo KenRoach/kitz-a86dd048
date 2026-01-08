@@ -20,15 +20,15 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 7%;
 
-    /* Primary Purple: #7A47E6 → HSL(258, 76%, 59%) */
-    --primary: 258 76% 59%;
+    /* Primary Purple: #8B5CF6 → HSL(262, 83%, 58%) - Vibrant Purple */
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
     
-    /* Primary Soft: #8E63EA → HSL(258, 74%, 65%) */
-    --primary-soft: 258 74% 65%;
+    /* Primary Soft: #A78BFA → HSL(262, 83%, 68%) */
+    --primary-soft: 262 83% 68%;
     
-    /* Primary Tint/Background: #EEE8FF → HSL(258, 100%, 96%) */
-    --primary-tint: 258 100% 96%;
+    /* Primary Tint/Background: #EDE9FE → HSL(262, 83% 96%) */
+    --primary-tint: 262 83% 96%;
 
     /* Secondary (muted cards) */
     --secondary: 240 14% 97%;
@@ -41,8 +41,8 @@
     --muted-foreground: 218 11% 65%;
 
     /* Accent uses primary tint */
-    --accent: 258 100% 96%;
-    --accent-foreground: 258 76% 50%;
+    --accent: 262 83% 96%;
+    --accent-foreground: 262 83% 50%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -50,12 +50,12 @@
     /* Dividers: #E5E7EB */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 258 76% 59%;
+    --ring: 262 83% 58%;
 
     --radius: 1rem;
 
-    /* Action Orange: #F28B30 → HSL(27, 88%, 57%) */
-    --action: 27 88% 57%;
+    /* Action uses Primary Purple for landing */
+    --action: 262 83% 58%;
     --action-foreground: 0 0% 100%;
 
     /* Status colors */
@@ -76,17 +76,17 @@
     --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.06);
     --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.08);
     --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.04);
-    --shadow-glow: 0 0 20px hsl(258 76% 59% / 0.15);
+    --shadow-glow: 0 0 20px hsl(262 83% 58% / 0.25);
     --shadow-pressed: inset 0 1px 3px hsl(0 0% 0% / 0.06);
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 7%;
-    --sidebar-primary: 258 76% 59%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 258 100% 96%;
-    --sidebar-accent-foreground: 258 76% 50%;
+    --sidebar-accent: 262 83% 96%;
+    --sidebar-accent-foreground: 262 83% 50%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 258 76% 59%;
+    --sidebar-ring: 262 83% 58%;
   }
 
   .dark {
@@ -100,11 +100,11 @@
     --popover: 240 10% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 258 76% 65%;
+    --primary: 262 83% 65%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-soft: 258 74% 70%;
-    --primary-tint: 258 50% 20%;
+    --primary-soft: 262 83% 72%;
+    --primary-tint: 262 50% 20%;
 
     --secondary: 240 10% 16%;
     --secondary-foreground: 218 11% 75%;
@@ -112,33 +112,33 @@
     --muted: 240 10% 18%;
     --muted-foreground: 218 11% 55%;
 
-    --accent: 258 50% 20%;
-    --accent-foreground: 258 76% 75%;
+    --accent: 262 50% 20%;
+    --accent-foreground: 262 83% 75%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 240 10% 18%;
     --input: 240 10% 18%;
-    --ring: 258 76% 65%;
+    --ring: 262 83% 65%;
 
-    --action: 27 88% 57%;
+    --action: 262 83% 65%;
     --action-foreground: 0 0% 100%;
 
     --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
     --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
     --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.4);
     --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-glow: 0 0 24px hsl(258 76% 65% / 0.25);
+    --shadow-glow: 0 0 24px hsl(262 83% 65% / 0.3);
 
     --sidebar-background: 240 10% 10%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 258 76% 65%;
+    --sidebar-primary: 262 83% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 258 50% 18%;
-    --sidebar-accent-foreground: 258 76% 75%;
+    --sidebar-accent: 262 50% 18%;
+    --sidebar-accent-foreground: 262 83% 75%;
     --sidebar-border: 240 10% 16%;
-    --sidebar-ring: 258 76% 65%;
+    --sidebar-ring: 262 83% 65%;
   }
 }
 
