@@ -1,7 +1,9 @@
+import { useState, useEffect, useRef } from "react";
 import { use4DX } from "@/hooks/use4DX";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Celebration } from "@/components/ui/Confetti";
 import { Target, TrendingUp, Store, Users, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +12,16 @@ export function FourDXWidget() {
   const { t, language } = useLanguage();
   const { goals, wigProgress, leadMeasures, commitments, loading } = use4DX();
   const navigate = useNavigate();
+  const [showCelebration, setShowCelebration] = useState(false);
+  const celebratedRef = useRef(false);
+
+  // Trigger celebration when goal is reached for the first time
+  useEffect(() => {
+    if (wigProgress && wigProgress.percentage >= 100 && !celebratedRef.current) {
+      celebratedRef.current = true;
+      setShowCelebration(true);
+    }
+  }, [wigProgress]);
 
   if (loading || !goals) return null;
 
@@ -41,10 +53,17 @@ export function FourDXWidget() {
   const followupProgress = ((leadMeasures?.followupsCompleted || 0) / (goals.followups_target || 10)) * 100;
 
   return (
-    <div 
-      onClick={() => navigate("/admin")}
-      className="bg-card rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all group"
-    >
+    <>
+      <Celebration 
+        show={showCelebration} 
+        message={language === "es" ? "¡Meta Alcanzada!" : "Goal Achieved!"}
+        subMessage={language === "es" ? "¡Felicitaciones por tu éxito!" : "Congratulations on your success!"}
+        onComplete={() => setShowCelebration(false)}
+      />
+      <div 
+        onClick={() => navigate("/admin")}
+        className="bg-card rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all group"
+      >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -125,5 +144,6 @@ export function FourDXWidget() {
         </div>
       )}
     </div>
+    </>
   );
 }
