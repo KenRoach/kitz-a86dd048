@@ -16,6 +16,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { EisenhowerMatrix } from "./EisenhowerMatrix";
 import { InstagramIdeas } from "./InstagramIdeas";
 import { ContentCalendar } from "./ContentCalendar";
+import { PomodoroTimer } from "./PomodoroTimer";
+import { WeeklyReview } from "./WeeklyReview";
+import { SwotAnalysis } from "./SwotAnalysis";
 import { 
   Bot, Zap, Store, Users, Play, Loader2, 
   CheckCircle, Clock, AlertCircle, Sparkles,
@@ -594,7 +597,14 @@ export function AutopilotPanel() {
           {/* Content Calendar */}
           <ContentCalendar />
 
-          {/* Recent Actions */}
+          {/* Pomodoro Timer */}
+          <PomodoroTimer />
+
+          {/* Weekly Review */}
+          <WeeklyReview />
+
+          {/* SWOT Analysis */}
+          <SwotAnalysis />
           {actions.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
