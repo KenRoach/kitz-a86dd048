@@ -326,7 +326,7 @@ export default function Admin() {
 
   const selectedCountry = COUNTRIES.find(c => c.code === profile.phone_country);
 
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <AppLayout>
@@ -349,25 +349,25 @@ export default function Admin() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Profile QR Code</DialogTitle>
+                  <DialogTitle>{t.profileQrCode}</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col items-center gap-4 py-4">
                   <div className="bg-white p-4 rounded-xl">
                     <QRCodeSVG value={profileLink} size={200} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    Scan to visit your profile
+                    {t.scanToVisit}
                   </p>
                   <Button
                     variant="outline"
                     onClick={() => {
                       navigator.clipboard.writeText(profileLink);
-                      toast.success("Link copied!");
+                      toast.success(t.linkCopied);
                     }}
                     className="gap-2"
                   >
                     <Copy className="w-4 h-4" />
-                    Copy Link
+                    {t.copyLink}
                   </Button>
                 </div>
               </DialogContent>
@@ -381,12 +381,12 @@ export default function Admin() {
               {profileLinkCopied ? (
                 <>
                   <Check className="w-4 h-4 text-success" />
-                  Copied!
+                  {t.copied}
                 </>
               ) : (
                 <>
                   <Share2 className="w-4 h-4" />
-                  Share
+                  {t.share}
                 </>
               )}
             </Button>
@@ -412,12 +412,12 @@ export default function Admin() {
           <TabsContent value="settings" className="mt-0 space-y-3 md:space-y-6">
             {/* Brand Section */}
             <section className="neu-card-flat p-6 space-y-5 animate-fade-in">
-              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Brand</h2>
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.brand}</h2>
           
           <div className="grid grid-cols-2 gap-6">
             {/* Logo */}
             <div>
-              <Label className="mb-2 block text-muted-foreground">Business logo</Label>
+              <Label className="mb-2 block text-muted-foreground">{t.businessLogo}</Label>
               <input
                 ref={logoInputRef}
                 type="file"
@@ -439,7 +439,7 @@ export default function Admin() {
 
             {/* Storefront Image */}
             <div>
-              <Label className="mb-2 block text-muted-foreground">Storefront image</Label>
+              <Label className="mb-2 block text-muted-foreground">{t.storefrontImage}</Label>
               <input
                 ref={storefrontInputRef}
                 type="file"
@@ -462,7 +462,7 @@ export default function Admin() {
 
           {/* Username / Profile Link */}
           <div className="pt-4 border-t border-border">
-            <Label htmlFor="username" className="text-muted-foreground">Profile username</Label>
+            <Label htmlFor="username" className="text-muted-foreground">{t.profileUsername}</Label>
             <div className="flex gap-2 mt-1.5">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
@@ -485,7 +485,7 @@ export default function Admin() {
 
         {/* Business Section */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "50ms" }}>
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Business</h2>
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.business}</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -558,7 +558,7 @@ export default function Admin() {
 
         {/* Contact & Presence */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Contact & Presence</h2>
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.contactPresence}</h2>
           
           <div className="space-y-4">
             {/* Phone with country */}
@@ -625,12 +625,12 @@ export default function Admin() {
 
         {/* Payments */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "150ms" }}>
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Payments</h2>
-          <p className="text-sm text-muted-foreground -mt-2">Accept payments your way</p>
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.payments}</h2>
+          <p className="text-sm text-muted-foreground -mt-2">{language === "es" ? "Acepta pagos a tu manera" : "Accept payments your way"}</p>
           
           {/* Online Payments */}
           <div className="space-y-3">
-            <h3 className="text-xs font-medium text-muted-foreground">Online payments</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">{t.onlinePayments}</h3>
             <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
@@ -638,7 +638,7 @@ export default function Admin() {
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Stripe</span>
-                  <p className="text-sm text-muted-foreground">Accept cards worldwide</p>
+                  <p className="text-sm text-muted-foreground">{t.acceptCardsWorldwide}</p>
                 </div>
               </div>
               <Switch
@@ -650,7 +650,7 @@ export default function Admin() {
 
           {/* Local Payments */}
           <div className="space-y-3">
-            <h3 className="text-xs font-medium text-muted-foreground">Local payments</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">{t.localPayments}</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-sm transition-all">
                 <div className="flex items-center gap-3">
@@ -659,7 +659,7 @@ export default function Admin() {
                   </div>
                   <div>
                     <span className="font-medium text-foreground">Yappy</span>
-                    <p className="text-sm text-muted-foreground">Banco General mobile payments</p>
+                    <p className="text-sm text-muted-foreground">{t.mobilePayments}</p>
                   </div>
                 </div>
                 <Switch
@@ -674,8 +674,8 @@ export default function Admin() {
                     <Banknote className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <span className="font-medium text-foreground">Cash</span>
-                    <p className="text-sm text-muted-foreground">In-person payments</p>
+                    <span className="font-medium text-foreground">{t.cash}</span>
+                    <p className="text-sm text-muted-foreground">{t.inPersonPayments}</p>
                   </div>
                 </div>
                 <Switch
@@ -691,7 +691,7 @@ export default function Admin() {
                   </div>
                   <div>
                     <span className="font-medium text-foreground">Pluxee</span>
-                    <p className="text-sm text-muted-foreground">Employee benefit cards</p>
+                    <p className="text-sm text-muted-foreground">{t.employeeBenefitCards}</p>
                   </div>
                 </div>
                 <Switch
@@ -707,20 +707,20 @@ export default function Admin() {
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "200ms" }}>
           <div className="flex items-center gap-2">
             <Link2 className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Integrations</h2>
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.integrations}</h2>
           </div>
-          <p className="text-sm text-muted-foreground -mt-2">Connect your favorite tools for a seamless workflow</p>
+          <p className="text-sm text-muted-foreground -mt-2">{language === "es" ? "Conecta tus herramientas favoritas" : "Connect your favorite tools for a seamless workflow"}</p>
           
           <IntegrationsSection />
         </section>
 
         {/* Location & Discovery */}
         <section className="neu-card-flat p-6 space-y-5 animate-fade-in" style={{ animationDelay: "250ms" }}>
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Location & Discovery</h2>
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t.location}</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="address" className="text-muted-foreground">Street address</Label>
+              <Label htmlFor="address" className="text-muted-foreground">{t.address}</Label>
               <Input
                 id="address"
                 value={profile.address || ""}
@@ -730,7 +730,7 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Label htmlFor="city" className="text-muted-foreground">City</Label>
+              <Label htmlFor="city" className="text-muted-foreground">{t.city}</Label>
               <Input
                 id="city"
                 value={profile.city || ""}
@@ -742,11 +742,11 @@ export default function Admin() {
           </div>
           
           <div>
-            <Label className="text-muted-foreground mb-2 block">Map pin (GPS location)</Label>
+            <Label className="text-muted-foreground mb-2 block">{language === "es" ? "Pin de mapa (ubicación GPS)" : "Map pin (GPS location)"}</Label>
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={handleGetLocation} className="gap-2">
                 <MapPin className="w-4 h-4" />
-                Get current location
+                {t.getLocation}
               </Button>
               {profile.latitude && profile.longitude && (
                 <span className="text-sm text-muted-foreground">
@@ -882,7 +882,7 @@ export default function Admin() {
         {/* Save Button */}
         <div className="flex justify-end pb-8">
           <Button onClick={handleSave} disabled={saving} size="lg" className="px-8">
-            {saving ? "Saving..." : "Save all changes"}
+            {saving ? t.saving : t.saveAllChanges}
           </Button>
         </div>
           </TabsContent>

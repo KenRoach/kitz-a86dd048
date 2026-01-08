@@ -39,7 +39,7 @@ const SUGGESTIONS_ES = [
 ];
 
 export function BusinessAdvisor() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -214,10 +214,10 @@ export function BusinessAdvisor() {
             </div>
             <div>
               <SheetTitle className="text-left">
-                {language === "es" ? "Asesor de Negocios" : "Business Advisor"}
+                {t.businessAdvisor}
               </SheetTitle>
               <p className="text-xs text-muted-foreground">
-                {language === "es" ? "Insights de IA para tu negocio" : "AI-powered insights for your business"}
+                {t.aiInsights}
               </p>
             </div>
           </div>
@@ -231,18 +231,16 @@ export function BusinessAdvisor() {
                   <Sparkles className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">
-                  {language === "es" ? "Tu Asesor de IA" : "Your AI Business Advisor"}
+                  {t.yourAiAdvisor}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                  {language === "es" 
-                    ? "Tengo acceso a tus productos, pedidos y clientes. ¡Pregúntame cómo aumentar tus ingresos!" 
-                    : "I have access to your products, orders, and customers. Ask me anything about growing your revenue!"}
+                  {t.advisorIntro}
                 </p>
               </div>
               
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {language === "es" ? "Preguntas rápidas" : "Quick questions"}
+                  {t.quickQuestions}
                 </p>
                 {suggestions.map((suggestion, i) => (
                   <button
@@ -277,7 +275,7 @@ export function BusinessAdvisor() {
                       {message.content || (
                         <span className="flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          {language === "es" ? "Analizando tus datos..." : "Analyzing your data..."}
+                          {t.analyzingData}
                         </span>
                       )}
                     </p>
@@ -304,18 +302,18 @@ export function BusinessAdvisor() {
                   {isListening ? (
                     <>
                       <MicOff className="w-4 h-4" />
-                      {language === "es" ? "Parar" : "Stop"}
+                      {t.stop}
                     </>
                   ) : (
                     <>
                       <Mic className="w-4 h-4" />
-                      {language === "es" ? "Hablar" : "Speak"}
+                      {t.speak}
                     </>
                   )}
                 </Button>
                 {isListening && (
                   <span className="text-xs text-muted-foreground animate-pulse">
-                    {language === "es" ? "Escuchando..." : "Listening..."}
+                    {t.listening}
                   </span>
                 )}
               </div>
@@ -331,10 +329,10 @@ export function BusinessAdvisor() {
                 }}
                 className="gap-2"
               >
-                {autoSpeak ? (
+              {autoSpeak ? (
                   <>
                     <Volume2 className="w-4 h-4" />
-                    {isSpeaking && <span className="text-xs">{language === "es" ? "Hablando..." : "Speaking..."}</span>}
+                    {isSpeaking && <span className="text-xs">{t.speaking}</span>}
                   </>
                 ) : (
                   <VolumeX className="w-4 h-4" />
@@ -349,7 +347,7 @@ export function BusinessAdvisor() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={language === "es" ? "Pregunta sobre tu negocio..." : "Ask about your business..."}
+              placeholder={t.askAboutBusiness}
               className="min-h-[44px] max-h-32 resize-none"
               rows={1}
               disabled={isLoading || isListening}

@@ -273,6 +273,87 @@ interface Translations {
   fulfillmentPreparing: string;
   fulfillmentReady: string;
   fulfillmentComplete: string;
+  
+  // Admin Page Extended
+  profileQrCode: string;
+  scanToVisit: string;
+  profileUsername: string;
+  onlinePayments: string;
+  localPayments: string;
+  acceptCardsWorldwide: string;
+  mobilePayments: string;
+  inPersonPayments: string;
+  employeeBenefitCards: string;
+  
+  // Public Profile
+  notFound: string;
+  profileNotFoundDesc: string;
+  contact: string;
+  verifiedSeller: string;
+  trusted: string;
+  highRepeat: string;
+  availableNow: string;
+  accepts: string;
+  links: string;
+  poweredBy: string;
+  contactBusiness: string;
+  sendInquiry: string;
+  yourMessage: string;
+  messagePlaceholder: string;
+  rememberMe: string;
+  messageSent: string;
+  willGetBack: string;
+  
+  // Public Storefront
+  storefrontNotFound: string;
+  storefrontNotFoundDesc: string;
+  goHome: string;
+  thisIsQuote: string;
+  reviewQuote: string;
+  quoteAccepted: string;
+  proceedToOrder: string;
+  orderSummary: string;
+  itemsCount: string;
+  deliveryInfo: string;
+  acceptedPayments: string;
+  yourDetails: string;
+  specialRequests: string;
+  saveInfoFaster: string;
+  usingSavedInfo: string;
+  saveYourInfo: string;
+  speedUpPurchase: string;
+  rememberDays: string;
+  noThanks: string;
+  saveMyInfo: string;
+  orderReceived: string;
+  uploadPaymentProof: string;
+  paymentComplete: string;
+  awaitingPaymentStatus: string;
+  acceptQuote: string;
+  accepting: string;
+  
+  // Chat Widget
+  support: string;
+  instantReplies: string;
+  chatGreeting: string;
+  howCanIHelp: string;
+  typeQuestion: string;
+  typing: string;
+  openChat: string;
+  closeChat: string;
+  
+  // Business Advisor
+  businessAdvisor: string;
+  aiInsights: string;
+  yourAiAdvisor: string;
+  advisorIntro: string;
+  quickQuestions: string;
+  analyzingData: string;
+  speak: string;
+  stop: string;
+  listening: string;
+  speaking: string;
+  askAboutBusiness: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -537,6 +618,87 @@ const translations: Record<Language, Translations> = {
     fulfillmentPreparing: "Preparing",
     fulfillmentReady: "Ready",
     fulfillmentComplete: "Complete",
+    
+    // Admin Page Extended
+    profileQrCode: "Profile QR Code",
+    scanToVisit: "Scan to visit your profile",
+    profileUsername: "Profile username",
+    onlinePayments: "Online payments",
+    localPayments: "Local payments",
+    acceptCardsWorldwide: "Accept cards worldwide",
+    mobilePayments: "Banco General mobile payments",
+    inPersonPayments: "In-person payments",
+    employeeBenefitCards: "Employee benefit cards",
+    
+    // Public Profile
+    notFound: "Not found",
+    profileNotFoundDesc: "This profile doesn't exist or has been removed.",
+    contact: "Contact",
+    verifiedSeller: "Verified Seller",
+    trusted: "Trusted",
+    highRepeat: "High Repeat",
+    availableNow: "Available Now",
+    accepts: "Accepts",
+    links: "Links",
+    poweredBy: "Powered by Kitz • Share your link to grow",
+    contactBusiness: "Contact",
+    sendInquiry: "Send a message or inquiry",
+    yourMessage: "Message",
+    messagePlaceholder: "Hi! I'm interested in...",
+    rememberMe: "Remember me for faster contact",
+    messageSent: "Message Sent!",
+    willGetBack: "will get back to you soon.",
+    
+    // Public Storefront
+    storefrontNotFound: "Storefront not found",
+    storefrontNotFoundDesc: "This link may have expired or doesn't exist.",
+    goHome: "Go home",
+    thisIsQuote: "This is a quote",
+    reviewQuote: "Review the details and accept this quote to proceed with your order.",
+    quoteAccepted: "Quote accepted!",
+    proceedToOrder: "You can now proceed to place your order.",
+    orderSummary: "Order Summary",
+    itemsCount: "items",
+    deliveryInfo: "Delivery info",
+    acceptedPayments: "Accepted payments",
+    yourDetails: "Your details",
+    specialRequests: "Any special requests...",
+    saveInfoFaster: "Save my info for faster checkout",
+    usingSavedInfo: "Using your saved info",
+    saveYourInfo: "Save your info?",
+    speedUpPurchase: "Speed up your next purchase",
+    rememberDays: "We'll remember your details for 120 days so you can checkout faster next time.",
+    noThanks: "No thanks",
+    saveMyInfo: "Save my info",
+    orderReceived: "Order received!",
+    uploadPaymentProof: "Upload your payment proof below, or the seller will contact you.",
+    paymentComplete: "Payment complete",
+    awaitingPaymentStatus: "Awaiting payment",
+    acceptQuote: "Accept Quote",
+    accepting: "Accepting...",
+    
+    // Chat Widget
+    support: "Support",
+    instantReplies: "Instant replies 24/7",
+    chatGreeting: "Hello!",
+    howCanIHelp: "How can I help you today?",
+    typeQuestion: "Type your question...",
+    typing: "Typing...",
+    openChat: "Open support chat",
+    closeChat: "Close chat",
+    
+    // Business Advisor
+    businessAdvisor: "Business Advisor",
+    aiInsights: "AI-powered insights for your business",
+    yourAiAdvisor: "Your AI Business Advisor",
+    advisorIntro: "I have access to your products, orders, and customers. Ask me anything about growing your revenue!",
+    quickQuestions: "Quick questions",
+    analyzingData: "Analyzing your data...",
+    speak: "Speak",
+    stop: "Stop",
+    listening: "Listening...",
+    speaking: "Speaking...",
+    askAboutBusiness: "Ask about your business...",
   },
   es: {
     goodMorning: "Buenos días",
@@ -799,6 +961,87 @@ const translations: Record<Language, Translations> = {
     fulfillmentPreparing: "Preparando",
     fulfillmentReady: "Listo",
     fulfillmentComplete: "Completado",
+    
+    // Admin Page Extended
+    profileQrCode: "Código QR del Perfil",
+    scanToVisit: "Escanea para visitar tu perfil",
+    profileUsername: "Nombre de usuario",
+    onlinePayments: "Pagos en línea",
+    localPayments: "Pagos locales",
+    acceptCardsWorldwide: "Acepta tarjetas mundialmente",
+    mobilePayments: "Pagos móviles Banco General",
+    inPersonPayments: "Pagos en persona",
+    employeeBenefitCards: "Tarjetas de beneficios",
+    
+    // Public Profile
+    notFound: "No encontrado",
+    profileNotFoundDesc: "Este perfil no existe o fue eliminado.",
+    contact: "Contactar",
+    verifiedSeller: "Vendedor Verificado",
+    trusted: "Confiable",
+    highRepeat: "Alta Repetición",
+    availableNow: "Disponible Ahora",
+    accepts: "Acepta",
+    links: "Enlaces",
+    poweredBy: "Powered by Kitz • Comparte tu enlace para crecer",
+    contactBusiness: "Contactar",
+    sendInquiry: "Enviar mensaje o consulta",
+    yourMessage: "Mensaje",
+    messagePlaceholder: "¡Hola! Me interesa...",
+    rememberMe: "Recordarme para contacto más rápido",
+    messageSent: "¡Mensaje Enviado!",
+    willGetBack: "te responderá pronto.",
+    
+    // Public Storefront
+    storefrontNotFound: "Vitrina no encontrada",
+    storefrontNotFoundDesc: "Este enlace puede haber expirado o no existe.",
+    goHome: "Ir al inicio",
+    thisIsQuote: "Esta es una cotización",
+    reviewQuote: "Revisa los detalles y acepta esta cotización para proceder con tu pedido.",
+    quoteAccepted: "¡Cotización aceptada!",
+    proceedToOrder: "Ahora puedes proceder a hacer tu pedido.",
+    orderSummary: "Resumen del Pedido",
+    itemsCount: "artículos",
+    deliveryInfo: "Info de entrega",
+    acceptedPayments: "Pagos aceptados",
+    yourDetails: "Tus datos",
+    specialRequests: "Alguna solicitud especial...",
+    saveInfoFaster: "Guardar mis datos para checkout más rápido",
+    usingSavedInfo: "Usando tus datos guardados",
+    saveYourInfo: "¿Guardar tus datos?",
+    speedUpPurchase: "Acelera tu próxima compra",
+    rememberDays: "Recordaremos tus datos por 120 días para que tu próximo checkout sea más rápido.",
+    noThanks: "No, gracias",
+    saveMyInfo: "Guardar mis datos",
+    orderReceived: "¡Pedido recibido!",
+    uploadPaymentProof: "Sube tu comprobante de pago abajo, o el vendedor te contactará.",
+    paymentComplete: "Pago completado",
+    awaitingPaymentStatus: "Esperando pago",
+    acceptQuote: "Aceptar Cotización",
+    accepting: "Aceptando...",
+    
+    // Chat Widget
+    support: "Soporte",
+    instantReplies: "Respuestas instantáneas 24/7",
+    chatGreeting: "¡Hola!",
+    howCanIHelp: "¿En qué puedo ayudarte hoy?",
+    typeQuestion: "Escribe tu pregunta...",
+    typing: "Escribiendo...",
+    openChat: "Abrir chat de soporte",
+    closeChat: "Cerrar chat",
+    
+    // Business Advisor
+    businessAdvisor: "Asesor de Negocios",
+    aiInsights: "Insights de IA para tu negocio",
+    yourAiAdvisor: "Tu Asesor de IA",
+    advisorIntro: "Tengo acceso a tus productos, pedidos y clientes. ¡Pregúntame cómo aumentar tus ingresos!",
+    quickQuestions: "Preguntas rápidas",
+    analyzingData: "Analizando tus datos...",
+    speak: "Hablar",
+    stop: "Parar",
+    listening: "Escuchando...",
+    speaking: "Hablando...",
+    askAboutBusiness: "Pregunta sobre tu negocio...",
   },
 };
 

@@ -24,7 +24,7 @@ interface Customer {
 
 export default function OrderHistory() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -96,12 +96,20 @@ export default function OrderHistory() {
           <EmptyState
             icon={ShoppingBag}
             title={t.noCustomersYet}
-            description="Your customers will appear here automatically when they place orders through your storefronts."
-            tips={[
-              "Create and share a storefront to get started",
-              "Customers are added when orders come in",
-              "Track spending, orders, and engagement"
-            ]}
+            description={t.customersAppearAuto}
+            tips={
+              language === "es" 
+                ? [
+                    "Crea y comparte una vitrina para empezar",
+                    "Los clientes se agregan cuando llegan pedidos",
+                    "Rastrea gastos, pedidos e interacciones"
+                  ]
+                : [
+                    "Create and share a storefront to get started",
+                    "Customers are added when orders come in",
+                    "Track spending, orders, and engagement"
+                  ]
+            }
           />
         )}
 
