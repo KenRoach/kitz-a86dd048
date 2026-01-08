@@ -45,14 +45,17 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-primary-soft relative overflow-hidden">
-      {/* Decorative circles */}
+      {/* Decorative animated circles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/10" />
-        <div className="absolute top-20 right-10 w-60 h-60 rounded-full border border-white/10" />
-        <div className="absolute bottom-40 -left-10 w-40 h-40 rounded-full border border-white/10" />
-        <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full border border-white/10" />
-        <div className="absolute -bottom-20 right-20 w-56 h-56 rounded-full border border-white/10" />
-        <div className="absolute top-10 left-1/2 w-48 h-48 rounded-full border border-white/8" />
+        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/10 animate-float-slow" />
+        <div className="absolute top-20 right-10 w-60 h-60 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-40 -left-10 w-40 h-40 rounded-full border border-white/10 animate-float-fast" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full border border-white/10 animate-float-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-20 right-20 w-56 h-56 rounded-full border border-white/10 animate-float-medium" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-10 left-1/2 w-48 h-48 rounded-full border border-white/8 animate-float-fast" style={{ animationDelay: '0.8s' }} />
+        {/* Glowing orbs */}
+        <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow" />
+        <div className="absolute bottom-1/3 left-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Header */}
