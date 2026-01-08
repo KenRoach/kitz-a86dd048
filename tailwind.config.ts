@@ -125,6 +125,19 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.8" },
         },
+        "confetti-fall": {
+          "0%": { transform: "translateY(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) rotate(720deg)", opacity: "0" },
+        },
+        "confetti-spin": {
+          "0%": { transform: "rotateX(0) rotateY(0)" },
+          "100%": { transform: "rotateX(360deg) rotateY(360deg)" },
+        },
+        "celebration-pop": {
+          "0%": { transform: "scale(0.5)", opacity: "0" },
+          "50%": { transform: "scale(1.1)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -133,6 +146,9 @@ export default {
         "slide-in": "slide-in 0.2s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "confetti-fall": "confetti-fall 3s ease-out forwards",
+        "confetti-spin": "confetti-spin 1s linear infinite",
+        "celebration-pop": "celebration-pop 0.5s ease-out forwards",
       },
     },
   },
