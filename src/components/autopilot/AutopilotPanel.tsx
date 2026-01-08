@@ -15,6 +15,7 @@ import { use4DX } from "@/hooks/use4DX";
 import { useLanguage } from "@/hooks/useLanguage";
 import { EisenhowerMatrix } from "./EisenhowerMatrix";
 import { InstagramIdeas } from "./InstagramIdeas";
+import { ContentCalendar } from "./ContentCalendar";
 import { 
   Bot, Zap, Store, Users, Play, Loader2, 
   CheckCircle, Clock, AlertCircle, Sparkles,
@@ -589,6 +590,9 @@ export function AutopilotPanel() {
 
           {/* Instagram Ideas */}
           <InstagramIdeas />
+
+          {/* Content Calendar */}
+          <ContentCalendar />
 
           {/* Recent Actions */}
           {actions.length > 0 && (
