@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Camera, Upload, X, CheckCircle, ImageIcon, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -83,6 +84,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
   const [uploadError, setUploadError] = useState(false);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [pendingFile, setPendingFile] = useState<Blob | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,16 +100,45 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
   const uploadFile = useCallback(async (file: Blob, fileName: string) => {
     setUploading(true);
     setUploadError(false);
+    setUploadProgress(0);
 
     try {
-      const { error: uploadError } = await supabase.storage
-        .from("storefront-images")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: true,
+      // Use XMLHttpRequest for progress tracking
+      const uploadPromise = new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            setUploadProgress(percent);
+          }
         });
 
-      if (uploadError) throw uploadError;
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("storefront-images")
+          .getPublicUrl(fileName);
+
+        // Get the upload URL
+        const uploadUrl = publicUrl.replace("/object/public/", "/object/");
+        
+        xhr.open("POST", uploadUrl);
+        xhr.setRequestHeader("Authorization", `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`);
+        xhr.setRequestHeader("x-upsert", "true");
+        xhr.send(file);
+      });
+
+      await uploadPromise;
 
       const { data: urlData } = supabase.storage
         .from("storefront-images")
@@ -273,12 +304,17 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
             </div>
           )}
 
-          {/* Uploading state */}
+          {/* Uploading state with progress */}
           {uploading && (
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-3 w-3/4 max-w-[200px]">
                 <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                <span className="text-sm text-muted-foreground">Uploading...</span>
+                <div className="w-full space-y-1">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <span className="text-xs text-muted-foreground block text-center">
+                    Uploading... {uploadProgress}%
+                  </span>
+                </div>
               </div>
             </div>
           )}
