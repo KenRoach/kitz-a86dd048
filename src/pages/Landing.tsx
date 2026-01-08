@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Check, MessageCircle } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Zap, Shield, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type FormState = "idle" | "form" | "success";
@@ -232,7 +232,39 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Features Section */}
+      <section className="pb-32 px-4 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed">
+                Create invoices and storefronts in seconds, not hours.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed">
+                Keep your customers, orders, and payments organized in one place.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed">
+                Track your progress and grow with AI-powered insights.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
       <footer className="fixed bottom-0 left-0 right-0 py-4 px-4 text-center z-10">
         <p className="text-xs text-white/60">
           © 2025 kitz
