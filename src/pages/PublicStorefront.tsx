@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save } from "lucide-react";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { PaymentProofUpload } from "@/components/storefront/PaymentProofUpload";
 
 const BUYER_INFO_KEY = "kitz_buyer_info";
 const BUYER_INFO_EXPIRY_DAYS = 120;
@@ -554,14 +555,23 @@ export default function PublicStorefront() {
 
         {/* Order Confirmation */}
         {orderPlaced && !isPaid && !showSavePrompt && (
-          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center animate-fade-in">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-primary" />
+          <div className="space-y-4 animate-fade-in">
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Order received!</h3>
+              <p className="text-muted-foreground text-sm">
+                Upload your payment proof below, or the seller will contact you.
+              </p>
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-1">Order received!</h3>
-            <p className="text-muted-foreground text-sm">
-              The seller has been notified and will contact you to arrange payment.
-            </p>
+            
+            {/* Payment Proof Upload */}
+            {storefront && (
+              <div className="bg-card border border-border rounded-2xl p-5">
+                <PaymentProofUpload storefrontId={storefront.id} />
+              </div>
+            )}
           </div>
         )}
       </main>

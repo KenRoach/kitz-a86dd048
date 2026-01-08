@@ -63,7 +63,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
       // Update storefront with payment proof URL
       const { error: updateError } = await supabase
         .from("storefronts")
-        .update({ payment_proof_url: urlData.publicUrl })
+        .update({ payment_proof_url: urlData.publicUrl } as any)
         .eq("id", storefrontId);
 
       if (updateError) throw updateError;
