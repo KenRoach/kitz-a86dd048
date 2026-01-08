@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Check, MessageCircle, Zap, Shield, TrendingUp, Globe } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -319,45 +319,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="pb-32 px-4 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/90 text-sm leading-relaxed">
-                {language === "en" 
-                  ? "Create invoices and storefronts in seconds, not hours."
-                  : "Crea facturas y vitrinas en segundos, no en horas."}
-              </p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/90 text-sm leading-relaxed">
-                {language === "en" 
-                  ? "Keep your customers, orders, and payments organized in one place."
-                  : "Mantén tus clientes, pedidos y pagos organizados en un solo lugar."}
-              </p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/90 text-sm leading-relaxed">
-                {language === "en" 
-                  ? "Track your progress and grow with AI-powered insights."
-                  : "Sigue tu progreso y crece con insights impulsados por IA."}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <footer className="fixed bottom-0 left-0 right-0 py-4 px-4 text-center z-10">
         <p className="text-xs text-white/60">
