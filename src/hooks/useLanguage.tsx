@@ -354,6 +354,36 @@ interface Translations {
   listening: string;
   speaking: string;
   askAboutBusiness: string;
+  
+  // 4DX Methodology
+  fourDxTitle: string;
+  wig: string;
+  wigFull: string;
+  leadMeasures: string;
+  scoreboard: string;
+  cadence: string;
+  setYourWig: string;
+  weeklyGoal: string;
+  dailyGoal: string;
+  monthlyGoal: string;
+  revenue: string;
+  newOrders: string;
+  newCustomers: string;
+  target: string;
+  current: string;
+  storefrontsCreated: string;
+  followupsCompleted: string;
+  ofTarget: string;
+  onTrack: string;
+  behindPace: string;
+  aheadOfPace: string;
+  weeklyReview: string;
+  daily: string;
+  weekly: string;
+  monthly: string;
+  period: string;
+  predictLeadMeasures: string;
+  activitiesThatDriveResults: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -699,6 +729,36 @@ const translations: Record<Language, Translations> = {
     listening: "Listening...",
     speaking: "Speaking...",
     askAboutBusiness: "Ask about your business...",
+    
+    // 4DX Methodology
+    fourDxTitle: "4DX Goals",
+    wig: "WIG",
+    wigFull: "Wildly Important Goal",
+    leadMeasures: "Lead Measures",
+    scoreboard: "Scoreboard",
+    cadence: "Cadence",
+    setYourWig: "Set your goal",
+    weeklyGoal: "Weekly goal",
+    dailyGoal: "Daily goal",
+    monthlyGoal: "Monthly goal",
+    revenue: "Revenue",
+    newOrders: "Orders",
+    newCustomers: "Customers",
+    target: "Target",
+    current: "Current",
+    storefrontsCreated: "Storefronts created",
+    followupsCompleted: "Follow-ups completed",
+    ofTarget: "of target",
+    onTrack: "On track",
+    behindPace: "Behind pace",
+    aheadOfPace: "Ahead of pace",
+    weeklyReview: "Weekly review",
+    daily: "Daily",
+    weekly: "Weekly",
+    monthly: "Monthly",
+    period: "Period",
+    predictLeadMeasures: "Predictive activities",
+    activitiesThatDriveResults: "Activities that drive results",
   },
   es: {
     goodMorning: "Buenos días",
@@ -1042,6 +1102,36 @@ const translations: Record<Language, Translations> = {
     listening: "Escuchando...",
     speaking: "Hablando...",
     askAboutBusiness: "Pregunta sobre tu negocio...",
+    
+    // 4DX Methodology
+    fourDxTitle: "Metas 4DX",
+    wig: "MCI",
+    wigFull: "Meta Crucialmente Importante",
+    leadMeasures: "Medidas de Predicción",
+    scoreboard: "Marcador",
+    cadence: "Cadencia",
+    setYourWig: "Define tu meta",
+    weeklyGoal: "Meta semanal",
+    dailyGoal: "Meta diaria",
+    monthlyGoal: "Meta mensual",
+    revenue: "Ingresos",
+    newOrders: "Pedidos",
+    newCustomers: "Clientes",
+    target: "Meta",
+    current: "Actual",
+    storefrontsCreated: "Vitrinas creadas",
+    followupsCompleted: "Seguimientos completados",
+    ofTarget: "de la meta",
+    onTrack: "En camino",
+    behindPace: "Por debajo",
+    aheadOfPace: "Por encima",
+    weeklyReview: "Revisión semanal",
+    daily: "Diario",
+    weekly: "Semanal",
+    monthly: "Mensual",
+    period: "Período",
+    predictLeadMeasures: "Actividades predictivas",
+    activitiesThatDriveResults: "Actividades que impulsan resultados",
   },
 };
 
