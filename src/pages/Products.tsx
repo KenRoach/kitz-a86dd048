@@ -58,15 +58,17 @@ const PRODUCT_TYPES = [
 ];
 
 const CATEGORIES = [
-  "Food & Beverages",
-  "Clothing & Apparel",
-  "Electronics",
-  "Home & Garden",
-  "Health & Beauty",
-  "Services",
-  "Digital Products",
-  "Handmade & Crafts",
-  "Other"
+  { value: "food", label: "Food & Beverages", labelEs: "Alimentos y Bebidas" },
+  { value: "clothing", label: "Clothing & Apparel", labelEs: "Ropa y Accesorios" },
+  { value: "electronics", label: "Electronics", labelEs: "Electrónica" },
+  { value: "home", label: "Home & Garden", labelEs: "Hogar y Jardín" },
+  { value: "health", label: "Health & Beauty", labelEs: "Salud y Belleza" },
+  { value: "services", label: "Services", labelEs: "Servicios" },
+  { value: "digital", label: "Digital Products", labelEs: "Productos Digitales" },
+  { value: "handmade", label: "Handmade & Crafts", labelEs: "Artesanías" },
+  { value: "consulting", label: "Consulting", labelEs: "Consultoría" },
+  { value: "training", label: "Training & Workshops", labelEs: "Capacitación y Talleres" },
+  { value: "other", label: "Other", labelEs: "Otro" }
 ];
 
 export default function Products() {
@@ -469,7 +471,9 @@ export default function Products() {
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {language === "es" ? cat.labelEs : cat.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -606,7 +610,9 @@ export default function Products() {
                     )}
                     {product.category && (
                       <span className="px-2 py-0.5 bg-black/60 backdrop-blur text-white text-xs rounded-full">
-                        {product.category}
+                        {language === "es" 
+                          ? CATEGORIES.find(c => c.value === product.category)?.labelEs || product.category
+                          : CATEGORIES.find(c => c.value === product.category)?.label || product.category}
                       </span>
                     )}
                   </div>
