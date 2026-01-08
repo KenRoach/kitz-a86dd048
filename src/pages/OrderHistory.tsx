@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail, Copy, CheckCircle, MessageSquare, Copy as Duplicate, CalendarIcon } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail, Copy, CheckCircle, MessageSquare, Copy as Duplicate, CalendarIcon, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -146,6 +146,56 @@ export default function OrderHistory() {
     setDuplicating(false);
   };
 
+  const handleExportCSV = () => {
+    if (filteredItems.length === 0) {
+      toast.error(language === "es" ? "No hay datos para exportar" : "No data to export");
+      return;
+    }
+
+    const headers = [
+      language === "es" ? "Título" : "Title",
+      language === "es" ? "Precio" : "Price",
+      language === "es" ? "Estado" : "Status",
+      language === "es" ? "Tipo" : "Type",
+      language === "es" ? "Cliente" : "Customer",
+      language === "es" ? "Teléfono" : "Phone",
+      "Email",
+      language === "es" ? "Cantidad" : "Quantity",
+      language === "es" ? "Creado" : "Created",
+      language === "es" ? "Pagado" : "Paid",
+    ];
+
+    const rows = filteredItems.map(item => [
+      `"${item.title.replace(/"/g, '""')}"`,
+      item.price.toFixed(2),
+      item.status,
+      item.mode,
+      item.customer_name ? `"${item.customer_name.replace(/"/g, '""')}"` : "",
+      item.customer_phone || "",
+      item.buyer_email || "",
+      item.quantity,
+      format(new Date(item.created_at), "yyyy-MM-dd"),
+      item.paid_at ? format(new Date(item.paid_at), "yyyy-MM-dd") : "",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `historial-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(language === "es" ? "CSV exportado" : "CSV exported");
+  };
+
   const getDateRangeFilter = (item: HistoryItem): boolean => {
     const itemDate = new Date(item.created_at);
     const now = new Date();
@@ -268,15 +318,27 @@ export default function OrderHistory() {
               {language === "es" ? "Cotizaciones, pedidos y cancelaciones" : "Quotes, orders and cancellations"}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleExportCSV}
+              disabled={loading || filteredItems.length === 0}
+              className="shrink-0"
+              title={language === "es" ? "Exportar CSV" : "Export CSV"}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="shrink-0"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </div>
 
         {/* Summary Stats */}
