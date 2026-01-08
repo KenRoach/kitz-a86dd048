@@ -311,6 +311,33 @@ export type Database = {
         }
         Relationships: []
       }
+      habits: {
+        Row: {
+          completed_dates: string[]
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_dates?: string[]
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_dates?: string[]
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,29 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Plus, Trash2, Flame } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { format, isToday, differenceInDays, startOfDay } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { format, differenceInDays, startOfDay } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Habit {
   id: string;
   name: string;
-  completedDates: string[];
-  createdAt: string;
+  completed_dates: string[];
+  created_at: string;
 }
 
-interface HabitData {
-  habits: Habit[];
-}
+const MAX_HABITS = 10;
 
 export function HabitTracker() {
   const { user } = useAuth();
@@ -26,88 +37,118 @@ export function HabitTracker() {
   const [newHabit, setNewHabit] = useState("");
   const todayKey = format(new Date(), "yyyy-MM-dd");
 
-  const { data, isLoading } = useQuery({
+  const { data: habits = [], isLoading } = useQuery({
     queryKey: ["habits", user?.id],
-    queryFn: () => {
-      const stored = localStorage.getItem(`habits_${user?.id}`);
-      return stored ? (JSON.parse(stored) as HabitData) : { habits: [] };
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("habits")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return data as Habit[];
     },
     enabled: !!user?.id,
   });
 
-  const saveMutation = useMutation({
-    mutationFn: async (habits: Habit[]) => {
-      localStorage.setItem(`habits_${user?.id}`, JSON.stringify({ habits }));
-      return { habits };
+  const addMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const { error } = await supabase.from("habits").insert({
+        user_id: user!.id,
+        name,
+        completed_dates: [],
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habits", user?.id] });
+      toast.success("Habit added!");
+    },
+    onError: () => toast.error("Failed to add habit"),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, completed_dates }: { id: string; completed_dates: string[] }) => {
+      const { error } = await supabase
+        .from("habits")
+        .update({ completed_dates })
+        .eq("id", id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits", user?.id] });
     },
   });
 
-  const habits = data?.habits || [];
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("habits").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habits", user?.id] });
+      toast.success("Habit deleted");
+    },
+    onError: () => toast.error("Failed to delete habit"),
+  });
 
   const addHabit = () => {
     if (!newHabit.trim()) return;
-    const habit: Habit = {
-      id: crypto.randomUUID(),
-      name: newHabit.trim(),
-      completedDates: [],
-      createdAt: new Date().toISOString(),
-    };
-    saveMutation.mutate([...habits, habit]);
+    if (habits.length >= MAX_HABITS) {
+      toast.error(`Maximum ${MAX_HABITS} habits allowed`);
+      return;
+    }
+    addMutation.mutate(newHabit.trim());
     setNewHabit("");
   };
 
-  const toggleHabit = (habitId: string) => {
-    const updated = habits.map((h) => {
-      if (h.id !== habitId) return h;
-      const isCompleted = h.completedDates.includes(todayKey);
-      return {
-        ...h,
-        completedDates: isCompleted
-          ? h.completedDates.filter((d) => d !== todayKey)
-          : [...h.completedDates, todayKey],
-      };
-    });
-    saveMutation.mutate(updated);
+  const toggleHabit = (habit: Habit) => {
+    const isCompleted = habit.completed_dates.includes(todayKey);
+    const newDates = isCompleted
+      ? habit.completed_dates.filter((d) => d !== todayKey)
+      : [...habit.completed_dates, todayKey];
+    updateMutation.mutate({ id: habit.id, completed_dates: newDates });
   };
 
-  const deleteHabit = (habitId: string) => {
-    saveMutation.mutate(habits.filter((h) => h.id !== habitId));
-  };
+  // Memoized streak calculations
+  const streaks = useMemo(() => {
+    const getStreak = (habit: Habit): number => {
+      if (habit.completed_dates.length === 0) return 0;
 
-  const getStreak = (habit: Habit): number => {
-    if (habit.completedDates.length === 0) return 0;
-    
-    const sortedDates = [...habit.completedDates]
-      .map((d) => startOfDay(new Date(d)))
-      .sort((a, b) => b.getTime() - a.getTime());
+      const sortedDates = [...habit.completed_dates]
+        .map((d) => startOfDay(new Date(d)))
+        .sort((a, b) => b.getTime() - a.getTime());
 
-    let streak = 0;
-    let checkDate = startOfDay(new Date());
+      let streak = 0;
+      let checkDate = startOfDay(new Date());
 
-    // If not completed today, check from yesterday
-    if (!habit.completedDates.includes(todayKey)) {
-      checkDate = new Date(checkDate);
-      checkDate.setDate(checkDate.getDate() - 1);
-    }
-
-    for (const date of sortedDates) {
-      if (differenceInDays(checkDate, date) === 0) {
-        streak++;
+      if (!habit.completed_dates.includes(todayKey)) {
         checkDate = new Date(checkDate);
         checkDate.setDate(checkDate.getDate() - 1);
-      } else if (differenceInDays(checkDate, date) > 0) {
-        break;
       }
-    }
 
-    return streak;
-  };
+      for (const date of sortedDates) {
+        if (differenceInDays(checkDate, date) === 0) {
+          streak++;
+          checkDate = new Date(checkDate);
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else if (differenceInDays(checkDate, date) > 0) {
+          break;
+        }
+      }
+
+      return streak;
+    };
+
+    return habits.reduce((acc, habit) => {
+      acc[habit.id] = getStreak(habit);
+      return acc;
+    }, {} as Record<string, number>);
+  }, [habits, todayKey]);
 
   const completedToday = habits.filter((h) =>
-    h.completedDates.includes(todayKey)
+    h.completed_dates.includes(todayKey)
   ).length;
   const progressPercent = habits.length > 0 ? (completedToday / habits.length) * 100 : 0;
 
@@ -133,6 +174,9 @@ export function HabitTracker() {
         <CardTitle className="flex items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-primary" />
           Daily Habits
+          <span className="ml-auto text-sm font-normal text-muted-foreground">
+            {habits.length}/{MAX_HABITS}
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -154,8 +198,13 @@ export function HabitTracker() {
             value={newHabit}
             onChange={(e) => setNewHabit(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addHabit()}
+            disabled={habits.length >= MAX_HABITS}
           />
-          <Button size="icon" onClick={addHabit} disabled={!newHabit.trim()}>
+          <Button
+            size="icon"
+            onClick={addHabit}
+            disabled={!newHabit.trim() || habits.length >= MAX_HABITS || addMutation.isPending}
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -168,9 +217,9 @@ export function HabitTracker() {
             </p>
           ) : (
             habits.map((habit) => {
-              const isCompleted = habit.completedDates.includes(todayKey);
-              const streak = getStreak(habit);
-              
+              const isCompleted = habit.completed_dates.includes(todayKey);
+              const streak = streaks[habit.id] || 0;
+
               return (
                 <div
                   key={habit.id}
@@ -178,7 +227,8 @@ export function HabitTracker() {
                 >
                   <Checkbox
                     checked={isCompleted}
-                    onCheckedChange={() => toggleHabit(habit.id)}
+                    onCheckedChange={() => toggleHabit(habit)}
+                    disabled={updateMutation.isPending}
                   />
                   <span
                     className={`flex-1 ${
@@ -188,19 +238,39 @@ export function HabitTracker() {
                     {habit.name}
                   </span>
                   {streak > 0 && (
-                    <div className="flex items-center gap-1 text-orange-500">
+                    <div className="flex items-center gap-1 text-destructive">
                       <Flame className="h-4 w-4" />
                       <span className="text-sm font-medium">{streak}</span>
                     </div>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => deleteHabit(habit.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete habit?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete "{habit.name}" and all its streak history.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteMutation.mutate(habit.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               );
             })
