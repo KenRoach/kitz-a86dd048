@@ -1,0 +1,79 @@
+# Kitz
+
+> Simple storefront sales platform for small businesses in Panama.
+
+Kitz helps small business owners create shareable storefronts, manage orders, track customers, and get paid faster.
+
+## What Kitz Does
+
+Kitz is a web application that enables small businesses to:
+
+- **Create Storefronts**: Generate shareable links for products or services in seconds
+- **Accept Payments**: Support for Yappy, credit/debit cards, cash, and Pluxee vouchers
+- **Track Orders**: Monitor order status from draft to paid to fulfilled
+- **Manage Customers**: Keep track of customer history, interactions, and spending
+- **AI Business Advisor**: Get personalized business insights and recommendations
+- **Marketing Tools**: Generate marketing images and Instagram post ideas with AI
+
+## Target Users
+
+- Small business owners in Panama
+- Freelancers and service providers
+- Home bakers, crafters, and artisans
+- Anyone selling through WhatsApp or social media
+
+## Key Features
+
+### Storefronts
+Create shareable product pages with:
+- Title, description, and price
+- Product images
+- Multiple payment method options
+- Order tracking for customers
+
+### Customer Management
+- Customer lifecycle tracking (new, active, loyal)
+- Order history and total spending
+- Contact information management
+- Follow-up reminders
+
+### Productivity Tools
+- Eisenhower Matrix for task prioritization
+- Habit tracker
+- Pomodoro timer
+- Weekly review system
+- Content calendar
+
+### AI Features
+- Business advisor with personalized recommendations
+- Marketing image generator
+- Product description generator
+- Instagram post ideas
+
+## Payment Methods Supported
+
+1. **Yappy** - Panama's popular mobile payment system
+2. **Credit/Debit Cards** - Visa, Mastercard
+3. **Cash** - Cash on delivery
+4. **Pluxee** - Corporate vouchers (formerly Sodexo)
+
+## How It Works
+
+1. Sign up for free at kitz.app
+2. Create your first storefront with a product/service
+3. Share the link via WhatsApp or social media
+4. Customers view, order, and pay
+5. Track everything from your dashboard
+
+## Contact
+
+- Email: hello@kitz.app
+- Website: https://kitz.app
+
+## Technical Details
+
+Kitz is built with:
+- React + TypeScript frontend
+- Supabase backend (database, auth, edge functions)
+- Real-time order notifications
+- Responsive mobile-first design
