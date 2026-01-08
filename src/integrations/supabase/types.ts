@@ -191,6 +191,48 @@ export type Database = {
         }
         Relationships: []
       }
+      content_calendar: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          platform: string | null
+          scheduled_date: string
+          scheduled_time: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          scheduled_date: string
+          scheduled_time?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          scheduled_date?: string
+          scheduled_time?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
