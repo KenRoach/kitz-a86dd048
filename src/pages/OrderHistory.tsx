@@ -72,7 +72,7 @@ export default function OrderHistory() {
       case "quotes":
         return item.mode === "quote";
       case "orders":
-        return item.status === "paid" || item.ordered_at !== null;
+        return item.status === "paid";
       case "cancelled":
         return item.status === "cancelled";
       default:
@@ -114,7 +114,7 @@ export default function OrderHistory() {
   const getCounts = () => ({
     all: items.length,
     quotes: items.filter(i => i.mode === "quote").length,
-    orders: items.filter(i => i.status === "paid" || i.ordered_at !== null).length,
+    orders: items.filter(i => i.status === "paid").length,
     cancelled: items.filter(i => i.status === "cancelled").length,
   });
 
