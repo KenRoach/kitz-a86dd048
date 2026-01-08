@@ -1,12 +1,10 @@
 import { useState, useRef, useCallback } from "react";
-import { Camera, Upload, X, CheckCircle, ImageIcon, Loader2, RefreshCw, RotateCw, Crop, Check } from "lucide-react";
+import { Camera, Upload, X, CheckCircle, ImageIcon, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import ReactCrop, { type Crop as CropType, centerCrop, makeAspectCrop } from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
 
 interface PaymentProofUploadProps {
   storefrontId: string;
@@ -16,12 +14,9 @@ interface PaymentProofUploadProps {
 interface FileInfo {
   name: string;
   size: number;
-  originalSize: number;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const COMPRESSION_MAX_DIMENSION = 1920;
-const COMPRESSION_QUALITY = 0.8;
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -29,133 +24,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function centerAspectCrop(mediaWidth: number, mediaHeight: number) {
-  return centerCrop(
-    makeAspectCrop(
-      { unit: "%", width: 90 },
-      mediaWidth / mediaHeight,
-      mediaWidth,
-      mediaHeight
-    ),
-    mediaWidth,
-    mediaHeight
-  );
-}
-
-async function getCroppedImage(
-  imageSrc: string,
-  crop: CropType,
-  rotation: number
-): Promise<Blob> {
-  const image = new Image();
-  image.src = imageSrc;
-  await new Promise((resolve) => (image.onload = resolve));
-
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d")!;
-
-  const scaleX = image.naturalWidth / image.width;
-  const scaleY = image.naturalHeight / image.height;
-
-  // Calculate rotated dimensions
-  const radians = (rotation * Math.PI) / 180;
-  const sin = Math.abs(Math.sin(radians));
-  const cos = Math.abs(Math.cos(radians));
-
-  const cropWidth = (crop.width / 100) * image.naturalWidth;
-  const cropHeight = (crop.height / 100) * image.naturalHeight;
-
-  canvas.width = cropWidth;
-  canvas.height = cropHeight;
-
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.rotate(radians);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
-
-  const cropX = (crop.x / 100) * image.naturalWidth;
-  const cropY = (crop.y / 100) * image.naturalHeight;
-
-  ctx.drawImage(
-    image,
-    cropX,
-    cropY,
-    cropWidth,
-    cropHeight,
-    0,
-    0,
-    cropWidth,
-    cropHeight
-  );
-
-  return new Promise((resolve) => {
-    canvas.toBlob(
-      (blob) => resolve(blob!),
-      "image/jpeg",
-      COMPRESSION_QUALITY
-    );
-  });
-}
-
-async function compressImage(blob: Blob): Promise<{ blob: Blob; wasCompressed: boolean }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    img.onload = () => {
-      let { width, height } = img;
-      let wasCompressed = false;
-
-      if (width > COMPRESSION_MAX_DIMENSION || height > COMPRESSION_MAX_DIMENSION) {
-        wasCompressed = true;
-        if (width > height) {
-          height = Math.round((height * COMPRESSION_MAX_DIMENSION) / width);
-          width = COMPRESSION_MAX_DIMENSION;
-        } else {
-          width = Math.round((width * COMPRESSION_MAX_DIMENSION) / height);
-          height = COMPRESSION_MAX_DIMENSION;
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      ctx?.drawImage(img, 0, 0, width, height);
-
-      canvas.toBlob(
-        (compressedBlob) => {
-          if (compressedBlob && compressedBlob.size < blob.size) {
-            resolve({ blob: compressedBlob, wasCompressed: true });
-          } else {
-            resolve({ blob, wasCompressed: false });
-          }
-        },
-        "image/jpeg",
-        COMPRESSION_QUALITY
-      );
-    };
-
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = URL.createObjectURL(blob);
-  });
-}
-
 export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentProofUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [compressing, setCompressing] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
-  const [pendingFile, setPendingFile] = useState<Blob | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
-  // Editing state
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingImage, setEditingImage] = useState<string | null>(null);
-  const [crop, setCrop] = useState<CropType>();
-  const [rotation, setRotation] = useState(0);
-  const [originalFile, setOriginalFile] = useState<File | null>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -165,10 +41,13 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
     if (cameraInputRef.current) cameraInputRef.current.value = "";
   }, []);
 
-  const uploadFile = useCallback(async (file: Blob, fileName: string) => {
+  const uploadFile = useCallback(async (file: File) => {
     setUploading(true);
     setUploadError(false);
     setUploadProgress(0);
+
+    const fileExt = file.name.split(".").pop() || "jpg";
+    const fileName = `${storefrontId}/payment-proof-${Date.now()}.${fileExt}`;
 
     try {
       const uploadPromise = new Promise<void>((resolve, reject) => {
@@ -246,86 +125,24 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
       return;
     }
 
-    // Enter editing mode
+    // Show preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      setEditingImage(e.target?.result as string);
-      setIsEditing(true);
-      setRotation(0);
-      setCrop(undefined);
+      setPreview(e.target?.result as string);
     };
     reader.readAsDataURL(file);
-    setOriginalFile(file);
-  };
 
-  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height));
-  };
+    setFileInfo({ name: file.name, size: file.size });
+    setPendingFile(file);
+    setUploadError(false);
 
-  const handleRotate = () => {
-    setRotation((prev) => (prev + 90) % 360);
-  };
-
-  const handleConfirmEdit = async () => {
-    if (!editingImage || !crop || !originalFile) return;
-
-    setIsEditing(false);
-    setCompressing(true);
-
-    try {
-      // Get cropped and rotated image
-      const croppedBlob = await getCroppedImage(editingImage, crop, rotation);
-      
-      // Compress the result
-      const { blob: compressedBlob, wasCompressed } = await compressImage(croppedBlob);
-      
-      // Show preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(compressedBlob);
-
-      setFileInfo({
-        name: originalFile.name,
-        size: compressedBlob.size,
-        originalSize: originalFile.size,
-      });
-
-      if (wasCompressed) {
-        toast.success(`Compressed: ${formatFileSize(originalFile.size)} → ${formatFileSize(compressedBlob.size)}`);
-      }
-
-      setCompressing(false);
-      setEditingImage(null);
-
-      const fileExt = originalFile.name.split(".").pop() || "jpg";
-      const fileName = `${storefrontId}/payment-proof-${Date.now()}.${fileExt}`;
-      setPendingFile(compressedBlob);
-
-      await uploadFile(compressedBlob, fileName);
-    } catch (error) {
-      console.error("Processing error:", error);
-      toast.error("Failed to process image");
-      setCompressing(false);
-      resetInputs();
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditingImage(null);
-    setRotation(0);
-    setCrop(undefined);
-    setOriginalFile(null);
-    resetInputs();
+    // Upload immediately
+    await uploadFile(file);
   };
 
   const handleRetry = async () => {
     if (!pendingFile) return;
-    const fileName = `${storefrontId}/payment-proof-${Date.now()}.jpg`;
-    await uploadFile(pendingFile, fileName);
+    await uploadFile(pendingFile);
   };
 
   const handleRemove = () => {
@@ -334,78 +151,8 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
     setUploadError(false);
     setFileInfo(null);
     setPendingFile(null);
-    setOriginalFile(null);
     resetInputs();
   };
-
-  // Editing mode
-  if (isEditing && editingImage) {
-    return (
-      <div className="space-y-3 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Edit image</span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRotate}
-              className="gap-1.5"
-              aria-label="Rotate image 90 degrees"
-            >
-              <RotateCw className="w-4 h-4" />
-              Rotate
-            </Button>
-          </div>
-        </div>
-
-        <div className="relative bg-muted rounded-xl overflow-hidden">
-          <div 
-            className="flex items-center justify-center p-2"
-            style={{ maxHeight: "300px" }}
-          >
-            <ReactCrop
-              crop={crop}
-              onChange={(_, percentCrop) => setCrop(percentCrop)}
-              className="max-h-[280px]"
-            >
-              <img
-                ref={imgRef}
-                src={editingImage}
-                alt="Edit preview"
-                onLoad={onImageLoad}
-                className="max-h-[280px] w-auto"
-                style={{ transform: `rotate(${rotation}deg)` }}
-              />
-            </ReactCrop>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleCancelEdit}
-            className="flex-1"
-            aria-label="Cancel editing"
-          >
-            <X className="w-4 h-4 mr-1.5" />
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmEdit}
-            className="flex-1 gap-1.5"
-            aria-label="Confirm and upload"
-          >
-            <Check className="w-4 h-4" />
-            Done
-          </Button>
-        </div>
-
-        <p className="text-xs text-muted-foreground text-center">
-          Drag to crop • Tap rotate to adjust orientation
-        </p>
-      </div>
-    );
-  }
 
   // Success state
   if (uploaded && preview) {
@@ -454,19 +201,10 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
             <img src={preview} alt="Payment proof preview" className="w-full h-full object-cover" />
           </div>
           
-          {fileInfo && !uploading && !compressing && (
+          {fileInfo && !uploading && (
             <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm rounded-lg px-2 py-1">
               <p className="text-xs text-foreground truncate max-w-[150px]">{fileInfo.name}</p>
               <p className="text-xs text-muted-foreground">{formatFileSize(fileInfo.size)}</p>
-            </div>
-          )}
-
-          {compressing && (
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                <span className="text-sm text-muted-foreground">Processing...</span>
-              </div>
             </div>
           )}
 
@@ -502,7 +240,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
             </div>
           )}
 
-          {!uploading && !compressing && (
+          {!uploading && !uploadError && (
             <button
               onClick={handleRemove}
               className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
@@ -538,7 +276,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
         >
           <button
             onClick={() => cameraInputRef.current?.click()}
-            disabled={uploading || compressing}
+            disabled={uploading}
             className={cn(
               "flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-action/30 bg-action/5 transition-all",
               "hover:border-action/50 hover:bg-action/10 active:scale-[0.98]",
@@ -555,7 +293,7 @@ export function PaymentProofUpload({ storefrontId, onUploadComplete }: PaymentPr
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || compressing}
+            disabled={uploading}
             className={cn(
               "flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border transition-all",
               "hover:border-primary/50 hover:bg-muted/50 active:scale-[0.98]",

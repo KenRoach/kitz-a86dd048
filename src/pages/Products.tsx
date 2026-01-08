@@ -21,13 +21,11 @@ import {
 import { 
   Plus, 
   Sparkles, 
-  ImagePlus, 
   Trash2, 
   Pencil, 
   Loader2,
   Package,
   Wand2,
-  Zap,
   Briefcase,
   Calendar
 } from "lucide-react";
@@ -38,6 +36,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProductsSkeleton } from "@/components/ui/dashboard-skeleton";
 import { AnimatedCreateButton } from "@/components/ui/AnimatedCreateButton";
+import { ProductImageEditor } from "@/components/products/ProductImageEditor";
 
 interface Product {
   id: string;
@@ -92,7 +91,6 @@ export default function Products() {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -114,20 +112,6 @@ export default function Products() {
     
     setProducts((data || []) as Product[]);
     setLoading(false);
-  };
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
-        return;
-      }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -361,65 +345,17 @@ export default function Products() {
               </DialogHeader>
               
               <div className="space-y-5 py-4">
-                {/* Image Upload */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-muted-foreground">
-                      {language === "es" ? "Imagen" : "Image"}
-                    </Label>
-                    {imagePreview && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={enhanceImage}
-                        disabled={enhancingImage}
-                        className="gap-1.5 text-xs h-7"
-                      >
-                        {enhancingImage ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <Zap className="w-3 h-3" />
-                        )}
-                        {language === "es" ? "Mejorar con IA" : "Enhance with AI"}
-                      </Button>
-                    )}
-                  </div>
-                  <input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-                  <div
-                    onClick={() => !enhancingImage && imageInputRef.current?.click()}
-                    className="w-full aspect-video rounded-xl border-2 border-dashed border-border hover:border-primary/50 cursor-pointer flex items-center justify-center overflow-hidden bg-muted/50 transition-all relative"
-                  >
-                    {imagePreview ? (
-                      <>
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                        {enhancingImage && (
-                          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                            <div className="text-center">
-                              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground">
-                                {language === "es" ? "Mejorando imagen..." : "Enhancing image..."}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-center p-6">
-                        <ImagePlus className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          {language === "es" ? "Clic para subir imagen" : "Click to upload image"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Image Upload with Crop/Rotate/AI Enhance */}
+                <ProductImageEditor
+                  imagePreview={imagePreview}
+                  onImageChange={(file, preview) => {
+                    setImageFile(file);
+                    setImagePreview(preview);
+                  }}
+                  onEnhanceWithAI={enhanceImage}
+                  enhancing={enhancingImage}
+                  language={language}
+                />
 
                 {/* Title */}
                 <div>
