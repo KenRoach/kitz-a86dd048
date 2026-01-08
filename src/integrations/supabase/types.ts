@@ -420,18 +420,21 @@ export type Database = {
           customer_phone: string | null
           description: string | null
           fulfillment_note: string | null
+          fulfillment_status: string
           id: string
           image_url: string | null
           is_bundle: boolean
           mode: string
           order_key: string | null
           ordered_at: string | null
+          paid_at: string | null
           payment_cards: boolean | null
           payment_cash: boolean | null
           payment_pluxee: boolean | null
           payment_proof_url: string | null
           payment_yappy: boolean | null
           price: number
+          product_id: string | null
           quantity: number | null
           seller_phone: string | null
           slug: string
@@ -453,18 +456,21 @@ export type Database = {
           customer_phone?: string | null
           description?: string | null
           fulfillment_note?: string | null
+          fulfillment_status?: string
           id?: string
           image_url?: string | null
           is_bundle?: boolean
           mode?: string
           order_key?: string | null
           ordered_at?: string | null
+          paid_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null
           payment_proof_url?: string | null
           payment_yappy?: boolean | null
           price: number
+          product_id?: string | null
           quantity?: number | null
           seller_phone?: string | null
           slug: string
@@ -486,18 +492,21 @@ export type Database = {
           customer_phone?: string | null
           description?: string | null
           fulfillment_note?: string | null
+          fulfillment_status?: string
           id?: string
           image_url?: string | null
           is_bundle?: boolean
           mode?: string
           order_key?: string | null
           ordered_at?: string | null
+          paid_at?: string | null
           payment_cards?: boolean | null
           payment_cash?: boolean | null
           payment_pluxee?: boolean | null
           payment_proof_url?: string | null
           payment_yappy?: boolean | null
           price?: number
+          product_id?: string | null
           quantity?: number | null
           seller_phone?: string | null
           slug?: string
@@ -507,7 +516,15 @@ export type Database = {
           user_id?: string
           valid_until?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "storefronts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suggestion_comments: {
         Row: {
@@ -748,6 +765,7 @@ export type Database = {
           customer_name: string | null
           description: string | null
           fulfillment_note: string | null
+          fulfillment_status: string | null
           id: string | null
           image_url: string | null
           is_bundle: boolean | null
@@ -771,6 +789,7 @@ export type Database = {
           customer_name?: string | null
           description?: string | null
           fulfillment_note?: string | null
+          fulfillment_status?: string | null
           id?: string | null
           image_url?: string | null
           is_bundle?: boolean | null
@@ -794,6 +813,7 @@ export type Database = {
           customer_name?: string | null
           description?: string | null
           fulfillment_note?: string | null
+          fulfillment_status?: string | null
           id?: string | null
           image_url?: string | null
           is_bundle?: boolean | null

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save, Upload, FileText, ThumbsUp } from "lucide-react";
+import { ImageIcon, MessageCircle, CheckCircle, ArrowLeft, CreditCard, Banknote, Smartphone, Globe, ShoppingBag, User, Phone, Mail, Package, Save, Upload, FileText, ThumbsUp, ChefHat, PackageCheck, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -82,6 +82,7 @@ interface Storefront {
   mode: string;
   valid_until: string | null;
   accepted_at: string | null;
+  fulfillment_status: string | null;
 }
 
 export default function PublicStorefront() {
@@ -131,7 +132,7 @@ export default function PublicStorefront() {
       // Use public view that excludes sensitive data (buyer info, seller phone)
       const { data, error } = await supabase
         .from("public_storefronts" as any)
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id, mode, valid_until, accepted_at")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id, mode, valid_until, accepted_at, fulfillment_status")
         .eq("slug", effectiveSlug)
         .maybeSingle();
 
@@ -334,7 +335,25 @@ export default function PublicStorefront() {
               Accepted
             </span>
           )}
-          {isPaid && (
+          {isPaid && storefront?.fulfillment_status === "complete" && (
+            <span className="flex items-center gap-1 text-sm font-medium text-success">
+              <CheckCircle className="w-4 h-4" />
+              Complete
+            </span>
+          )}
+          {isPaid && storefront?.fulfillment_status === "ready" && (
+            <span className="flex items-center gap-1 text-sm font-medium text-primary">
+              <PackageCheck className="w-4 h-4" />
+              Ready
+            </span>
+          )}
+          {isPaid && storefront?.fulfillment_status === "preparing" && (
+            <span className="flex items-center gap-1 text-sm font-medium text-attention">
+              <ChefHat className="w-4 h-4" />
+              Preparing
+            </span>
+          )}
+          {isPaid && (!storefront?.fulfillment_status || storefront?.fulfillment_status === "pending") && (
             <span className="flex items-center gap-1 text-sm font-medium text-success">
               <CheckCircle className="w-4 h-4" />
               Paid

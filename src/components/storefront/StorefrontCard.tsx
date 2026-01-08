@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash, RotateCcw, Receipt, X, ZoomIn } from "lucide-react";
+import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, Clock, ImageIcon, Instagram, QrCode, Package, Hash, RotateCcw, Receipt, X, ZoomIn, ChefHat, PackageCheck, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export type StorefrontStatus = "draft" | "sent" | "paid";
+export type FulfillmentStatus = "pending" | "preparing" | "ready" | "complete";
 
 interface StorefrontCardProps {
   id: string;
@@ -45,18 +46,27 @@ interface StorefrontCardProps {
   paymentProofUrl?: string | null;
   mode?: "invoice" | "quote";
   acceptedAt?: string | null;
+  fulfillmentStatus?: FulfillmentStatus;
   delay?: number;
   onEdit?: () => void;
   onDelete?: () => void;
   onSend?: () => void;
   onMarkPaid?: () => void;
   onReorder?: () => void;
+  onFulfillmentChange?: (status: FulfillmentStatus) => void;
 }
 
 const statusConfig = {
   draft: { label: "Draft", icon: Clock, color: "bg-muted text-muted-foreground" },
   sent: { label: "Sent", icon: Send, color: "bg-attention/10 text-attention" },
   paid: { label: "Paid", icon: CheckCircle, color: "bg-success/10 text-success" },
+};
+
+const fulfillmentConfig = {
+  pending: { label: "Pending", color: "text-muted-foreground" },
+  preparing: { label: "Preparing", color: "text-attention" },
+  ready: { label: "Ready", color: "text-primary" },
+  complete: { label: "Complete", color: "text-success" },
 };
 
 export function StorefrontCard({
@@ -74,12 +84,14 @@ export function StorefrontCard({
   paymentProofUrl,
   mode = "invoice",
   acceptedAt,
+  fulfillmentStatus = "pending",
   delay = 0,
   onEdit,
   onDelete,
   onSend,
   onMarkPaid,
   onReorder,
+  onFulfillmentChange,
 }: StorefrontCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -295,14 +307,46 @@ export function StorefrontCard({
                   <span>View proof</span>
                 </button>
               )}
-              {status === "paid" && (
-                <button 
-                  onClick={onReorder}
-                  className="text-[10px] sm:text-xs text-primary font-medium bg-primary/10 hover:bg-primary/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full transition-colors flex items-center gap-1"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Reorder
-                </button>
+              {status === "paid" && fulfillmentStatus !== "complete" && onFulfillmentChange && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className={cn(
+                      "text-[10px] sm:text-xs font-medium px-2 py-1 sm:px-3 sm:py-1.5 rounded-full transition-colors flex items-center gap-1",
+                      fulfillmentStatus === "pending" && "bg-muted text-muted-foreground hover:bg-muted/80",
+                      fulfillmentStatus === "preparing" && "bg-attention/10 text-attention hover:bg-attention/20",
+                      fulfillmentStatus === "ready" && "bg-primary/10 text-primary hover:bg-primary/20"
+                    )}>
+                      {fulfillmentStatus === "pending" && <Clock className="w-3 h-3" />}
+                      {fulfillmentStatus === "preparing" && <ChefHat className="w-3 h-3" />}
+                      {fulfillmentStatus === "ready" && <PackageCheck className="w-3 h-3" />}
+                      {fulfillmentConfig[fulfillmentStatus].label}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-36 bg-card">
+                    {fulfillmentStatus === "pending" && (
+                      <DropdownMenuItem onClick={() => onFulfillmentChange("preparing")}>
+                        <ChefHat className="w-4 h-4 mr-2 text-attention" />
+                        Preparing
+                      </DropdownMenuItem>
+                    )}
+                    {(fulfillmentStatus === "pending" || fulfillmentStatus === "preparing") && (
+                      <DropdownMenuItem onClick={() => onFulfillmentChange("ready")}>
+                        <PackageCheck className="w-4 h-4 mr-2 text-primary" />
+                        Ready
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={() => onFulfillmentChange("complete")}>
+                      <CheckCircle className="w-4 h-4 mr-2 text-success" />
+                      Complete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {status === "paid" && fulfillmentStatus === "complete" && (
+                <span className="text-[10px] sm:text-xs text-success font-medium bg-success/10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  Complete
+                </span>
               )}
             </div>
           </div>

@@ -11,10 +11,19 @@ import { toast } from "sonner";
 import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
 import { ProductSelector } from "./ProductSelector";
 
+interface ProductData {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+}
+
 interface StorefrontWizardProps {
   open: boolean;
   onClose: () => void;
   onCreated: () => void;
+  initialProduct?: ProductData | null;
 }
 
 type Step = "type" | "what" | "confirm";
@@ -27,7 +36,7 @@ const generateSlug = (title: string) => {
     .slice(0, 50) + "-" + Date.now().toString(36);
 };
 
-export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardProps) {
+export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: StorefrontWizardProps) {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("type");
   
@@ -43,6 +52,19 @@ export function StorefrontWizard({ open, onClose, onCreated }: StorefrontWizardP
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [showProductSelector, setShowProductSelector] = useState(false);
+
+  // Pre-fill from product when initialProduct changes
+  useEffect(() => {
+    if (initialProduct && open) {
+      setTitle(initialProduct.title);
+      setDescription(initialProduct.description || "");
+      setPrice(initialProduct.price.toString());
+      setImagePreview(initialProduct.image_url);
+      setSelectedProductId(initialProduct.id);
+      setIsBundle(false);
+      setStep("what"); // Skip type selection, go straight to details
+    }
+  }, [initialProduct, open]);
   
   // Bundle fields
   const [bundleTitle, setBundleTitle] = useState("");
