@@ -10,7 +10,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-type FilterType = "all" | "quotes" | "orders" | "cancelled";
+type FilterType = "all" | "sent" | "quotes" | "orders" | "cancelled";
 
 interface HistoryItem {
   id: string;
@@ -69,6 +69,8 @@ export default function OrderHistory() {
 
     // Apply status filter
     switch (filter) {
+      case "sent":
+        return item.status === "sent" && item.mode !== "quote";
       case "quotes":
         return item.mode === "quote";
       case "orders":
@@ -106,6 +108,7 @@ export default function OrderHistory() {
 
   const filterTabs: { key: FilterType; label: string; icon: typeof FileText }[] = [
     { key: "all", label: language === "es" ? "Todo" : "All", icon: Clock },
+    { key: "sent", label: language === "es" ? "Enviadas" : "Sent", icon: FileText },
     { key: "quotes", label: language === "es" ? "Cotizaciones" : "Quotes", icon: FileText },
     { key: "orders", label: language === "es" ? "Pedidos" : "Orders", icon: ShoppingBag },
     { key: "cancelled", label: language === "es" ? "Cancelados" : "Cancelled", icon: XCircle },
@@ -113,6 +116,7 @@ export default function OrderHistory() {
 
   const getCounts = () => ({
     all: items.length,
+    sent: items.filter(i => i.status === "sent" && i.mode !== "quote").length,
     quotes: items.filter(i => i.mode === "quote").length,
     orders: items.filter(i => i.status === "paid").length,
     cancelled: items.filter(i => i.status === "cancelled").length,
