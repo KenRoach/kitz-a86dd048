@@ -646,6 +646,39 @@ export type Database = {
           },
         ]
       }
+      user_commitments: {
+        Row: {
+          commitment: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          commitment: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          week_start?: string
+        }
+        Update: {
+          commitment?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       user_goals: {
         Row: {
           created_at: string

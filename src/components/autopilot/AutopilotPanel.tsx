@@ -9,16 +9,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAutopilot, AutopilotOpportunity } from "@/hooks/useAutopilot";
 import { use4DX } from "@/hooks/use4DX";
 import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Bot, Zap, Store, Users, Play, Loader2, 
   CheckCircle, Clock, AlertCircle, Sparkles,
-  RefreshCw, Target, TrendingUp, Trophy
+  RefreshCw, Target, TrendingUp, Trophy,
+  Calendar, Plus, Trash2, ChevronDown, ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function AutopilotPanel() {
   const { t, language } = useLanguage();
@@ -37,9 +40,17 @@ export function AutopilotPanel() {
     goals,
     leadMeasures,
     wigProgress,
+    commitments,
+    lastWeekCommitments,
     loading: goalsLoading,
     updateGoals,
+    addCommitment,
+    toggleCommitment,
+    deleteCommitment,
   } = use4DX();
+
+  const [newCommitment, setNewCommitment] = useState("");
+  const [showLastWeek, setShowLastWeek] = useState(false);
 
   const loading = autopilotLoading || goalsLoading;
 
@@ -278,6 +289,135 @@ export function AutopilotPanel() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Weekly Cadence */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                <CardTitle className="text-base">{t.weeklyCommitments}</CardTitle>
+              </div>
+              <CardDescription>{t.commitToActions}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add new commitment */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder={t.commitmentPlaceholder}
+                  value={newCommitment}
+                  onChange={(e) => setNewCommitment(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newCommitment.trim()) {
+                      addCommitment(newCommitment);
+                      setNewCommitment("");
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <Button
+                  size="icon"
+                  onClick={() => {
+                    if (newCommitment.trim()) {
+                      addCommitment(newCommitment);
+                      setNewCommitment("");
+                    }
+                  }}
+                  disabled={!newCommitment.trim()}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* This week's commitments */}
+              {commitments.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">{t.noCommitmentsYet}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <span>{t.thisWeeksCommitments}</span>
+                    <Badge variant="outline">
+                      {commitments.filter(c => c.completed).length}/{commitments.length} {t.completedOf}
+                    </Badge>
+                  </div>
+                  {commitments.map((commitment) => (
+                    <div
+                      key={commitment.id}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                        commitment.completed 
+                          ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                          : "bg-muted/50"
+                      )}
+                    >
+                      <Checkbox
+                        checked={commitment.completed}
+                        onCheckedChange={(checked) => toggleCommitment(commitment.id, checked as boolean)}
+                        className="shrink-0"
+                      />
+                      <span className={cn(
+                        "flex-1 text-sm",
+                        commitment.completed && "line-through text-muted-foreground"
+                      )}>
+                        {commitment.commitment}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => deleteCommitment(commitment.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Last week's review */}
+              {lastWeekCommitments.length > 0 && (
+                <Collapsible open={showLastWeek} onOpenChange={setShowLastWeek}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-between">
+                      <span className="text-sm">{t.lastWeekResults}</span>
+                      {showLastWeek ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-2 space-y-2">
+                    <div className="text-xs text-muted-foreground mb-2">
+                      {lastWeekCommitments.filter(c => c.completed).length}/{lastWeekCommitments.length} {t.completedOf}
+                    </div>
+                    {lastWeekCommitments.map((commitment) => (
+                      <div
+                        key={commitment.id}
+                        className={cn(
+                          "flex items-center gap-3 p-2 rounded-lg text-sm",
+                          commitment.completed 
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {commitment.completed ? (
+                          <CheckCircle className="w-4 h-4 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" />
+                        )}
+                        <span className={commitment.completed ? "line-through" : ""}>
+                          {commitment.commitment}
+                        </span>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </CardContent>
           </Card>
 
