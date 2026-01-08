@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail, Copy, CheckCircle, MessageSquare, Copy as Duplicate } from "lucide-react";
+import { Search, RefreshCw, FileText, ShoppingBag, XCircle, Clock, DollarSign, TrendingUp, X, ChevronRight, Phone, Mail, Copy, CheckCircle, MessageSquare, Copy as Duplicate, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,11 +8,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfWeek, startOfMonth } from "date-fns";
+import { format, startOfWeek, startOfMonth, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 type FilterType = "all" | "sent" | "quotes" | "orders" | "cancelled";
+
+type DateRangeType = "all" | "week" | "month" | "custom";
 
 interface HistoryItem {
   id: string;
@@ -46,6 +51,9 @@ export default function OrderHistory() {
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const [markingPaid, setMarkingPaid] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRangeType>("all");
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (user) fetchHistory();
@@ -138,6 +146,24 @@ export default function OrderHistory() {
     setDuplicating(false);
   };
 
+  const getDateRangeFilter = (item: HistoryItem): boolean => {
+    const itemDate = new Date(item.created_at);
+    const now = new Date();
+
+    switch (dateRange) {
+      case "week":
+        return isAfter(itemDate, startOfWeek(now, { weekStartsOn: 1 }));
+      case "month":
+        return isAfter(itemDate, startOfMonth(now));
+      case "custom":
+        if (customStartDate && isBefore(itemDate, startOfDay(customStartDate))) return false;
+        if (customEndDate && isAfter(itemDate, endOfDay(customEndDate))) return false;
+        return true;
+      default:
+        return true;
+    }
+  };
+
   const filteredItems = items.filter((item) => {
     // Apply search filter
     const matchesSearch = 
@@ -145,6 +171,9 @@ export default function OrderHistory() {
       (item.customer_name?.toLowerCase().includes(search.toLowerCase()) ?? false);
     
     if (!matchesSearch) return false;
+
+    // Apply date range filter
+    if (!getDateRangeFilter(item)) return false;
 
     // Apply status filter
     switch (filter) {
@@ -307,6 +336,87 @@ export default function OrderHistory() {
               </span>
             </button>
           ))}
+        </div>
+
+        {/* Date Range Filter */}
+        <div className="flex flex-wrap gap-2 animate-fade-in" style={{ animationDelay: "40ms" }}>
+          <button
+            onClick={() => { setDateRange("all"); setCustomStartDate(undefined); setCustomEndDate(undefined); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              dateRange === "all"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            {language === "es" ? "Todo el tiempo" : "All time"}
+          </button>
+          <button
+            onClick={() => setDateRange("week")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              dateRange === "week"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            {language === "es" ? "Esta semana" : "This week"}
+          </button>
+          <button
+            onClick={() => setDateRange("month")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              dateRange === "month"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            {language === "es" ? "Este mes" : "This month"}
+          </button>
+
+          {/* Custom Date Range */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  dateRange === "custom"
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                }`}
+              >
+                <CalendarIcon className="w-3 h-3" />
+                {dateRange === "custom" && customStartDate && customEndDate
+                  ? `${format(customStartDate, "MMM d")} - ${format(customEndDate, "MMM d")}`
+                  : (language === "es" ? "Personalizado" : "Custom")}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className="p-3 space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">{language === "es" ? "Desde" : "From"}</p>
+                  <Calendar
+                    mode="single"
+                    selected={customStartDate}
+                    onSelect={(date) => {
+                      setCustomStartDate(date);
+                      if (date) setDateRange("custom");
+                    }}
+                    className={cn("rounded-md border pointer-events-auto")}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">{language === "es" ? "Hasta" : "To"}</p>
+                  <Calendar
+                    mode="single"
+                    selected={customEndDate}
+                    onSelect={(date) => {
+                      setCustomEndDate(date);
+                      if (date) setDateRange("custom");
+                    }}
+                    disabled={(date) => customStartDate ? isBefore(date, customStartDate) : false}
+                    className={cn("rounded-md border pointer-events-auto")}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Search */}
