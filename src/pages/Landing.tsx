@@ -1,20 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Check, MessageCircle, Zap, Shield, TrendingUp } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Zap, Shield, TrendingUp, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type FormState = "idle" | "form" | "success";
 
 export default function Landing() {
+  const { language, setLanguage } = useLanguage();
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [formState, setFormState] = useState<FormState>("idle");
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "email">("whatsapp");
   const [firstName, setFirstName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Show language modal on first visit (if no language preference saved)
+    const hasSeenLanguageModal = localStorage.getItem("language-modal-shown");
+    if (!hasSeenLanguageModal) {
+      // Small delay for smooth appearance
+      const timer = setTimeout(() => {
+        setShowLanguageModal(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleLanguageSelect = (lang: "en" | "es") => {
+    setLanguage(lang);
+    localStorage.setItem("language-modal-shown", "true");
+    setShowLanguageModal(false);
+  };
 
   const handleGetStarted = () => {
     setFormState("form");
@@ -45,6 +66,49 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-primary-soft relative overflow-hidden">
+      {/* Language Selection Modal */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => handleLanguageSelect("en")}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4 animate-scale-in">
+            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-primary/10 flex items-center justify-center">
+              <Globe className="w-7 h-7 text-primary" />
+            </div>
+            
+            <h2 className="text-xl font-semibold tracking-tight text-foreground mb-2 text-center">
+              Choose your language
+            </h2>
+            <p className="text-muted-foreground mb-6 text-sm text-center">
+              Elige tu idioma
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => handleLanguageSelect("en")}
+                className="w-full py-4 px-6 rounded-xl text-left font-medium transition-all bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-between group"
+              >
+                <span>🇺🇸 English</span>
+                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+              
+              <button
+                onClick={() => handleLanguageSelect("es")}
+                className="w-full py-4 px-6 rounded-xl text-left font-medium transition-all bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-between group"
+              >
+                <span>🇪🇸 Español</span>
+                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Decorative animated circles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/10 animate-float-slow" />
@@ -64,11 +128,20 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-xl tracking-tight text-white">kitz</span>
           </div>
-          <Link to="/auth">
-            <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10">
-              Log in
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowLanguageModal(true)}
+              className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+              title={language === "en" ? "Change language" : "Cambiar idioma"}
+            >
+              <Globe className="w-5 h-5" />
+            </button>
+            <Link to="/auth">
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10">
+                {language === "en" ? "Log in" : "Iniciar sesión"}
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -78,13 +151,17 @@ export default function Landing() {
           {formState === "idle" && (
             <div className="animate-fade-in">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-6 leading-tight">
-                Run your business.
+                {language === "en" ? "Run your business." : "Maneja tu negocio."}
                 <br />
-                <span className="text-white/70">Without the noise.</span>
+                <span className="text-white/70">
+                  {language === "en" ? "Without the noise." : "Sin complicaciones."}
+                </span>
               </h1>
               
               <p className="text-lg text-white/80 max-w-md mx-auto mb-10 leading-relaxed">
-                A simple system to stay organized and in control.
+                {language === "en" 
+                  ? "A simple system to stay organized and in control."
+                  : "Un sistema simple para mantenerte organizado y en control."}
               </p>
 
               <Button 
@@ -92,7 +169,7 @@ export default function Landing() {
                 size="lg" 
                 className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all font-medium"
               >
-                Get started
+                {language === "en" ? "Get started" : "Comenzar"}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -102,28 +179,34 @@ export default function Landing() {
             <div className="animate-fade-in">
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl max-w-sm mx-auto">
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-2">
-                  Start simple.
+                  {language === "en" ? "Start simple." : "Empieza simple."}
                 </h2>
                 <p className="text-muted-foreground mb-6 text-sm">
-                  We'll help you set things up when you're ready.
+                  {language === "en" 
+                    ? "We'll help you set things up when you're ready."
+                    : "Te ayudaremos a configurar todo cuando estés listo."}
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-foreground text-sm">First name</Label>
+                    <Label htmlFor="firstName" className="text-foreground text-sm">
+                      {language === "en" ? "First name" : "Nombre"}
+                    </Label>
                     <Input
                       id="firstName"
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Your first name"
+                      placeholder={language === "en" ? "Your first name" : "Tu nombre"}
                       required
                       className="h-11 rounded-xl border-border bg-background"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-foreground text-sm">How should we reach you?</Label>
+                    <Label className="text-foreground text-sm">
+                      {language === "en" ? "How should we reach you?" : "¿Cómo te contactamos?"}
+                    </Label>
                     <div className="flex gap-2">
                       <button
                         type="button"
@@ -152,7 +235,9 @@ export default function Landing() {
 
                   {contactMethod === "whatsapp" ? (
                     <div className="space-y-2">
-                      <Label htmlFor="whatsapp" className="text-foreground text-sm">WhatsApp number</Label>
+                      <Label htmlFor="whatsapp" className="text-foreground text-sm">
+                        {language === "en" ? "WhatsApp number" : "Número de WhatsApp"}
+                      </Label>
                       <Input
                         id="whatsapp"
                         type="tel"
@@ -183,11 +268,11 @@ export default function Landing() {
                     disabled={isSubmitting}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11 rounded-xl text-sm font-medium"
                   >
-                    {isSubmitting ? "..." : "Continue"}
+                    {isSubmitting ? "..." : (language === "en" ? "Continue" : "Continuar")}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center pt-1">
-                    No spam. No pressure.
+                    {language === "en" ? "No spam. No pressure." : "Sin spam. Sin presión."}
                   </p>
                 </form>
               </div>
@@ -202,10 +287,12 @@ export default function Landing() {
                 </div>
                 
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-2">
-                  You're in.
+                  {language === "en" ? "You're in." : "¡Estás dentro!"}
                 </h2>
                 <p className="text-muted-foreground mb-6 text-sm">
-                  We'll reach out when it makes sense.
+                  {language === "en" 
+                    ? "We'll reach out when it makes sense."
+                    : "Te contactaremos cuando sea el momento."}
                 </p>
 
                 {contactMethod === "whatsapp" && whatsapp && (
@@ -214,14 +301,14 @@ export default function Landing() {
                     className="bg-success hover:bg-success/90 text-success-foreground h-11 px-5 rounded-xl text-sm font-medium w-full"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Continue on WhatsApp
+                    {language === "en" ? "Continue on WhatsApp" : "Continuar en WhatsApp"}
                   </Button>
                 )}
 
                 <div className="mt-4">
                   <Link to="/auth">
                     <Button variant="ghost" className="text-muted-foreground hover:text-foreground text-sm">
-                      Or create your account now
+                      {language === "en" ? "Or create your account now" : "O crea tu cuenta ahora"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
@@ -241,7 +328,9 @@ export default function Landing() {
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <p className="text-white/90 text-sm leading-relaxed">
-                Create invoices and storefronts in seconds, not hours.
+                {language === "en" 
+                  ? "Create invoices and storefronts in seconds, not hours."
+                  : "Crea facturas y vitrinas en segundos, no en horas."}
               </p>
             </div>
             
@@ -250,7 +339,9 @@ export default function Landing() {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <p className="text-white/90 text-sm leading-relaxed">
-                Keep your customers, orders, and payments organized in one place.
+                {language === "en" 
+                  ? "Keep your customers, orders, and payments organized in one place."
+                  : "Mantén tus clientes, pedidos y pagos organizados en un solo lugar."}
               </p>
             </div>
             
@@ -259,12 +350,15 @@ export default function Landing() {
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <p className="text-white/90 text-sm leading-relaxed">
-                Track your progress and grow with AI-powered insights.
+                {language === "en" 
+                  ? "Track your progress and grow with AI-powered insights."
+                  : "Sigue tu progreso y crece con insights impulsados por IA."}
               </p>
             </div>
           </div>
         </div>
       </section>
+
       <footer className="fixed bottom-0 left-0 right-0 py-4 px-4 text-center z-10">
         <p className="text-xs text-white/60">
           © 2025 kitz
