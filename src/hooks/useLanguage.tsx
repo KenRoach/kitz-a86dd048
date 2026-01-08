@@ -13,6 +13,7 @@ interface Translations {
   storefronts: string;
   products: string;
   orderHistory: string;
+  suggestions: string;
   admin: string;
   home: string;
   orders: string;
@@ -152,6 +153,7 @@ const translations: Record<Language, Translations> = {
     storefronts: "Storefronts",
     products: "Products",
     orderHistory: "Order History",
+    suggestions: "Suggestions",
     admin: "Admin",
     home: "Home",
     orders: "Orders",
@@ -281,6 +283,7 @@ const translations: Record<Language, Translations> = {
     storefronts: "Tiendas",
     products: "Productos",
     orderHistory: "Historial",
+    suggestions: "Sugerencias",
     admin: "Admin",
     home: "Inicio",
     orders: "Pedidos",
