@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CustomerCard } from "@/components/crm/CustomerCard";
 import { CustomerProfile } from "@/components/crm/CustomerProfile";
-import { Search, Users, ShoppingBag } from "lucide-react";
+import { Search, Users, ShoppingBag, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CustomersSkeleton } from "@/components/ui/dashboard-skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,12 +30,15 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [search, setSearch] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) fetchCustomers();
   }, [user]);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -48,6 +52,11 @@ export default function OrderHistory() {
       })));
     }
     setLoading(false);
+    setRefreshing(false);
+  };
+
+  const handleRefresh = () => {
+    fetchCustomers(true);
   };
 
   const filteredCustomers = customers.filter((c) =>
@@ -70,9 +79,20 @@ export default function OrderHistory() {
     <AppLayout>
       <div className="space-y-3 md:space-y-6">
         {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
-          <p className="text-xs md:text-base text-muted-foreground mt-0.5">{t.orderHistoryDesc}</p>
+        <div className="flex items-start justify-between animate-fade-in">
+          <div>
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.orderHistoryTitle}</h1>
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5">{t.orderHistoryDesc}</p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
 
         {/* Search */}
