@@ -313,56 +313,46 @@ export default function PublicStorefront() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-          {sellerUsername ? (
-            <Link to={`/p/@${sellerUsername}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              {businessName || "Store"}
-            </Link>
-          ) : (
-            <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
-          )}
-          {isQuote && !quoteAccepted && !orderPlaced && !isPaid && (
-            <span className="flex items-center gap-1 text-sm font-medium text-attention">
-              <FileText className="w-4 h-4" />
-              Quote
+      {/* Header - Clean, trust-building */}
+      <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {sellerUsername ? (
+              <Link 
+                to={`/p/@${sellerUsername}`} 
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                {businessName || "Store"}
+              </Link>
+            ) : (
+              <span className="text-sm font-medium text-foreground">{businessName || "Store"}</span>
+            )}
+            {/* Trust indicator */}
+            <span className="trust-badge">
+              <span className="w-1.5 h-1.5 rounded-full bg-success" />
+              Verified
             </span>
-          )}
-          {isQuote && quoteAccepted && !orderPlaced && !isPaid && (
-            <span className="flex items-center gap-1 text-sm font-medium text-success">
-              <ThumbsUp className="w-4 h-4" />
-              Accepted
-            </span>
-          )}
-          {isPaid && storefront?.fulfillment_status === "complete" && (
-            <span className="flex items-center gap-1 text-sm font-medium text-success">
-              <CheckCircle className="w-4 h-4" />
-              Complete
-            </span>
-          )}
-          {isPaid && storefront?.fulfillment_status === "ready" && (
-            <span className="flex items-center gap-1 text-sm font-medium text-primary">
-              <PackageCheck className="w-4 h-4" />
-              Ready
-            </span>
-          )}
-          {isPaid && storefront?.fulfillment_status === "preparing" && (
-            <span className="flex items-center gap-1 text-sm font-medium text-attention">
-              <ChefHat className="w-4 h-4" />
-              Preparing
-            </span>
-          )}
-          {isPaid && (!storefront?.fulfillment_status || storefront?.fulfillment_status === "pending") && (
-            <span className="flex items-center gap-1 text-sm font-medium text-success">
-              <CheckCircle className="w-4 h-4" />
-              Paid
+          </div>
+          
+          {/* Status badges - minimal */}
+          {isPaid && (
+            <span className="flex items-center gap-1 text-xs font-medium text-success">
+              <CheckCircle className="w-3.5 h-3.5" />
+              {storefront?.fulfillment_status === "complete" ? "Complete" : 
+               storefront?.fulfillment_status === "ready" ? "Ready" :
+               storefront?.fulfillment_status === "preparing" ? "Preparing" : "Paid"}
             </span>
           )}
           {orderPlaced && !isPaid && (
-            <span className="flex items-center gap-1 text-sm font-medium text-primary">
-              <ShoppingBag className="w-4 h-4" />
-              Order placed
+            <span className="flex items-center gap-1 text-xs font-medium text-primary">
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Ordered
+            </span>
+          )}
+          {needsQuoteAcceptance && (
+            <span className="flex items-center gap-1 text-xs font-medium text-attention">
+              <FileText className="w-3.5 h-3.5" />
+              Quote
             </span>
           )}
         </div>
@@ -737,6 +727,13 @@ export default function PublicStorefront() {
               Order now
             </Button>
           )}
+        </div>
+        
+        {/* Powered by - subtle viral branding */}
+        <div className="text-center py-2">
+          <span className="powered-by">
+            Powered by <a href="/" className="hover:text-primary transition-colors">Kitz</a>
+          </span>
         </div>
       </div>
       
