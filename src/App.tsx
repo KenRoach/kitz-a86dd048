@@ -25,6 +25,9 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PublicStorefront = lazy(() => import("./pages/PublicStorefront"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 
 // Optimized QueryClient with caching
 const queryClient = new QueryClient({
@@ -103,6 +106,9 @@ function AppRoutes() {
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/delete-account" element={<ProtectedRoute><DeleteAccount /></ProtectedRoute>} />
         <Route path="/s/:slug" element={<PublicStorefront />} />
         <Route path="/p/:profileId" element={<PublicProfile />} />
         <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
