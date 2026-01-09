@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Award, Lightbulb } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Award, Lightbulb, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -10,6 +10,7 @@ const navItems = [
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
+  { icon: Users, labelKey: "customers" as const, path: "/profile?tab=crm" },
   { icon: Lightbulb, labelKey: "suggestions" as const, path: "/suggestions" },
 ];
 
@@ -48,7 +49,14 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+            (item.path.includes("?") && location.pathname + location.search === item.path);
+          
+          // Custom label for customers
+          const label = item.labelKey === "customers" 
+            ? (language === "es" ? "Clientes" : "Customers")
+            : (t as any)[item.labelKey];
+          
           return (
             <Link
               key={item.path}
@@ -61,7 +69,7 @@ export function Sidebar() {
               )}
             >
               <item.icon className="w-5 h-5" />
-              <span className="font-medium">{t[item.labelKey]}</span>
+              <span className="font-medium">{label}</span>
             </Link>
           );
         })}
