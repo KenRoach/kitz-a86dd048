@@ -6,9 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 const getAutoDemoKey = (userId: string) => `kitz_auto_demo_${userId}`;
 
 const DEMO_PRODUCTS = [
-  { title: "Sample Product", price: 25.00 },
-  { title: "Quick Service", price: 50.00 },
-  { title: "Premium Package", price: 99.00 },
+  { title: "[Demo] Sample Product", price: 25.00 },
+  { title: "[Demo] Quick Service", price: 50.00 },
+  { title: "[Demo] Premium Package", price: 99.00 },
 ];
 
 const generateSlug = (title: string) => {
@@ -64,7 +64,7 @@ export function useAutoDemo() {
           slug,
           status: "draft",
           is_bundle: false,
-          description: "Your first shareable link is ready! Edit or share it now.",
+          description: "This is a demo link to help you get started. Feel free to edit or delete it!",
           seller_phone: profile?.phone || null,
           payment_cards: profile?.payment_cards ?? false,
           payment_yappy: profile?.payment_yappy ?? false,
