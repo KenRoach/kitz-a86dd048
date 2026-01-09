@@ -8,6 +8,7 @@ import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { FourDXWidget } from "@/components/dashboard/FourDXWidget";
 import { ProgressChecklist } from "@/components/dashboard/ProgressChecklist";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
+import { SpotlightTour } from "@/components/onboarding/SpotlightTour";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
@@ -46,12 +47,14 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSpotlightTour, setShowSpotlightTour] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   // Check if user needs profile setup or feature tour
   useEffect(() => {
     const hasCompletedProfileSetup = localStorage.getItem("kitz_profile_setup_complete");
     const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
+    const hasSeenSpotlightTour = localStorage.getItem("kitz_spotlight_tour_complete");
     
     // Check if profile is incomplete (missing phone or username)
     const isProfileIncomplete = profile && (!profile.phone || !profile.username);
@@ -60,6 +63,9 @@ export default function Dashboard() {
       setShowProfileSetup(true);
     } else if (!hasSeenOnboarding) {
       setShowOnboarding(true);
+    } else if (!hasSeenSpotlightTour) {
+      // Show spotlight tour after onboarding dialog
+      setShowSpotlightTour(true);
     }
   }, [profile]);
 
@@ -75,6 +81,16 @@ export default function Dashboard() {
   const handleOnboardingComplete = () => {
     localStorage.setItem("kitz_onboarding_complete", "true");
     setShowOnboarding(false);
+    // Start spotlight tour after onboarding
+    const hasSeenSpotlightTour = localStorage.getItem("kitz_spotlight_tour_complete");
+    if (!hasSeenSpotlightTour) {
+      setTimeout(() => setShowSpotlightTour(true), 500);
+    }
+  };
+
+  const handleSpotlightTourComplete = () => {
+    localStorage.setItem("kitz_spotlight_tour_complete", "true");
+    setShowSpotlightTour(false);
   };
 
   useEffect(() => {
@@ -231,6 +247,7 @@ export default function Dashboard() {
     <AppLayout>
       <ProfileSetupWizard open={showProfileSetup} onComplete={handleProfileSetupComplete} />
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
+      <SpotlightTour open={showSpotlightTour} onComplete={handleSpotlightTourComplete} />
       
       <div ref={containerRef} className="relative">
         <PullToRefreshIndicator
