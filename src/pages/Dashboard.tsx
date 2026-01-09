@@ -6,6 +6,7 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { FourDXWidget } from "@/components/dashboard/FourDXWidget";
+import { ProgressChecklist } from "@/components/dashboard/ProgressChecklist";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
@@ -299,6 +300,9 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
+
+        {/* Progress Checklist */}
+        <ProgressChecklist />
 
         {/* Attention Section */}
         {attentionItems && attentionItems.length > 0 && (
