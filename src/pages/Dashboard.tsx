@@ -5,26 +5,19 @@ import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
-import { FourDXWidget } from "@/components/dashboard/FourDXWidget";
-import { ProgressChecklist } from "@/components/dashboard/ProgressChecklist";
-import { InsightsCarousel } from "@/components/dashboard/InsightsCarousel";
-import { FeatureSpotlight } from "@/components/dashboard/FeatureSpotlight";
 import { ContextualTip, useContextualTips } from "@/components/dashboard/ContextualTip";
-import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
-import { SpotlightTour } from "@/components/onboarding/SpotlightTour";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
-import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoDemo } from "@/hooks/useAutoDemo";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, TrendingDown, Rocket, Circle } from "lucide-react";
+import { TrendingUp, TrendingDown, Plus, Circle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
 
 interface Storefront {
   id: string;
@@ -44,59 +37,30 @@ interface Activity {
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
-  const { t, getGreeting, language } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const { demoCreated } = useAutoDemo();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showSpotlightTour, setShowSpotlightTour] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [productCount, setProductCount] = useState(0);
   const [customerCount, setCustomerCount] = useState(0);
   const [hasGoals, setHasGoals] = useState(false);
 
-  // Check if user needs profile setup or feature tour
+  // Check if user needs profile setup (minimal friction)
   useEffect(() => {
     const hasCompletedProfileSetup = localStorage.getItem("kitz_profile_setup_complete");
-    const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
-    const hasSeenSpotlightTour = localStorage.getItem("kitz_spotlight_tour_complete");
-    
-    // Check if profile is incomplete (missing phone or username)
     const isProfileIncomplete = profile && (!profile.phone || !profile.username);
     
-    if (!hasCompletedProfileSetup && isProfileIncomplete) {
+    // Only show profile setup after user has created something
+    if (!hasCompletedProfileSetup && isProfileIncomplete && storefronts.length > 1) {
       setShowProfileSetup(true);
-    } else if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    } else if (!hasSeenSpotlightTour) {
-      // Show spotlight tour after onboarding dialog
-      setShowSpotlightTour(true);
     }
-  }, [profile]);
+  }, [profile, storefronts.length]);
 
   const handleProfileSetupComplete = () => {
     setShowProfileSetup(false);
-    // Show feature tour after profile setup
-    const hasSeenOnboarding = localStorage.getItem("kitz_onboarding_complete");
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    }
-  };
-
-  const handleOnboardingComplete = () => {
-    localStorage.setItem("kitz_onboarding_complete", "true");
-    setShowOnboarding(false);
-    // Start spotlight tour after onboarding
-    const hasSeenSpotlightTour = localStorage.getItem("kitz_spotlight_tour_complete");
-    if (!hasSeenSpotlightTour) {
-      setTimeout(() => setShowSpotlightTour(true), 500);
-    }
-  };
-
-  const handleSpotlightTourComplete = () => {
-    localStorage.setItem("kitz_spotlight_tour_complete", "true");
-    setShowSpotlightTour(false);
   };
 
   useEffect(() => {
@@ -270,8 +234,6 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <ProfileSetupWizard open={showProfileSetup} onComplete={handleProfileSetupComplete} />
-      <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
-      <SpotlightTour open={showSpotlightTour} onComplete={handleSpotlightTourComplete} />
       
       <div ref={containerRef} className="relative">
         <PullToRefreshIndicator
@@ -281,167 +243,154 @@ export default function Dashboard() {
           isPulling={isPulling}
         />
         
-        <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="space-y-5">
+          {/* Header with primary action */}
+          <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-foreground">
               {t.dashboard}
             </h1>
+            <Button 
+              onClick={() => navigate("/storefronts")} 
+              size="sm"
+              className="gap-1.5 animate-calm-in"
+            >
+              <Plus className="w-4 h-4" />
+              {language === "es" ? "Nuevo" : "New"}
+            </Button>
           </div>
-          <ProfileShareButton />
-        </div>
 
-        {/* Balance Card - Purple gradient */}
-        <div className="bg-primary rounded-2xl p-6 text-primary-foreground">
-          <p className="text-sm text-primary-foreground/70 mb-1">
-            {language === "es" ? "Balance Total" : "Total Balance"}
-          </p>
-          <div className="flex items-baseline gap-3 mb-3">
-            <span className="text-4xl font-semibold tracking-tight">
-              ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            {isPositiveChange ? (
-              <div className="flex items-center gap-1">
-                <TrendingUp className="w-4 h-4" />
-                <span>+{changePercent}%</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <TrendingDown className="w-4 h-4" />
-                <span>{changePercent}%</span>
-              </div>
-            )}
-            <span className="text-primary-foreground/60">
-              {language === "es" ? "vs ayer" : "vs yesterday"}
-            </span>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card rounded-2xl p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground mb-1">
-              {language === "es" ? "Hoy" : "Today"}
+          {/* Balance Card - Primary focus */}
+          <div className="bg-primary rounded-2xl p-6 text-primary-foreground animate-calm-in hover-calm">
+            <p className="text-sm text-primary-foreground/70 mb-1">
+              {language === "es" ? "Balance Total" : "Total Balance"}
             </p>
-            <p className="text-2xl font-semibold text-foreground">${totalToday.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {todaysPaid.length} {language === "es" ? "órdenes" : "orders"}
-            </p>
-          </div>
-          <div className="bg-card rounded-2xl p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground mb-1">
-              {language === "es" ? "Borradores" : "Drafts"}
-            </p>
-            <p className="text-2xl font-semibold text-foreground">{draftStorefronts.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {language === "es" ? "pendientes" : "pending"}
-            </p>
-          </div>
-        </div>
-
-        {/* Progress Checklist */}
-        <ProgressChecklist />
-
-        {/* Contextual Tips - Smart Nudges */}
-        {contextualTips.length > 0 && (
-          <div className="space-y-2">
-            {contextualTips.slice(0, 2).map((tip, index) => (
-              <ContextualTip
-                key={tip.key}
-                tipKey={tip.key}
-                title={tip.title}
-                titleEs={tip.titleEs}
-                description={tip.description}
-                descriptionEs={tip.descriptionEs}
-                actionLabel={tip.actionLabel}
-                actionLabelEs={tip.actionLabelEs}
-                onAction={() => navigate(tip.route)}
-                variant={tip.variant}
-                delay={index * 200}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Attention Section */}
-        {attentionItems && attentionItems.length > 0 && (
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium text-foreground">
-              {language === "es" ? "Requiere atención" : "Needs attention"}
-            </h2>
-            <div className="space-y-2">
-              {attentionItems.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={item.onAction}
-                  className="bg-card rounded-2xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
-                >
-                  <div className="w-10 h-10 rounded-full bg-action/10 flex items-center justify-center">
-                    <Circle className="w-4 h-4 text-action fill-action" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{item.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{item.description}</p>
-                  </div>
+            <div className="flex items-baseline gap-3 mb-3">
+              <span className="text-4xl font-semibold tracking-tight">
+                ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              {isPositiveChange ? (
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>+{changePercent}%</span>
                 </div>
-              ))}
+              ) : (
+                <div className="flex items-center gap-1">
+                  <TrendingDown className="w-4 h-4" />
+                  <span>{changePercent}%</span>
+                </div>
+              )}
+              <span className="text-primary-foreground/60">
+                {language === "es" ? "vs ayer" : "vs yesterday"}
+              </span>
             </div>
-          </section>
-        )}
-
-        {/* Calm state when nothing needs attention */}
-        {attentionItems === null && (
-          <div className="bg-card rounded-2xl p-8 text-center shadow-sm">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
-              <span className="text-xl">✓</span>
-            </div>
-            <p className="font-medium text-foreground">{t.allCaughtUp}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t.businessRunningSmooth}
-            </p>
           </div>
-        )}
 
-        {/* Insights Carousel - Pro Tips */}
-        <InsightsCarousel />
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-card rounded-2xl p-4 shadow-sm hover-calm" style={{ animationDelay: "50ms" }}>
+              <p className="text-xs text-muted-foreground mb-1">
+                {language === "es" ? "Hoy" : "Today"}
+              </p>
+              <p className="text-2xl font-semibold text-foreground">${totalToday.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {todaysPaid.length} {language === "es" ? "órdenes" : "orders"}
+              </p>
+            </div>
+            <div 
+              className="bg-card rounded-2xl p-4 shadow-sm hover-calm cursor-pointer" 
+              style={{ animationDelay: "100ms" }}
+              onClick={() => navigate("/storefronts")}
+            >
+              <p className="text-xs text-muted-foreground mb-1">
+                {language === "es" ? "Listos para enviar" : "Ready to send"}
+              </p>
+              <p className="text-2xl font-semibold text-foreground">{draftStorefronts.length}</p>
+              <p className="text-xs text-primary flex items-center gap-1 mt-1">
+                {language === "es" ? "Ver" : "View"} <ArrowRight className="w-3 h-3" />
+              </p>
+            </div>
+          </div>
 
-        {/* Feature Spotlight - Unused Features */}
-        <FeatureSpotlight />
+          {/* Attention Section - Only show if items exist */}
+          {attentionItems && attentionItems.length > 0 && (
+            <section className="space-y-3 animate-calm-in" style={{ animationDelay: "150ms" }}>
+              <h2 className="text-sm font-medium text-foreground">
+                {language === "es" ? "Pendiente" : "Pending"}
+              </h2>
+              <div className="space-y-2">
+                {attentionItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    onClick={item.onAction}
+                    className="bg-card rounded-2xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover-calm touch-feedback"
+                    style={{ animationDelay: `${200 + index * 50}ms` }}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-action/10 flex items-center justify-center">
+                      <Circle className="w-4 h-4 text-action fill-action" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{item.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-        {/* 4DX Goals + Momentum + Earnings */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <FourDXWidget />
-          <MomentumScore score={calculateMomentum()} />
-          <EarningsToday earnings={todaysEarnings} total={totalToday} />
-        </div>
+          {/* Calm state when nothing needs attention */}
+          {attentionItems === null && storefronts.length > 0 && (
+            <div className="bg-card rounded-2xl p-6 text-center shadow-sm animate-calm-in">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-success/10 flex items-center justify-center">
+                <span className="text-lg">✓</span>
+              </div>
+              <p className="font-medium text-foreground text-sm">{t.allCaughtUp}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t.businessRunningSmooth}
+              </p>
+            </div>
+          )}
 
-        {/* Activity Feed */}
-        {formattedActivities.length > 0 && (
-          <ActivityFeed activities={formattedActivities} />
-        )}
+          {/* Contextual Tips - Max 1 at a time for calm UX */}
+          {contextualTips.length > 0 && (
+            <div className="animate-calm-in" style={{ animationDelay: "200ms" }}>
+              <ContextualTip
+                key={contextualTips[0].key}
+                tipKey={contextualTips[0].key}
+                title={contextualTips[0].title}
+                titleEs={contextualTips[0].titleEs}
+                description={contextualTips[0].description}
+                descriptionEs={contextualTips[0].descriptionEs}
+                actionLabel={contextualTips[0].actionLabel}
+                actionLabelEs={contextualTips[0].actionLabelEs}
+                onAction={() => navigate(contextualTips[0].route)}
+                variant={contextualTips[0].variant}
+              />
+            </div>
+          )}
 
-        {/* Empty state for new users */}
-        {!loading && storefronts.length === 0 && (
-          <EmptyState
-            icon={Rocket}
-            title={t.startSelling}
-            description={t.createFirstStorefront}
-            actionLabel={t.createStorefront}
-            onAction={() => navigate("/storefronts")}
-            tips={[
-              language === "es" ? "Crea una vitrina en menos de 30 segundos" : "Create a storefront in under 30 seconds",
-              language === "es" ? "Comparte al instante por WhatsApp" : "Share instantly via WhatsApp",
-              language === "es" ? "Recibe notificaciones cuando ordenen" : "Get notified when customers order"
-            ]}
-          />
-        )}
+          {/* Activity Feed - Minimal */}
+          {formattedActivities.length > 0 && (
+            <div className="animate-calm-in" style={{ animationDelay: "250ms" }}>
+              <ActivityFeed activities={formattedActivities.slice(0, 3)} />
+            </div>
+          )}
+
+          {/* Momentum + Earnings - Simplified grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-calm-in" style={{ animationDelay: "300ms" }}>
+            <MomentumScore score={calculateMomentum()} />
+            <EarningsToday earnings={todaysEarnings} total={totalToday} />
+          </div>
+
+          {/* Share profile - subtle placement */}
+          <div className="flex justify-center pt-2 animate-calm-in" style={{ animationDelay: "350ms" }}>
+            <ProfileShareButton />
+          </div>
         </div>
       </div>
-      
-      <BusinessAdvisor />
     </AppLayout>
   );
 }
