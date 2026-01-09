@@ -4,6 +4,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Celebration } from "@/components/ui/Confetti";
+import { HelpTooltip } from "@/components/ui/HelpTooltip";
 import { Target, TrendingUp, Store, Users, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -69,9 +70,14 @@ export function FourDXWidget() {
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Trophy className="w-4 h-4 text-primary" />
           </div>
-          <div>
+          <div className="flex items-center gap-1">
             <h3 className="text-sm font-medium text-foreground">{t.wig}</h3>
-            <p className="text-[10px] text-muted-foreground capitalize">{goals.wig_period}</p>
+            <HelpTooltip 
+              content={language === "es" 
+                ? "WIG = Meta Importante. Es tu objetivo principal que más impacta tu negocio." 
+                : "WIG = Wildly Important Goal. Your #1 priority that matters most to your business."}
+            />
+            <p className="text-[10px] text-muted-foreground capitalize ml-1">({goals.wig_period})</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -103,6 +109,18 @@ export function FourDXWidget() {
       </div>
 
       {/* Lead Measures - Compact */}
+      <div className="mb-2">
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-[10px] text-muted-foreground font-medium">
+            {language === "es" ? "Actividades Clave" : "Lead Measures"}
+          </span>
+          <HelpTooltip 
+            content={language === "es" 
+              ? "Actividades que puedes controlar y que impulsan tu meta (ej: vitrinas creadas, seguimientos)." 
+              : "Daily activities you control that drive your goal (e.g. storefronts created, follow-ups)."}
+          />
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
           <Store className="w-3 h-3 text-primary shrink-0" />

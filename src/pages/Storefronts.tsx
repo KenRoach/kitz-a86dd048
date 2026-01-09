@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
 import { StorefrontCard } from "@/components/storefront/StorefrontCard";
 import { StorefrontWizard } from "@/components/storefront/StorefrontWizard";
 import { EditStorefrontDialog } from "@/components/storefront/EditStorefrontDialog";
@@ -10,6 +11,7 @@ import { Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+const { language } = { language: "en" }; // Will be overridden in component
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefresh";
 import { toast } from "sonner";
@@ -65,7 +67,7 @@ const generateSlug = (title: string) => {
 
 export default function Storefronts() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const location = useLocation();
   const [storefronts, setStorefronts] = useState<Storefront[]>([]);
   const [loading, setLoading] = useState(true);
@@ -320,7 +322,11 @@ export default function Storefronts() {
         <div className="flex items-center justify-between gap-2 animate-fade-in">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">{t.storefrontsTitle}</h1>
-            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">{t.storefrontsDesc}</p>
+            <p className="text-xs md:text-base text-muted-foreground mt-0.5 truncate">
+              {language === "es" 
+                ? "Crea enlaces de pago y envíalos a clientes" 
+                : "Create payment links and share with customers"}
+            </p>
           </div>
           <AnimatedCreateButton 
             onClick={() => setWizardOpen(true)} 
@@ -419,8 +425,15 @@ export default function Storefronts() {
 
         {/* Empty filter state */}
         {!loading && storefronts.length > 0 && filteredStorefronts.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            No {filter} storefronts
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-3">
+              {language === "es" 
+                ? `No hay vitrinas ${filter === "draft" ? "en borrador" : filter === "sent" ? "enviadas" : "pagadas"}` 
+                : `No ${filter} storefronts`}
+            </p>
+            <Button variant="outline" onClick={() => setWizardOpen(true)}>
+              {language === "es" ? "Crear nueva vitrina" : "Create new storefront"}
+            </Button>
           </div>
         )}
 

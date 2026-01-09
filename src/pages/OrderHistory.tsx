@@ -312,10 +312,10 @@ export default function OrderHistory() {
         <div className="flex items-start justify-between animate-fade-in">
           <div>
             <h1 className="text-lg md:text-2xl font-semibold text-foreground">
-              {language === "es" ? "Historial" : "History"}
+              {language === "es" ? "Órdenes" : "Orders"}
             </h1>
             <p className="text-xs md:text-base text-muted-foreground mt-0.5">
-              {language === "es" ? "Cotizaciones, pedidos y cancelaciones" : "Quotes, orders and cancellations"}
+              {language === "es" ? "Seguimiento de cotizaciones, pagos y entregas" : "Track quotes, payments and deliveries"}
             </p>
           </div>
           <div className="flex gap-2">

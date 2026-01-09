@@ -48,9 +48,9 @@ export default function Suggestions() {
 
   const t = {
     en: {
-      title: "Suggestions",
-      desc: "Share your ideas and vote on features you want to see.",
-      newSuggestion: "New Suggestion",
+      title: "Feature Requests",
+      desc: "Help shape Kitz! Share ideas and vote on features you'd love to see.",
+      newSuggestion: "New Idea",
       titleLabel: "Title",
       titlePlaceholder: "What feature would you like to see?",
       descriptionLabel: "Description",
@@ -64,11 +64,12 @@ export default function Suggestions() {
       comment: "comment",
       addComment: "Add a comment...",
       noComments: "No comments yet. Be the first to share your thoughts!",
+      whatIsThis: "This is where you can request new features for Kitz. Your votes help us prioritize what to build next!",
     },
     es: {
-      title: "Sugerencias",
-      desc: "Comparte tus ideas y vota por las funciones que quieres ver.",
-      newSuggestion: "Nueva Sugerencia",
+      title: "Solicitudes de Funciones",
+      desc: "¡Ayuda a mejorar Kitz! Comparte ideas y vota por las funciones que te gustaría ver.",
+      newSuggestion: "Nueva Idea",
       titleLabel: "Título",
       titlePlaceholder: "¿Qué función te gustaría ver?",
       descriptionLabel: "Descripción",
@@ -82,6 +83,7 @@ export default function Suggestions() {
       comment: "comentario",
       addComment: "Añade un comentario...",
       noComments: "Sin comentarios aún. ¡Sé el primero en compartir tus ideas!",
+      whatIsThis: "Aquí puedes solicitar nuevas funciones para Kitz. ¡Tus votos nos ayudan a priorizar qué construir!",
     },
   };
 
@@ -262,6 +264,9 @@ export default function Suggestions() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">{texts.title}</h1>
             <p className="text-muted-foreground text-sm mt-1">{texts.desc}</p>
+            <p className="text-xs text-muted-foreground/70 mt-2 bg-muted/50 px-3 py-2 rounded-lg inline-block">
+              💡 {texts.whatIsThis}
+            </p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>

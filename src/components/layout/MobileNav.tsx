@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Package, Menu } from "lucide-react";
+import { LayoutDashboard, Store, History, Package, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -8,12 +8,20 @@ const navItems = [
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orders" as const, path: "/order-history" },
-  { icon: Menu, labelKey: "more" as const, path: "/admin" },
+  { icon: User, labelKey: "profile" as const, path: "/profile" },
 ];
 
 export function MobileNav() {
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Custom labels since "profile" key might not exist
+  const getLabel = (labelKey: string) => {
+    if (labelKey === "profile") {
+      return language === "es" ? "Perfil" : "Profile";
+    }
+    return (t as any)[labelKey] || labelKey;
+  };
 
   return (
     <nav className="shrink-0 bg-background/95 backdrop-blur-lg border-t border-border/30 md:hidden safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
@@ -46,7 +54,7 @@ export function MobileNav() {
                 "text-[10px] transition-all leading-tight truncate max-w-full",
                 isActive ? "font-semibold" : "font-medium"
               )}>
-                {t[item.labelKey]}
+                {getLabel(item.labelKey)}
               </span>
             </Link>
           );

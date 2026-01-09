@@ -90,7 +90,7 @@ export function AiFloatingButton({ onClick }: AiFloatingButtonProps) {
   }, [tips.length]);
 
   return (
-    <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]">
+    <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]" aria-label="AI Business Advisor">
       {/* Tooltip */}
       <div
         className={cn(
@@ -119,13 +119,15 @@ export function AiFloatingButton({ onClick }: AiFloatingButtonProps) {
         onClick={onClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        aria-label={language === "es" ? "Abrir Asesor de Negocios IA" : "Open AI Business Advisor"}
         className={cn(
-          "relative group h-14 w-14 rounded-full overflow-hidden",
+          "relative group h-16 w-16 rounded-full overflow-hidden",
           "bg-gradient-to-br from-primary via-primary to-primary/80",
           "shadow-lg hover:shadow-xl",
           "transition-all duration-300 ease-out",
           "hover:scale-110 active:scale-95",
-          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2",
+          "md:h-14 md:w-14"
         )}
         style={{
           boxShadow: isHovered 
