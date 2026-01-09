@@ -7,6 +7,7 @@ interface AiFloatingButtonProps {
   onClick: () => void;
 }
 
+// Standard tips
 const TIPS_EN = [
   "Ask about revenue trends",
   "Get product insights",
@@ -21,13 +22,49 @@ const TIPS_ES = [
   "Aumenta tus ventas",
 ];
 
+// Proactive feature suggestions based on unused features
+const PROACTIVE_TIPS_EN = [
+  "Try the Pomodoro timer for focus!",
+  "Set your weekly goals with 4DX",
+  "Use SWOT to plan your quarter",
+  "Track habits to build consistency",
+  "Get Instagram content ideas with AI",
+];
+
+const PROACTIVE_TIPS_ES = [
+  "¡Prueba el Pomodoro para enfocarte!",
+  "Establece metas semanales con 4DX",
+  "Usa FODA para planificar tu trimestre",
+  "Sigue hábitos para ser consistente",
+  "Obtén ideas para Instagram con IA",
+];
+
 export function AiFloatingButton({ onClick }: AiFloatingButtonProps) {
   const { language } = useLanguage();
   const [isHovered, setIsHovered] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const [showTip, setShowTip] = useState(false);
+  const [useProactive, setUseProactive] = useState(false);
 
-  const tips = language === "es" ? TIPS_ES : TIPS_EN;
+  // Check for unused features and occasionally show proactive tips
+  useEffect(() => {
+    const unusedFeatures = [
+      !localStorage.getItem("kitz_pomodoro_used"),
+      !localStorage.getItem("kitz_goals_set"),
+      !localStorage.getItem("kitz_swot_used"),
+      !localStorage.getItem("kitz_habits_used"),
+      !localStorage.getItem("kitz_instagram_used"),
+    ].filter(Boolean).length;
+
+    // If user has unused features, occasionally show proactive tips
+    if (unusedFeatures > 2) {
+      setUseProactive(Math.random() > 0.5);
+    }
+  }, []);
+
+  const tips = useProactive 
+    ? (language === "es" ? PROACTIVE_TIPS_ES : PROACTIVE_TIPS_EN)
+    : (language === "es" ? TIPS_ES : TIPS_EN);
 
   // Rotate tips and show periodically
   useEffect(() => {
