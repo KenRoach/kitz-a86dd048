@@ -10,10 +10,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Building2, MapPin, CreditCard, Banknote, 
-  Smartphone, Globe, Image, Instagram, Save, Loader2
+  Smartphone, Globe, Image, Instagram, Save, Loader2, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
-
+import { useNavigate } from "react-router-dom";
 const BUSINESS_TYPES = [
   "Restaurant", "Cafe", "Bakery", "Food Truck", "Retail Store",
   "Online Store", "Services", "Beauty & Wellness", "Health & Fitness",
@@ -37,9 +37,18 @@ interface ProfileSettingsTabProps {
 export function ProfileSettingsTab({ initialProfile, onSaved }: ProfileSettingsTabProps) {
   const { user, profile: authProfile } = useAuth();
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   
   const profile = initialProfile || authProfile;
+
+  const handleReplayTour = () => {
+    localStorage.removeItem("kitz_spotlight_tour_complete");
+    toast.success(language === "es" ? "Redirigiendo al tour..." : "Redirecting to tour...");
+    navigate("/dashboard");
+    // Small delay to ensure navigation completes before reload triggers tour
+    setTimeout(() => window.location.reload(), 100);
+  };
   
   const [formData, setFormData] = useState({
     business_name: profile?.business_name || "",
@@ -345,6 +354,34 @@ export function ProfileSettingsTab({ initialProfile, onSaved }: ProfileSettingsT
               />
             </div>
           ))}
+      </CardContent>
+      </Card>
+
+      {/* App Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RotateCcw className="w-5 h-5 text-primary" />
+            {language === "es" ? "Preferencias de la App" : "App Preferences"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">
+                {language === "es" ? "Tour de la Aplicación" : "App Tour"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === "es" 
+                  ? "Revisa las funciones principales" 
+                  : "Review the main features"}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleReplayTour} className="gap-2">
+              <RotateCcw className="w-4 h-4" />
+              {language === "es" ? "Repetir Tour" : "Replay Tour"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
