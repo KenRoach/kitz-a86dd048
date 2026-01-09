@@ -141,6 +141,8 @@ export function StorefrontCard({
   const StatusIcon = statusConfig[status].icon;
   const hasOrder = !!buyerName;
   const hasPaymentProof = !!paymentProofUrl;
+  const isDemo = title.includes("[Demo]");
+  const displayTitle = title.replace("[Demo] ", "");
 
   return (
     <>
@@ -155,7 +157,10 @@ export function StorefrontCard({
             <div className="flex items-start justify-between gap-1.5 sm:gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-foreground truncate text-sm sm:text-base">{title}</h4>
+                  {isDemo && (
+                    <span className="text-[9px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Demo</span>
+                  )}
+                  <h4 className="font-semibold text-foreground truncate text-sm sm:text-base">{displayTitle}</h4>
                   {orderKey && <span className="flex items-center gap-0.5 text-[9px] sm:text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded"><Hash className="w-2.5 h-2.5" />{orderKey}</span>}
                 </div>
                 {customerName && <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t.for}: {customerName}</p>}
