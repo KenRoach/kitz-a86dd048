@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-const AUTO_DEMO_KEY = "kitz_auto_demo_created";
+// User-specific key to avoid cross-account contamination
+const getAutoDemoKey = (userId: string) => `kitz_auto_demo_${userId}`;
 
 const DEMO_PRODUCTS = [
   { title: "Sample Product", price: 25.00 },
@@ -27,8 +28,10 @@ export function useAutoDemo() {
     const createDemoStorefront = async () => {
       if (!user || isCreating) return;
       
-      // Check if demo already created
-      const hasCreatedDemo = localStorage.getItem(AUTO_DEMO_KEY);
+      const demoKey = getAutoDemoKey(user.id);
+      
+      // Check if demo already created for THIS user
+      const hasCreatedDemo = localStorage.getItem(demoKey);
       if (hasCreatedDemo) {
         setDemoCreated(true);
         return;
@@ -41,7 +44,7 @@ export function useAutoDemo() {
         .eq("user_id", user.id);
 
       if (count && count > 0) {
-        localStorage.setItem(AUTO_DEMO_KEY, "true");
+        localStorage.setItem(demoKey, "true");
         setDemoCreated(true);
         return;
       }
@@ -77,7 +80,7 @@ export function useAutoDemo() {
             message: `Welcome! Created your first link: ${demo.title}`
           });
 
-          localStorage.setItem(AUTO_DEMO_KEY, "true");
+          localStorage.setItem(demoKey, "true");
           setDemoCreated(true);
         }
       } catch (err) {
