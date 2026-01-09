@@ -7,6 +7,9 @@ import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { FourDXWidget } from "@/components/dashboard/FourDXWidget";
 import { ProgressChecklist } from "@/components/dashboard/ProgressChecklist";
+import { InsightsCarousel } from "@/components/dashboard/InsightsCarousel";
+import { FeatureSpotlight } from "@/components/dashboard/FeatureSpotlight";
+import { ContextualTip, useContextualTips } from "@/components/dashboard/ContextualTip";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 import { SpotlightTour } from "@/components/onboarding/SpotlightTour";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
@@ -49,6 +52,9 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSpotlightTour, setShowSpotlightTour] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [productCount, setProductCount] = useState(0);
+  const [customerCount, setCustomerCount] = useState(0);
+  const [hasGoals, setHasGoals] = useState(false);
 
   // Check if user needs profile setup or feature tour
   useEffect(() => {
@@ -100,27 +106,35 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchData = useCallback(async () => {
-    const { data: sfData } = await supabase
-      .from("storefronts")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [sfResult, actResult, prodResult, custResult, goalsResult] = await Promise.all([
+      supabase
+        .from("storefronts")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("activity_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase.from("products").select("id", { count: "exact", head: true }),
+      supabase.from("customers").select("id", { count: "exact", head: true }),
+      supabase.from("user_goals").select("id").limit(1)
+    ]);
 
-    if (sfData) {
-      setStorefronts(sfData);
+    if (sfResult.data) {
+      setStorefronts(sfResult.data);
     }
 
-    const { data: actData } = await supabase
-      .from("activity_log")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10);
-
-    if (actData) {
-      setActivities(actData.map(a => ({
+    if (actResult.data) {
+      setActivities(actResult.data.map(a => ({
         ...a,
         type: a.type as Activity["type"]
       })));
     }
+
+    setProductCount(prodResult.count || 0);
+    setCustomerCount(custResult.count || 0);
+    setHasGoals((goalsResult.data?.length || 0) > 0);
 
     setLoading(false);
   }, []);
@@ -233,6 +247,16 @@ export default function Dashboard() {
     return `${Math.floor(hours / 24)}d`;
   }
 
+  // Contextual tips based on user stats
+  const profileComplete = !!(profile?.phone && profile?.logo_url && profile?.username);
+  const contextualTips = useContextualTips({
+    products: productCount,
+    storefronts: storefronts.length,
+    customers: customerCount,
+    hasGoals,
+    profileComplete
+  });
+
   const isPositiveChange = parseFloat(changePercent) >= 0;
 
   if (loading) {
@@ -321,6 +345,27 @@ export default function Dashboard() {
         {/* Progress Checklist */}
         <ProgressChecklist />
 
+        {/* Contextual Tips - Smart Nudges */}
+        {contextualTips.length > 0 && (
+          <div className="space-y-2">
+            {contextualTips.slice(0, 2).map((tip, index) => (
+              <ContextualTip
+                key={tip.key}
+                tipKey={tip.key}
+                title={tip.title}
+                titleEs={tip.titleEs}
+                description={tip.description}
+                descriptionEs={tip.descriptionEs}
+                actionLabel={tip.actionLabel}
+                actionLabelEs={tip.actionLabelEs}
+                onAction={() => navigate(tip.route)}
+                variant={tip.variant}
+                delay={index * 200}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Attention Section */}
         {attentionItems && attentionItems.length > 0 && (
           <section className="space-y-3">
@@ -359,6 +404,12 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+
+        {/* Insights Carousel - Pro Tips */}
+        <InsightsCarousel />
+
+        {/* Feature Spotlight - Unused Features */}
+        <FeatureSpotlight />
 
         {/* 4DX Goals + Momentum + Earnings */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
