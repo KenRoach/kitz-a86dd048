@@ -333,7 +333,7 @@ export default function Landing() {
               <span className="font-medium text-white/90 text-sm">kitz</span>
               <span className="text-white/40 hidden sm:inline">·</span>
               <span className="text-xs text-white/50">
-                {language === "en" ? "Simple tools for smart sellers" : "Sistema de gestión simple para negocios inteligentes"}
+                {language === "en" ? "Simple management system for smart businesses" : "Sistema de gestión simple para negocios inteligentes"}
               </span>
             </div>
             
