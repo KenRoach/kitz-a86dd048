@@ -271,13 +271,23 @@ export default function Auth() {
 
           {mode !== "forgot" && (
             <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => handleModeChange(mode === "signup" ? "signin" : "signup")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {mode === "signup" ? t.alreadyHaveAccount : t.noAccount}
-              </button>
+              {mode === "signup" ? (
+                <button
+                  type="button"
+                  onClick={() => handleModeChange("signin")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t.alreadyHaveAccount}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleModeChange("signup")}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  {t.noAccount}
+                </button>
+              )}
             </div>
           )}
         </div>
