@@ -62,7 +62,7 @@ export function useAutoDemo() {
           price: demo.price,
           quantity: 1,
           slug,
-          status: "draft",
+          status: "sent", // Ready to share immediately!
           is_bundle: false,
           description: "This is a demo link to help you get started. Feel free to edit or delete it!",
           seller_phone: profile?.phone || null,
