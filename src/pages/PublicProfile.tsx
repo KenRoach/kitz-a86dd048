@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 // Saved contact info for repeat visitors
 const CONTACT_INFO_KEY = "kitz_contact_info";
@@ -418,13 +419,14 @@ export default function PublicProfile() {
             {/* Main Profile Section */}
             <div className="p-6">
               <div className="flex items-start gap-4">
-                {/* Avatar */}
+                {/* Avatar - Optimized with lazy loading */}
                 <div className="relative">
                   {profile?.logo_url ? (
-                    <img
+                    <OptimizedImage
                       src={profile.logo_url}
-                      alt={profile?.business_name}
-                      className="w-20 h-20 rounded-2xl object-cover border-2 border-white/10"
+                      alt={profile?.business_name || "Business"}
+                      containerClassName="w-20 h-20 rounded-2xl border-2 border-white/10"
+                      priority={true}
                     />
                   ) : (
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center border-2 border-white/10">
@@ -563,10 +565,10 @@ export default function PublicProfile() {
                 className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-white/10 hover:bg-zinc-900 transition-all group"
               >
                 {storefront.image_url ? (
-                  <img
+                  <OptimizedImage
                     src={storefront.image_url}
                     alt={storefront.title}
-                    className="w-16 h-16 rounded-xl object-cover"
+                    containerClassName="w-16 h-16 rounded-xl"
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center">
