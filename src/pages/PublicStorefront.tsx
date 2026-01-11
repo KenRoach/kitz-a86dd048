@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { PaymentProofUpload } from "@/components/storefront/PaymentProofUpload";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 const BUYER_INFO_KEY = "kitz_buyer_info";
 const BUYER_INFO_EXPIRY_DAYS = 120;
@@ -404,20 +405,15 @@ export default function PublicStorefront() {
           </div>
         ) : (
           <>
-            {/* Product image for single items */}
-            <div className="aspect-square rounded-2xl bg-muted overflow-hidden mb-6">
-              {storefront?.image_url ? (
-                <img
-                  src={storefront.image_url}
-                  alt={storefront.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ImageIcon className="w-16 h-16 text-muted-foreground/30" />
-                </div>
-              )}
-            </div>
+            {/* Product image for single items - Optimized with lazy loading */}
+            <OptimizedImage
+              src={storefront?.image_url}
+              alt={storefront?.title || "Product"}
+              containerClassName="rounded-2xl mb-6"
+              aspectRatio="square"
+              priority={true} // Above the fold
+              fallbackIcon={<ImageIcon className="w-16 h-16 text-muted-foreground/30" />}
+            />
 
             {/* Product details for single items */}
             <div className="mb-6">
@@ -443,22 +439,16 @@ export default function PublicStorefront() {
               <p className="text-sm text-muted-foreground">{bundleItems.length} items</p>
             </div>
             <div className="divide-y divide-border">
-              {bundleItems.map((item) => (
+              {bundleItems.map((item, index) => (
                 <div key={item.id} className="p-4 flex gap-4">
-                  {/* Item image */}
-                  <div className="w-20 h-20 rounded-xl bg-muted overflow-hidden flex-shrink-0">
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
+                  {/* Item image - Lazy loaded for bundle items */}
+                  <OptimizedImage
+                    src={item.image_url}
+                    alt={item.title}
+                    containerClassName="w-20 h-20 rounded-xl flex-shrink-0"
+                    priority={index < 2} // First 2 items load immediately
+                    fallbackIcon={<ImageIcon className="w-8 h-8 text-muted-foreground/30" />}
+                  />
                   
                   {/* Item details */}
                   <div className="flex-1 min-w-0">
