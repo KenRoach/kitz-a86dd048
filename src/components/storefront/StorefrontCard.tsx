@@ -4,6 +4,7 @@ import { Copy, MessageCircle, MoreVertical, Pencil, Trash2, Send, CheckCircle, C
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,8 +149,13 @@ export function StorefrontCard({
     <>
       <div className="bg-card rounded-xl md:rounded-2xl border border-border overflow-hidden card-hover animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
         <div className="flex">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-muted flex items-center justify-center relative">
-            {imageUrl ? <img src={imageUrl} alt={title} className="w-full h-full object-cover" /> : <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30" />}
+          <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative">
+            <OptimizedImage
+              src={imageUrl}
+              alt={title}
+              containerClassName="w-full h-full"
+              fallbackIcon={<ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30" />}
+            />
             {isBundle && <div className="absolute bottom-1 left-1 p-1 rounded-md bg-primary/90 text-primary-foreground"><Package className="w-3 h-3" /></div>}
             {mode === "quote" && <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-attention/90 text-white">{t.quote}</div>}
           </div>
