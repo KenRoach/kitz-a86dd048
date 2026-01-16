@@ -84,6 +84,10 @@ interface Storefront {
   valid_until: string | null;
   accepted_at: string | null;
   fulfillment_status: string | null;
+  version_major: number;
+  version_minor: number;
+  version_patch: number;
+  version_updated_at: string;
 }
 
 export default function PublicStorefront() {
@@ -133,7 +137,7 @@ export default function PublicStorefront() {
       // Use public view that excludes sensitive data (buyer info, seller phone)
       const { data, error } = await supabase
         .from("public_storefronts" as any)
-        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id, mode, valid_until, accepted_at, fulfillment_status")
+        .select("id, title, description, price, quantity, status, image_url, customer_name, fulfillment_note, payment_cards, payment_yappy, payment_cash, payment_pluxee, ordered_at, is_bundle, user_id, mode, valid_until, accepted_at, fulfillment_status, version_major, version_minor, version_patch, version_updated_at")
         .eq("slug", effectiveSlug)
         .maybeSingle();
 
@@ -719,8 +723,31 @@ export default function PublicStorefront() {
           )}
         </div>
         
-        {/* Powered by - subtle viral branding */}
-        <div className="text-center py-2">
+        {/* Version stamp + Powered by */}
+        <div className="text-center py-3 space-y-1.5">
+          {/* Version stamp for trust & audit */}
+          <div className="text-xs text-muted-foreground/70 font-mono">
+            Business Flow v{storefront?.version_major || 1}.{storefront?.version_minor || 0}.{storefront?.version_patch || 0}
+            <span className="mx-1.5">—</span>
+            Updated: {storefront?.version_updated_at 
+              ? new Date(storefront.version_updated_at).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })
+              : 'N/A'}
+            <span className="mx-1.5">—</span>
+            Status: <span className={cn(
+              "font-medium",
+              isPaid ? "text-success" : 
+              orderPlaced ? "text-primary" : 
+              storefront?.status === "sent" ? "text-attention" : "text-muted-foreground"
+            )}>
+              {isPaid ? "Paid" : orderPlaced ? "Ordered" : storefront?.status === "sent" ? "Sent" : "Draft"}
+            </span>
+          </div>
+          
+          {/* Powered by */}
           <span className="powered-by">
             Powered by <a href="/" className="hover:text-primary transition-colors">Kitz</a>
           </span>
