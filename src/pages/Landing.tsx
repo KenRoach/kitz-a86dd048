@@ -55,7 +55,8 @@ export default function Landing() {
   };
 
   const handleGetStarted = useCallback(() => {
-    setFormState("form");
+    // Navigate directly to auth page for signup
+    window.location.href = "/auth";
   }, []);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
