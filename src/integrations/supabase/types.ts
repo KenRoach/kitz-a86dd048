@@ -545,6 +545,10 @@ export type Database = {
           updated_at: string
           user_id: string
           valid_until: string | null
+          version_major: number
+          version_minor: number
+          version_patch: number
+          version_updated_at: string
         }
         Insert: {
           accepted_at?: string | null
@@ -581,6 +585,10 @@ export type Database = {
           updated_at?: string
           user_id: string
           valid_until?: string | null
+          version_major?: number
+          version_minor?: number
+          version_patch?: number
+          version_updated_at?: string
         }
         Update: {
           accepted_at?: string | null
@@ -617,6 +625,10 @@ export type Database = {
           updated_at?: string
           user_id?: string
           valid_until?: string | null
+          version_major?: number
+          version_minor?: number
+          version_patch?: number
+          version_updated_at?: string
         }
         Relationships: [
           {
@@ -978,6 +990,10 @@ export type Database = {
           title: string | null
           user_id: string | null
           valid_until: string | null
+          version_major: number | null
+          version_minor: number | null
+          version_patch: number | null
+          version_updated_at: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -1002,6 +1018,10 @@ export type Database = {
           title?: string | null
           user_id?: string | null
           valid_until?: string | null
+          version_major?: number | null
+          version_minor?: number | null
+          version_patch?: number | null
+          version_updated_at?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -1026,6 +1046,10 @@ export type Database = {
           title?: string | null
           user_id?: string | null
           valid_until?: string | null
+          version_major?: number | null
+          version_minor?: number | null
+          version_patch?: number | null
+          version_updated_at?: string | null
         }
         Relationships: []
       }
