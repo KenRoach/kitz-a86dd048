@@ -92,7 +92,33 @@ export default function Auth() {
 
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error("Invalid email or password");
+          // Show specific error messages based on Supabase error codes
+          const errorMessage = error.message?.toLowerCase() || "";
+          if (errorMessage.includes("invalid login credentials") || errorMessage.includes("invalid_credentials")) {
+            toast.error(language === "es" 
+              ? "Email o contraseña incorrectos. Verifica tus datos e intenta de nuevo."
+              : "Incorrect email or password. Please check your credentials and try again.");
+          } else if (errorMessage.includes("email not confirmed")) {
+            toast.error(language === "es"
+              ? "Por favor confirma tu email antes de iniciar sesión."
+              : "Please confirm your email before signing in.");
+          } else if (errorMessage.includes("too many requests") || errorMessage.includes("rate limit")) {
+            toast.error(language === "es"
+              ? "Demasiados intentos. Por favor espera unos minutos antes de intentar de nuevo."
+              : "Too many attempts. Please wait a few minutes before trying again.");
+          } else if (errorMessage.includes("user not found") || errorMessage.includes("no user")) {
+            toast.error(language === "es"
+              ? "No existe una cuenta con este email. ¿Deseas crear una cuenta?"
+              : "No account exists with this email. Would you like to create one?");
+          } else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+            toast.error(language === "es"
+              ? "Error de conexión. Verifica tu internet e intenta de nuevo."
+              : "Connection error. Please check your internet and try again.");
+          } else {
+            toast.error(language === "es"
+              ? "Error al iniciar sesión. Por favor intenta de nuevo."
+              : "Login failed. Please try again.");
+          }
         } else {
           toast.success(t.welcomeBack + "!");
           navigate("/dashboard");
