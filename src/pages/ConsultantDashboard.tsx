@@ -25,6 +25,7 @@ import { ConsultantContact } from "@/components/consultant/ConsultantContactCard
 import { ProductivityTab } from "@/components/profile/ProductivityTab";
 import { MarketingTab } from "@/components/profile/MarketingTab";
 import { ShareLinksTab } from "@/components/profile/ShareLinksTab";
+import { ActivityList } from "@/components/consultant/ActivityList";
 
 // Demo contacts for test user
 const DEMO_CONTACTS = [
@@ -337,6 +338,9 @@ export default function ConsultantDashboard() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Activity List */}
+                <ActivityList language={language} limit={10} />
               </CollapsibleContent>
             </Collapsible>
           </TabsContent>
