@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ConsultantKanban } from "@/components/consultant/ConsultantKanban";
 import { DailyAssistantPanel } from "@/components/consultant/DailyAssistantPanel";
@@ -47,11 +48,21 @@ export default function BarbershopDashboard() {
   const { language } = useLanguage();
   useBarbershopTheme(); // Initialize theme on load
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkEmailOpen, setIsBulkEmailOpen] = useState(false);
   const [seeded, setSeeded] = useState(false);
-  const [activeTab, setActiveTab] = useState("panel");
   const [secondaryExpanded, setSecondaryExpanded] = useState(false);
+  
+  // Read tab from URL, default to "panel"
+  const activeTab = searchParams.get("tab") || "panel";
+  const setActiveTab = (tab: string) => {
+    if (tab === "panel") {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab });
+    }
+  };
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["consultant-contacts", user?.id],
