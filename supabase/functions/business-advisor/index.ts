@@ -47,17 +47,21 @@ serve(async (req) => {
     // Fetch user's business data for context
     console.log('Fetching business data for user:', user.id);
 
-    const [storefrontsRes, productsRes, customersRes, profileRes] = await Promise.all([
+    const [storefrontsRes, productsRes, customersRes, profileRes, contactsRes, rolesRes] = await Promise.all([
       supabase.from('storefronts').select('*').order('created_at', { ascending: false }).limit(50),
       supabase.from('products').select('*').order('created_at', { ascending: false }),
       supabase.from('customers').select('*').order('total_spent', { ascending: false }).limit(20),
-      supabase.from('profiles').select('*').single()
+      supabase.from('profiles').select('*').single(),
+      supabase.from('consultant_contacts').select('*').order('last_interaction', { ascending: false }),
+      supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'consultant').maybeSingle()
     ]);
 
     const storefronts = storefrontsRes.data || [];
     const products = productsRes.data || [];
     const customers = customersRes.data || [];
     const profile = profileRes.data;
+    const contacts = contactsRes.data || [];
+    const isConsultant = !!rolesRes.data;
 
     // Calculate business metrics
     const paidStorefronts = storefronts.filter(s => s.status === 'paid');
@@ -83,9 +87,40 @@ serve(async (req) => {
     const recentOrders = paidStorefronts.slice(0, 10);
     const draftStorefronts = storefronts.filter(s => s.status === 'draft');
 
+    // Consultant funnel analysis (if consultant)
+    const funnelStats = {
+      total: contacts.length,
+      atraccion: contacts.filter(c => c.funnel_stage === 'atraccion').length,
+      nutricion: contacts.filter(c => c.funnel_stage === 'nutricion').length,
+      conversacion: contacts.filter(c => c.funnel_stage === 'conversacion').length,
+      retencion: contacts.filter(c => c.funnel_stage === 'retencion').length,
+    };
+    const pendingPayments = contacts.filter(c => c.funnel_stage === 'conversacion' && c.payment_pending);
+    const highAttentionContacts = contacts.filter(c => c.is_high_attention);
+
+    // Build consultant context
+    const consultantContext = isConsultant && contacts.length > 0 ? `
+
+🎯 CONSULTANT FUNNEL DATA:
+- Total Contacts: ${funnelStats.total}
+- Atracción (Attraction): ${funnelStats.atraccion} contacts
+- Nutrición (Nurturing): ${funnelStats.nutricion} contacts
+- Conversación (Conversation): ${funnelStats.conversacion} contacts
+- Retención (Retention): ${funnelStats.retencion} contacts
+
+📊 FUNNEL INSIGHTS:
+- Contacts with pending payments: ${pendingPayments.length}
+- High-attention contacts: ${highAttentionContacts.length}
+- Conversion rate from Atracción to Retención: ${funnelStats.total > 0 ? ((funnelStats.retencion / funnelStats.total) * 100).toFixed(1) : 0}%
+
+👥 RECENT CONTACTS:
+${contacts.slice(0, 5).map(c => `- ${c.name}: ${c.funnel_stage} stage ${c.source ? `(via ${c.source})` : ''} ${c.payment_pending ? '⚠️ Payment pending' : ''} ${c.is_high_attention ? '🔥 High attention' : ''}`).join('\n')}
+` : '';
+
     const businessContext = `
 BUSINESS CONTEXT FOR ${profile?.business_name || 'This Business'}:
 Business Type: ${profile?.business_type || 'Not specified'}
+${isConsultant ? 'Role: Consultant' : ''}
 
 📊 REVENUE METRICS:
 - Total Revenue (paid orders): $${totalRevenue.toFixed(2)}
@@ -107,13 +142,31 @@ ${topCustomers.map(c => `- ${c.name}: $${c.total_spent?.toFixed(2) || 0} spent, 
 
 📋 RECENT ORDERS:
 ${recentOrders.slice(0, 5).map(s => `- ${s.title}: $${s.price} (${s.status}) ${s.customer_name ? `to ${s.customer_name}` : ''}`).join('\n')}
-
+${consultantContext}
 PAYMENT METHODS ENABLED:
 - Cash: ${profile?.payment_cash ? 'Yes' : 'No'}
 - Cards: ${profile?.payment_cards ? 'Yes' : 'No'}
 - Yappy: ${profile?.payment_yappy ? 'Yes' : 'No'}
 - Pluxee: ${profile?.payment_pluxee ? 'Yes' : 'No'}
 `;
+
+    const consultantInstructions = isConsultant ? (isSpanish 
+      ? `
+
+INSTRUCCIONES ESPECIALES PARA CONSULTORES:
+- Tienes acceso a datos del embudo de contactos del consultor
+- Ayuda a mover contactos de una etapa a otra
+- Sugiere estrategias para convertir contactos en Nutrición a Conversación
+- Identifica contactos de alta prioridad que necesitan atención
+- Ofrece consejos sobre seguimiento y retención`
+      : `
+
+SPECIAL CONSULTANT INSTRUCTIONS:
+- You have access to the consultant's contact funnel data
+- Help move contacts from one stage to another
+- Suggest strategies to convert Nurturing contacts to Conversation
+- Identify high-priority contacts that need attention
+- Offer advice on follow-up and retention`) : '';
 
     const systemPrompt = isSpanish 
       ? `Eres un asesor de negocios estratégico para pequeños empresarios que usan kitz.io. Tu rol es ayudarlos a AUMENTAR INGRESOS y MEJORAR MÁRGENES.
@@ -127,6 +180,7 @@ TU MISIÓN:
 4. Identificar sus mejores clientes y productos
 5. Ayudar a convertir pedidos pendientes en pagados
 6. Sugerir estrategias de venta cruzada y paquetes
+${isConsultant ? '7. Ayudar a gestionar el embudo de contactos y mover prospectos' : ''}
 
 ESTILO DE COMUNICACIÓN:
 - Sé directo y orientado a la acción
@@ -141,7 +195,7 @@ SIEMPRE:
 - Referencia sus productos, clientes y números específicos
 - Sugiere pasos concretos que pueden tomar HOY
 - Enfócate en victorias rápidas que aumenten ingresos
-- Ayúdales a entender en qué productos/clientes enfocarse`
+- Ayúdales a entender en qué productos/clientes enfocarse${consultantInstructions}`
       : `You are a strategic business advisor for small business owners using kitz.io. Your role is to help them INCREASE REVENUE and IMPROVE MARGINS.
 
 ${businessContext}
@@ -153,6 +207,7 @@ YOUR MISSION:
 4. Identify their best customers and products
 5. Help convert pending orders to paid
 6. Suggest upselling and bundling strategies
+${isConsultant ? '7. Help manage the contact funnel and move prospects' : ''}
 
 COMMUNICATION STYLE:
 - Be direct and action-oriented
@@ -167,7 +222,7 @@ ALWAYS:
 - Reference their specific products, customers, and numbers
 - Suggest concrete next steps they can take TODAY
 - Focus on quick wins that increase revenue
-- Help them understand which products/customers to focus on`;
+- Help them understand which products/customers to focus on${consultantInstructions}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
