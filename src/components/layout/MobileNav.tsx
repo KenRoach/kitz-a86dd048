@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Package, Users, Scissors, Image, ShoppingBag, Settings } from "lucide-react";
+import { LayoutDashboard, Store, History, Package, Users, Scissors, Megaphone, ShoppingBag, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -14,7 +14,7 @@ const consultantNavItems = [
 const barbershopNavItems = [
   { icon: LayoutDashboard, labelKey: "panel" as const, path: "/barbershop" },
   { icon: Scissors, labelKey: "services" as const, path: "/barbershop?tab=services" },
-  { icon: Image, labelKey: "gallery" as const, path: "/barbershop?tab=gallery" },
+  { icon: Megaphone, labelKey: "marketing" as const, path: "/barbershop?tab=marketing" },
   { icon: ShoppingBag, labelKey: "products" as const, path: "/barbershop?tab=products" },
   { icon: Users, labelKey: "contacts" as const, path: "/barbershop?tab=contacts" },
 ];
@@ -37,8 +37,8 @@ export function MobileNav() {
     if (labelKey === "services") {
       return language === "es" ? "Servicios" : "Services";
     }
-    if (labelKey === "gallery") {
-      return language === "es" ? "Galería" : "Gallery";
+    if (labelKey === "marketing") {
+      return "Marketing";
     }
     if (labelKey === "contacts") {
       return language === "es" ? "Clientes" : "Clients";
