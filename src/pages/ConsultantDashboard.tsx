@@ -159,36 +159,26 @@ export default function ConsultantDashboard() {
   return (
     <AppLayout>
       <div className="space-y-4 pb-4">
-        {/* Header - Minimal */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-primary uppercase tracking-wide">
-              {getGreeting()}
-            </p>
-            <h1 className="text-lg font-semibold text-foreground">
-              {profile?.business_name || "Consultant"}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {stats.nutricion > 0 && (
-              <Button 
-                variant="outline"
-                onClick={() => setIsBulkEmailOpen(true)} 
-                size="sm"
-                className="gap-1.5 h-9"
-              >
-                <Mail className="w-4 h-4" />
-              </Button>
-            )}
+        {/* Quick Actions - No duplicate greeting */}
+        <div className="flex items-center justify-end gap-2">
+          {stats.nutricion > 0 && (
             <Button 
-              onClick={() => setIsAddDialogOpen(true)} 
+              variant="outline"
+              onClick={() => setIsBulkEmailOpen(true)} 
               size="sm"
               className="gap-1.5 h-9"
             >
-              <Plus className="w-4 h-4" />
-              {language === "es" ? "Nuevo" : "New"}
+              <Mail className="w-4 h-4" />
             </Button>
-          </div>
+          )}
+          <Button 
+            onClick={() => setIsAddDialogOpen(true)} 
+            size="sm"
+            className="gap-1.5 h-9"
+          >
+            <Plus className="w-4 h-4" />
+            {language === "es" ? "Nuevo" : "New"}
+          </Button>
         </div>
 
         {/* Funnel Overview - Always Visible */}
