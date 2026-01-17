@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ConsultantContactCard, ConsultantContact } from "./ConsultantContactCard";
 import { ConsultantContactPanel } from "./ConsultantContactPanel";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -53,6 +53,8 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedContact, setSelectedContact] = useState<ConsultantContact | null>(null);
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["consultant-contacts", user?.id],
@@ -99,19 +101,180 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
     return contacts.filter(c => c.funnel_stage === stageId);
   };
 
+  const scrollToStage = (index: number) => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const stageWidth = container.offsetWidth;
+      container.scrollTo({
+        left: index * stageWidth,
+        behavior: "smooth"
+      });
+      setActiveStageIndex(index);
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const stageWidth = container.offsetWidth;
+      const newIndex = Math.round(container.scrollLeft / stageWidth);
+      if (newIndex !== activeStageIndex && newIndex >= 0 && newIndex < FUNNEL_STAGES.length) {
+        setActiveStageIndex(newIndex);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {FUNNEL_STAGES.map(stage => (
-          <div key={stage.id} className="bg-muted/30 rounded-2xl p-4 min-h-[300px] animate-pulse" />
-        ))}
-      </div>
+      <>
+        {/* Desktop skeleton */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FUNNEL_STAGES.map(stage => (
+            <div key={stage.id} className="bg-muted/30 rounded-2xl p-4 min-h-[300px] animate-pulse" />
+          ))}
+        </div>
+        {/* Mobile skeleton */}
+        <div className="sm:hidden bg-muted/30 rounded-2xl p-4 min-h-[400px] animate-pulse" />
+      </>
     );
   }
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Mobile: Swipeable single column view */}
+      <div className="sm:hidden space-y-3">
+        {/* Stage indicator dots + navigation */}
+        <div className="flex items-center justify-between px-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => scrollToStage(Math.max(0, activeStageIndex - 1))}
+            disabled={activeStageIndex === 0}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            {FUNNEL_STAGES.map((stage, index) => (
+              <button
+                key={stage.id}
+                onClick={() => scrollToStage(index)}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all",
+                  index === activeStageIndex
+                    ? "bg-foreground text-background"
+                    : "bg-muted/50 text-muted-foreground"
+                )}
+              >
+                <div className={cn("w-2 h-2 rounded-full", stage.color)} />
+                {index === activeStageIndex && (
+                  <span className="text-xs font-medium">
+                    {language === "es" ? stage.label : stage.labelEn}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => scrollToStage(Math.min(FUNNEL_STAGES.length - 1, activeStageIndex + 1))}
+            disabled={activeStageIndex === FUNNEL_STAGES.length - 1}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Swipeable container */}
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {FUNNEL_STAGES.map((stage, index) => {
+            const stageContacts = getContactsByStage(stage.id);
+            return (
+              <div 
+                key={stage.id}
+                className="flex-none w-full snap-center pr-4 last:pr-0"
+              >
+                <div className="bg-muted/20 rounded-2xl p-4 min-h-[400px] flex flex-col">
+                  {/* Column Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className={cn("w-3 h-3 rounded-full", stage.color)} />
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          {language === "es" ? stage.label : stage.labelEn}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {language === "es" ? stage.description : stage.descriptionEn}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground bg-muted px-2.5 py-1 rounded-full">
+                      {stageContacts.length}
+                    </span>
+                  </div>
+
+                  {/* Cards */}
+                  <div className="flex-1 space-y-2 overflow-y-auto max-h-[350px]">
+                    {stageContacts.length === 0 ? (
+                      <div className="text-center py-12 text-sm text-muted-foreground">
+                        <p className="mb-2">{language === "es" ? "Sin contactos" : "No contacts"}</p>
+                        {stage.id === "atraccion" && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={onAddContact}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            {language === "es" ? "Agregar" : "Add"}
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      stageContacts.map(contact => (
+                        <ConsultantContactCard
+                          key={contact.id}
+                          contact={contact}
+                          language={language}
+                          onClick={() => setSelectedContact(contact)}
+                        />
+                      ))
+                    )}
+                  </div>
+
+                  {/* Add button for atraccion with contacts */}
+                  {stage.id === "atraccion" && stageContacts.length > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-3 w-full"
+                      onClick={onAddContact}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      {language === "es" ? "Agregar contacto" : "Add contact"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Swipe hint - only show briefly */}
+        <p className="text-center text-xs text-muted-foreground">
+          {language === "es" ? "← Desliza para cambiar etapa →" : "← Swipe to change stage →"}
+        </p>
+      </div>
+
+      {/* Desktop: Grid view */}
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {FUNNEL_STAGES.map(stage => {
           const stageContacts = getContactsByStage(stage.id);
           return (
