@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { MobileHeader } from "./MobileHeader";
 import { PageTransition } from "./PageTransition";
+import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -30,6 +31,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Fixed bottom nav */}
         <MobileNav />
       </div>
+      
+      {/* AI Business Advisor floating button */}
+      <BusinessAdvisor />
     </div>
   );
 }
