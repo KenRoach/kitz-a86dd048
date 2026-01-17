@@ -4,12 +4,13 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ConsultantKanban } from "@/components/consultant/ConsultantKanban";
 import { DailyAssistantPanel } from "@/components/consultant/DailyAssistantPanel";
 import { AddContactDialog } from "@/components/consultant/AddContactDialog";
+import { BulkEmailDialog } from "@/components/consultant/BulkEmailDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
+import { Plus, Mail } from "lucide-react";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
 
 // Demo contacts for test user
@@ -27,6 +28,7 @@ export default function ConsultantDashboard() {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isBulkEmailOpen, setIsBulkEmailOpen] = useState(false);
   const [seeded, setSeeded] = useState(false);
 
   const { data: contacts = [], isLoading } = useQuery({
@@ -118,14 +120,27 @@ export default function ConsultantDashboard() {
               {profile?.business_name || "Consultant Demo"}
             </p>
           </div>
-          <Button 
-            onClick={() => setIsAddDialogOpen(true)} 
-            size="sm"
-            className="gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            {language === "es" ? "Nuevo" : "New"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {stats.nutricion > 0 && (
+              <Button 
+                variant="outline"
+                onClick={() => setIsBulkEmailOpen(true)} 
+                size="sm"
+                className="gap-1.5"
+              >
+                <Mail className="w-4 h-4" />
+                {language === "es" ? "Email Masivo" : "Bulk Email"}
+              </Button>
+            )}
+            <Button 
+              onClick={() => setIsAddDialogOpen(true)} 
+              size="sm"
+              className="gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              {language === "es" ? "Nuevo" : "New"}
+            </Button>
+          </div>
         </div>
 
         {/* Daily Assistant */}
@@ -169,6 +184,14 @@ export default function ConsultantDashboard() {
       <AddContactDialog 
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}
+        language={language}
+      />
+
+      {/* Bulk Email Dialog */}
+      <BulkEmailDialog
+        open={isBulkEmailOpen}
+        onClose={() => setIsBulkEmailOpen(false)}
+        contacts={contacts}
         language={language}
       />
     </AppLayout>
