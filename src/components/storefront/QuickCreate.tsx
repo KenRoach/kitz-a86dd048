@@ -39,7 +39,7 @@ export function QuickCreate({ onCreated }: QuickCreateProps) {
 
     const parsed = parseInput(input);
     if (!parsed || !parsed.title || parsed.price <= 0) {
-      toast.error("Enter title and price (e.g., 'Chicken Bowl $12')");
+      toast.error("Enter title and price (e.g., 'Service $25')");
       return;
     }
 
@@ -98,7 +98,7 @@ export function QuickCreate({ onCreated }: QuickCreateProps) {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Quick: Chicken Bowl $12"
+          placeholder="Quick: Servicio $25"
           className="pl-10 pr-4 py-5 text-sm bg-muted/50 border-dashed"
           disabled={loading}
         />
