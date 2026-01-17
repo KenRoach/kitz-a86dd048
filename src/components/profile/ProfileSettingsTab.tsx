@@ -10,7 +10,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Building2, MapPin, CreditCard, Banknote, 
-  Smartphone, Globe, Image, Instagram, Save, Loader2, RotateCcw
+  Smartphone, Globe, Image, Instagram, Save, Loader2, RotateCcw, Clock
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,15 @@ const COUNTRIES = [
   { code: "CO", name: "Colombia", phoneCode: "+57" },
   { code: "CR", name: "Costa Rica", phoneCode: "+506" },
   { code: "GT", name: "Guatemala", phoneCode: "+502" },
+];
+
+const TIMEZONES = [
+  { value: "America/Panama", label: "Panama (GMT-5)" },
+  { value: "America/New_York", label: "New York (GMT-5/-4)" },
+  { value: "America/Los_Angeles", label: "Los Angeles (GMT-8/-7)" },
+  { value: "America/Mexico_City", label: "Mexico City (GMT-6)" },
+  { value: "America/Bogota", label: "Bogota (GMT-5)" },
+  { value: "America/Costa_Rica", label: "Costa Rica (GMT-6)" },
 ];
 
 interface ProfileSettingsTabProps {
@@ -57,6 +66,7 @@ export function ProfileSettingsTab({ initialProfile, onSaved }: ProfileSettingsT
     address: profile?.address || "",
     city: profile?.city || "",
     country: profile?.country || "PA",
+    timezone: "America/Panama",
     website: profile?.website || "",
     instagram: profile?.instagram || "",
     username: profile?.username || "",
@@ -272,6 +282,26 @@ export function ProfileSettingsTab({ initialProfile, onSaved }: ProfileSettingsT
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              {language === "es" ? "Zona Horaria" : "Timezone"}
+            </Label>
+            <Select
+              value={formData.timezone}
+              onValueChange={(v) => updateField("timezone", v)}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMEZONES.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
