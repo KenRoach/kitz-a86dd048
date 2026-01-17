@@ -5,11 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 // User-specific key to avoid cross-account contamination
 const getAutoDemoKey = (userId: string) => `kitz_auto_demo_${userId}`;
 
-const DEMO_PRODUCTS = [
-  { title: "[Demo] Sample Product", price: 25.00 },
-  { title: "[Demo] Quick Service", price: 50.00 },
-  { title: "[Demo] Premium Package", price: 99.00 },
-];
+// Single demo product for new users
+const DEMO_PRODUCT = { title: "[Demo] Mi Servicio", price: 50.00 };
 
 const generateSlug = (title: string) => {
   return title
@@ -37,6 +34,20 @@ export function useAutoDemo() {
         return;
       }
 
+      // Skip demo creation for consultants - they have their own dashboard
+      const { data: consultantRole } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "consultant")
+        .maybeSingle();
+
+      if (consultantRole) {
+        localStorage.setItem(demoKey, "true");
+        setDemoCreated(true);
+        return;
+      }
+
       // Check if user already has storefronts
       const { count } = await supabase
         .from("storefronts")
@@ -52,19 +63,17 @@ export function useAutoDemo() {
       setIsCreating(true);
 
       try {
-        // Pick a random demo product
-        const demo = DEMO_PRODUCTS[Math.floor(Math.random() * DEMO_PRODUCTS.length)];
-        const slug = generateSlug(demo.title);
+        const slug = generateSlug(DEMO_PRODUCT.title);
 
         const { error } = await supabase.from("storefronts").insert({
           user_id: user.id,
-          title: demo.title,
-          price: demo.price,
+          title: DEMO_PRODUCT.title,
+          price: DEMO_PRODUCT.price,
           quantity: 1,
           slug,
-          status: "sent", // Ready to share immediately!
+          status: "sent",
           is_bundle: false,
-          description: "This is a demo link to help you get started. Feel free to edit or delete it!",
+          description: "Este es un enlace de demostración. ¡Puedes editarlo o eliminarlo!",
           seller_phone: profile?.phone || null,
           payment_cards: profile?.payment_cards ?? false,
           payment_yappy: profile?.payment_yappy ?? false,
@@ -73,11 +82,10 @@ export function useAutoDemo() {
         });
 
         if (!error) {
-          // Log activity
           await supabase.from("activity_log").insert({
             user_id: user.id,
             type: "storefront",
-            message: `Welcome! Created your first link: ${demo.title}`
+            message: `¡Bienvenido! Creamos tu primer enlace: ${DEMO_PRODUCT.title}`
           });
 
           localStorage.setItem(demoKey, "true");
