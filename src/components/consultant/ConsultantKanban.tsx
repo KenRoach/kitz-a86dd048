@@ -20,6 +20,8 @@ const FUNNEL_STAGES = [
     label: "Atracción", 
     labelEn: "Attraction",
     color: "bg-blue-500",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/20",
     description: "Primer contacto",
     descriptionEn: "First contact"
   },
@@ -27,7 +29,9 @@ const FUNNEL_STAGES = [
     id: "nutricion", 
     label: "Nutrición", 
     labelEn: "Nurturing",
-    color: "bg-amber-500",
+    color: "bg-consultant-cta",
+    bgColor: "bg-consultant-cta/10",
+    borderColor: "border-consultant-cta/20",
     description: "Construyendo relación",
     descriptionEn: "Building relationship"
   },
@@ -35,7 +39,9 @@ const FUNNEL_STAGES = [
     id: "conversacion", 
     label: "Conversación", 
     labelEn: "Conversation",
-    color: "bg-purple-500",
+    color: "bg-consultant-accent",
+    bgColor: "bg-consultant-accent/10",
+    borderColor: "border-consultant-accent/20",
     description: "Diálogo activo",
     descriptionEn: "Active dialogue"
   },
@@ -44,6 +50,8 @@ const FUNNEL_STAGES = [
     label: "Retención", 
     labelEn: "Retention",
     color: "bg-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/20",
     description: "Cliente confirmado",
     descriptionEn: "Confirmed client"
   },
@@ -148,7 +156,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 text-consultant-muted hover:text-consultant-header"
             onClick={() => scrollToStage(Math.max(0, activeStageIndex - 1))}
             disabled={activeStageIndex === 0}
           >
@@ -163,8 +171,8 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
                 className={cn(
                   "flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all",
                   index === activeStageIndex
-                    ? "bg-foreground text-background"
-                    : "bg-muted/50 text-muted-foreground"
+                    ? "bg-consultant-header text-consultant-section"
+                    : "bg-consultant-section-alt text-consultant-muted"
                 )}
               >
                 <div className={cn("w-2 h-2 rounded-full", stage.color)} />
@@ -180,7 +188,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 text-consultant-muted hover:text-consultant-header"
             onClick={() => scrollToStage(Math.min(FUNNEL_STAGES.length - 1, activeStageIndex + 1))}
             disabled={activeStageIndex === FUNNEL_STAGES.length - 1}
           >
@@ -202,21 +210,21 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
                 key={stage.id}
                 className="flex-none w-full snap-center pr-4 last:pr-0"
               >
-                <div className="bg-muted/20 rounded-2xl p-4 min-h-[400px] flex flex-col">
+                <div className={cn("rounded-2xl p-4 min-h-[400px] flex flex-col border", stage.bgColor, stage.borderColor)}>
                   {/* Column Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <div className={cn("w-3 h-3 rounded-full", stage.color)} />
                       <div>
-                        <h3 className="font-semibold text-foreground">
+                        <h3 className="font-semibold text-consultant-header">
                           {language === "es" ? stage.label : stage.labelEn}
                         </h3>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-consultant-muted">
                           {language === "es" ? stage.description : stage.descriptionEn}
                         </p>
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-foreground bg-muted px-2.5 py-1 rounded-full">
+                    <span className="text-sm font-semibold text-consultant-header bg-consultant-section px-2.5 py-1 rounded-full border border-consultant-accent/20">
                       {stageContacts.length}
                     </span>
                   </div>
@@ -224,13 +232,14 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
                   {/* Cards */}
                   <div className="flex-1 space-y-2 overflow-y-auto max-h-[350px]">
                     {stageContacts.length === 0 ? (
-                      <div className="text-center py-12 text-sm text-muted-foreground">
+                      <div className="text-center py-12 text-sm text-consultant-muted">
                         <p className="mb-2">{language === "es" ? "Sin contactos" : "No contacts"}</p>
                         {stage.id === "atraccion" && (
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={onAddContact}
+                            className="border-consultant-cta text-consultant-cta hover:bg-consultant-cta/10"
                           >
                             <Plus className="w-4 h-4 mr-1" />
                             {language === "es" ? "Agregar" : "Add"}
@@ -254,7 +263,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="mt-3 w-full"
+                      className="mt-3 w-full text-consultant-cta hover:bg-consultant-cta/10"
                       onClick={onAddContact}
                     >
                       <Plus className="w-4 h-4 mr-1" />
@@ -268,7 +277,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
         </div>
 
         {/* Swipe hint - only show briefly */}
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-consultant-muted">
           {language === "es" ? "← Desliza para cambiar etapa →" : "← Swipe to change stage →"}
         </p>
       </div>
@@ -280,22 +289,22 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
           return (
             <div 
               key={stage.id} 
-              className="bg-muted/20 rounded-2xl p-3 min-h-[300px] flex flex-col"
+              className={cn("rounded-2xl p-3 min-h-[300px] flex flex-col border", stage.bgColor, stage.borderColor)}
             >
               {/* Column Header */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div className={cn("w-2.5 h-2.5 rounded-full", stage.color)} />
                   <div>
-                    <h3 className="font-medium text-sm text-foreground">
+                    <h3 className="font-medium text-sm text-consultant-header">
                       {language === "es" ? stage.label : stage.labelEn}
                     </h3>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-[10px] text-consultant-muted">
                       {language === "es" ? stage.description : stage.descriptionEn}
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-consultant-header bg-consultant-section px-2 py-0.5 rounded-full border border-consultant-accent/20">
                   {stageContacts.length}
                 </span>
               </div>
@@ -303,7 +312,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
               {/* Cards */}
               <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
                 {stageContacts.length === 0 ? (
-                  <div className="text-center py-8 text-xs text-muted-foreground">
+                  <div className="text-center py-8 text-xs text-consultant-muted">
                     {language === "es" ? "Sin contactos" : "No contacts"}
                   </div>
                 ) : (
@@ -323,7 +332,7 @@ export function ConsultantKanban({ language = "es", onAddContact }: ConsultantKa
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="mt-2 w-full text-xs"
+                  className="mt-2 w-full text-xs text-consultant-cta hover:bg-consultant-cta/10"
                   onClick={onAddContact}
                 >
                   <Plus className="w-3 h-3 mr-1" />
