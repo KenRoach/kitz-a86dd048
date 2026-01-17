@@ -30,7 +30,6 @@ import { ActivityList } from "@/components/consultant/ActivityList";
 
 // Barbershop-specific components
 import { ServicesManager } from "@/components/barbershop/ServicesManager";
-import { GalleryManager } from "@/components/barbershop/GalleryManager";
 import { ProductsManager } from "@/components/barbershop/ProductsManager";
 
 // Demo contacts for barbershop test user
@@ -254,11 +253,11 @@ export default function BarbershopDashboard() {
               <span>{language === "es" ? "Servicios" : "Services"}</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="gallery"
+              value="marketing"
               className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
             >
-              <Image className="w-4 h-4" />
-              <span>{language === "es" ? "Galería" : "Gallery"}</span>
+              <Megaphone className="w-4 h-4" />
+              <span>Marketing</span>
             </TabsTrigger>
             <TabsTrigger 
               value="products"
@@ -381,9 +380,9 @@ export default function BarbershopDashboard() {
             <ServicesManager language={language} />
           </TabsContent>
 
-          {/* Gallery Tab */}
-          <TabsContent value="gallery" className="mt-4">
-            <GalleryManager language={language} />
+          {/* Marketing Tab */}
+          <TabsContent value="marketing" className="mt-4">
+            <MarketingTab />
           </TabsContent>
 
           {/* Products Tab */}
