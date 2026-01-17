@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useConsultantTheme } from "@/hooks/useConsultantTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Plus, Mail, Store, ShoppingBag, Package, DollarSign, 
@@ -38,6 +39,7 @@ const DEMO_CONTACTS = [
 export default function ConsultantDashboard() {
   const { user, profile } = useAuth();
   const { language } = useLanguage();
+  useConsultantTheme(); // Initialize theme on load
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkEmailOpen, setIsBulkEmailOpen] = useState(false);
