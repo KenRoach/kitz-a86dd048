@@ -8,11 +8,11 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
+import { GoogleCalendarConnect } from "./GoogleCalendarConnect";
+import { CalendarInviteDialog } from "./CalendarInviteDialog";
 interface ConsultantContactPanelProps {
   contact: ConsultantContact;
   language?: "en" | "es";
@@ -35,7 +35,8 @@ export function ConsultantContactPanel({
 }: ConsultantContactPanelProps) {
   const queryClient = useQueryClient();
   const [notes, setNotes] = useState(contact.notes || "");
-
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false);
+  const [showCalendarInvite, setShowCalendarInvite] = useState(false);
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<ConsultantContact>) => {
       const { error } = await supabase
@@ -222,6 +223,18 @@ export function ConsultantContactPanel({
               <h4 className="font-medium text-sm flex items-center gap-2">
                 ✓ {language === "es" ? "Cliente confirmado" : "Confirmed Client"}
               </h4>
+              
+              {/* Google Calendar Connection */}
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">
+                  Google Calendar
+                </span>
+                <GoogleCalendarConnect 
+                  language={language} 
+                  onConnectionChange={setIsCalendarConnected}
+                />
+              </div>
+              
               {!contact.attendance_confirmed ? (
                 <Button 
                   variant="outline" 
@@ -237,22 +250,50 @@ export function ConsultantContactPanel({
                   {language === "es" ? "Asistencia confirmada" : "Attendance confirmed"}
                 </p>
               )}
-              {!contact.calendar_reminder_sent && (
+              
+              {/* Calendar Invite Button */}
+              {!contact.calendar_reminder_sent ? (
                 <Button 
-                  variant="ghost" 
+                  variant={isCalendarConnected ? "default" : "outline"}
                   size="sm"
-                  className="w-full gap-2 text-xs"
-                  onClick={() => {
-                    updateMutation.mutate({ calendar_reminder_sent: true });
-                    toast.success(language === "es" ? "Recordatorio enviado" : "Reminder sent");
-                  }}
+                  className="w-full gap-2"
+                  disabled={!isCalendarConnected}
+                  onClick={() => setShowCalendarInvite(true)}
                 >
-                  <Calendar className="w-3.5 h-3.5" />
-                  {language === "es" ? "Enviar recordatorio calendario" : "Send calendar reminder"}
+                  <Calendar className="w-4 h-4" />
+                  {language === "es" ? "Enviar invitación de calendario" : "Send calendar invite"}
                 </Button>
+              ) : (
+                <p className="text-sm text-emerald-600 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {language === "es" ? "Invitación enviada" : "Invite sent"}
+                </p>
+              )}
+              
+              {!isCalendarConnected && (
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" 
+                    ? "Conecta tu Google Calendar para enviar invitaciones automáticas"
+                    : "Connect your Google Calendar to send automatic invites"}
+                </p>
               )}
             </div>
           )}
+          
+          {/* Calendar Invite Dialog */}
+          <CalendarInviteDialog
+            open={showCalendarInvite}
+            onOpenChange={setShowCalendarInvite}
+            contact={{
+              id: contact.id,
+              name: contact.name,
+              email: contact.email,
+            }}
+            language={language}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["consultant-contacts"] });
+            }}
+          />
 
           {/* Notes */}
           <div className="space-y-2">
