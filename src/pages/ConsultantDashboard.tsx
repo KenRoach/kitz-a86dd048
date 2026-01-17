@@ -166,7 +166,7 @@ export default function ConsultantDashboard() {
               variant="outline"
               onClick={() => setIsBulkEmailOpen(true)} 
               size="sm"
-              className="gap-1.5 h-9"
+              className="gap-1.5 h-9 border-consultant-accent text-consultant-accent hover:bg-consultant-accent/10"
             >
               <Mail className="w-4 h-4" />
             </Button>
@@ -174,7 +174,7 @@ export default function ConsultantDashboard() {
           <Button 
             onClick={() => setIsAddDialogOpen(true)} 
             size="sm"
-            className="gap-1.5 h-9"
+            className="gap-1.5 h-9 bg-consultant-cta hover:bg-consultant-cta/90 text-consultant-cta-foreground"
           >
             <Plus className="w-4 h-4" />
             {language === "es" ? "Nuevo" : "New"}
@@ -184,26 +184,26 @@ export default function ConsultantDashboard() {
         {/* Funnel Overview - Always Visible */}
         <div className="grid grid-cols-4 gap-2">
           <div className="bg-blue-500/10 rounded-xl p-3 text-center border border-blue-500/20">
-            <p className="text-xl font-bold text-blue-600">{stats.atraccion}</p>
-            <p className="text-[9px] text-muted-foreground font-medium">
+            <p className="text-xl font-bold text-consultant-header">{stats.atraccion}</p>
+            <p className="text-[9px] text-consultant-muted font-medium">
               {language === "es" ? "Atracción" : "Attraction"}
             </p>
           </div>
-          <div className="bg-amber-500/10 rounded-xl p-3 text-center border border-amber-500/20">
-            <p className="text-xl font-bold text-amber-600">{stats.nutricion}</p>
-            <p className="text-[9px] text-muted-foreground font-medium">
+          <div className="bg-consultant-cta/10 rounded-xl p-3 text-center border border-consultant-cta/20">
+            <p className="text-xl font-bold text-consultant-header">{stats.nutricion}</p>
+            <p className="text-[9px] text-consultant-muted font-medium">
               {language === "es" ? "Nutrición" : "Nurturing"}
             </p>
           </div>
-          <div className="bg-purple-500/10 rounded-xl p-3 text-center border border-purple-500/20">
-            <p className="text-xl font-bold text-purple-600">{stats.conversacion}</p>
-            <p className="text-[9px] text-muted-foreground font-medium">
+          <div className="bg-consultant-accent/10 rounded-xl p-3 text-center border border-consultant-accent/20">
+            <p className="text-xl font-bold text-consultant-header">{stats.conversacion}</p>
+            <p className="text-[9px] text-consultant-muted font-medium">
               {language === "es" ? "Conversación" : "Conversation"}
             </p>
           </div>
           <div className="bg-emerald-500/10 rounded-xl p-3 text-center border border-emerald-500/20">
-            <p className="text-xl font-bold text-emerald-600">{stats.retencion}</p>
-            <p className="text-[9px] text-muted-foreground font-medium">
+            <p className="text-xl font-bold text-consultant-header">{stats.retencion}</p>
+            <p className="text-[9px] text-consultant-muted font-medium">
               {language === "es" ? "Retención" : "Retention"}
             </p>
           </div>
@@ -211,38 +211,38 @@ export default function ConsultantDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 w-full h-auto p-1 bg-muted/50">
+          <TabsList className="grid grid-cols-5 w-full h-auto p-1 bg-consultant-section-alt">
             <TabsTrigger 
               value="panel" 
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-consultant-section data-[state=active]:text-consultant-header text-[10px] text-consultant-muted"
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Panel</span>
             </TabsTrigger>
             <TabsTrigger 
               value="contacts"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-consultant-section data-[state=active]:text-consultant-header text-[10px] text-consultant-muted"
             >
               <Users className="w-4 h-4" />
               <span>{language === "es" ? "Contactos" : "Contacts"}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="marketing"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-consultant-section data-[state=active]:text-consultant-header text-[10px] text-consultant-muted"
             >
               <Megaphone className="w-4 h-4" />
               <span>Marketing</span>
             </TabsTrigger>
             <TabsTrigger 
               value="productivity"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-consultant-section data-[state=active]:text-consultant-header text-[10px] text-consultant-muted"
             >
               <Brain className="w-4 h-4" />
               <span>{language === "es" ? "Tareas" : "Tasks"}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="share"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-consultant-section data-[state=active]:text-consultant-header text-[10px] text-consultant-muted"
             >
               <Share2 className="w-4 h-4" />
               <span>{language === "es" ? "Compartir" : "Share"}</span>
@@ -258,48 +258,48 @@ export default function ConsultantDashboard() {
             <div className="grid grid-cols-2 gap-3">
               <Link 
                 to="/storefronts"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-consultant-section border border-consultant-accent/20 hover:bg-consultant-section-alt transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Store className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-consultant-cta/10 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-consultant-cta" />
                 </div>
-                <p className="text-xl font-bold text-foreground">{kitzStats?.storefronts || 0}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xl font-bold text-consultant-header">{kitzStats?.storefronts || 0}</p>
+                <p className="text-xs text-consultant-muted">
                   {language === "es" ? "Vitrinas" : "Storefronts"}
                 </p>
               </Link>
               <Link 
                 to="/products"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-consultant-section border border-consultant-accent/20 hover:bg-consultant-section-alt transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                  <Package className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 rounded-full bg-consultant-accent/10 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-consultant-accent" />
                 </div>
-                <p className="text-xl font-bold text-foreground">{kitzStats?.products || 0}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xl font-bold text-consultant-header">{kitzStats?.products || 0}</p>
+                <p className="text-xs text-consultant-muted">
                   {language === "es" ? "Productos" : "Products"}
                 </p>
               </Link>
               <Link 
                 to="/order-history"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-consultant-section border border-consultant-accent/20 hover:bg-consultant-section-alt transition-colors"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
                   <ShoppingBag className="w-5 h-5 text-emerald-600" />
                 </div>
-                <p className="text-xl font-bold text-foreground">{kitzStats?.orders || 0}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xl font-bold text-consultant-header">{kitzStats?.orders || 0}</p>
+                <p className="text-xs text-consultant-muted">
                   {language === "es" ? "Pedidos" : "Orders"}
                 </p>
               </Link>
-              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-emerald-500/5 to-green-500/10 border border-emerald-500/20">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-emerald-600" />
+              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-consultant-cta/5 to-consultant-cta/10 border border-consultant-cta/20">
+                <div className="w-10 h-10 rounded-full bg-consultant-cta/20 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-consultant-cta" />
                 </div>
-                <p className="text-xl font-bold text-emerald-600">
+                <p className="text-xl font-bold text-consultant-cta">
                   ${(kitzStats?.revenue || 0).toFixed(0)}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-consultant-muted">
                   {language === "es" ? "Ingresos" : "Revenue"}
                 </p>
               </div>
@@ -310,7 +310,7 @@ export default function ConsultantDashboard() {
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-center gap-2 text-muted-foreground"
+                  className="w-full flex items-center justify-center gap-2 text-consultant-muted hover:text-consultant-header"
                 >
                   <ChevronDown className={`w-4 h-4 transition-transform ${secondaryExpanded ? "rotate-180" : ""}`} />
                   {language === "es" ? "Ver más" : "View more"}
@@ -318,17 +318,17 @@ export default function ConsultantDashboard() {
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-4 mt-4">
                 {/* Total Revenue Card */}
-                <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
+                <Card className="bg-gradient-to-br from-consultant-cta/5 to-consultant-cta/10 border-consultant-cta/30">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-consultant-cta to-consultant-accent flex items-center justify-center shadow-lg">
                         <DollarSign className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-consultant-muted">
                           {language === "es" ? "Ingresos totales" : "Total Revenue"}
                         </p>
-                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        <p className="text-2xl font-bold text-consultant-cta">
                           ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </p>
                       </div>

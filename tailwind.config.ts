@@ -83,6 +83,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        consultant: {
+          header: "hsl(var(--consultant-header))",
+          section: "hsl(var(--consultant-section))",
+          "section-alt": "hsl(var(--consultant-section-alt))",
+          cta: "hsl(var(--consultant-cta))",
+          "cta-foreground": "hsl(var(--consultant-cta-foreground))",
+          accent: "hsl(var(--consultant-accent))",
+          muted: "hsl(var(--consultant-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
