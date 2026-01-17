@@ -92,6 +92,15 @@ export default {
           accent: "hsl(var(--consultant-accent))",
           muted: "hsl(var(--consultant-muted))",
         },
+        barbershop: {
+          header: "hsl(var(--barbershop-header))",
+          section: "hsl(var(--barbershop-section))",
+          "section-alt": "hsl(var(--barbershop-section-alt))",
+          cta: "hsl(var(--barbershop-cta))",
+          "cta-foreground": "hsl(var(--barbershop-cta-foreground))",
+          accent: "hsl(var(--barbershop-accent))",
+          muted: "hsl(var(--barbershop-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

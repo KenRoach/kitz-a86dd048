@@ -96,6 +96,15 @@
     --consultant-cta-foreground: 0 0% 100%;
     --consultant-accent: 16 51% 52%;
     --consultant-muted: 0 0% 42%;
+
+    /* Barbershop Theme - Classic masculine palette */
+    --barbershop-header: 220 20% 15%;
+    --barbershop-section: 0 0% 100%;
+    --barbershop-section-alt: 30 10% 96%;
+    --barbershop-cta: 25 80% 45%;
+    --barbershop-cta-foreground: 0 0% 100%;
+    --barbershop-accent: 35 60% 50%;
+    --barbershop-muted: 30 5% 45%;
   }
 
   .dark {
