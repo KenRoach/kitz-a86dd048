@@ -16,7 +16,7 @@ import { useBarbershopTheme } from "@/hooks/useBarbershopTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Plus, Mail, Store, ShoppingBag, Package, DollarSign, 
-  LayoutDashboard, Users, Megaphone, Brain, Share2, ChevronDown, Scissors
+  LayoutDashboard, Users, Megaphone, Brain, Share2, ChevronDown, Scissors, Image, Settings
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
@@ -26,6 +26,11 @@ import { ProductivityTab } from "@/components/profile/ProductivityTab";
 import { MarketingTab } from "@/components/profile/MarketingTab";
 import { ShareLinksTab } from "@/components/profile/ShareLinksTab";
 import { ActivityList } from "@/components/consultant/ActivityList";
+
+// Barbershop-specific components
+import { ServicesManager } from "@/components/barbershop/ServicesManager";
+import { GalleryManager } from "@/components/barbershop/GalleryManager";
+import { ProductsManager } from "@/components/barbershop/ProductsManager";
 
 // Demo contacts for barbershop test user
 const DEMO_CONTACTS = [
@@ -222,13 +227,34 @@ export default function BarbershopDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 w-full h-auto p-1 bg-barbershop-section-alt">
+          <TabsList className="grid grid-cols-6 w-full h-auto p-1 bg-barbershop-section-alt">
             <TabsTrigger 
               value="panel" 
               className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Panel</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="services"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
+            >
+              <Scissors className="w-4 h-4" />
+              <span>{language === "es" ? "Servicios" : "Services"}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="gallery"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
+            >
+              <Image className="w-4 h-4" />
+              <span>{language === "es" ? "Galería" : "Gallery"}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="products"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
+            >
+              <Package className="w-4 h-4" />
+              <span>{language === "es" ? "Productos" : "Products"}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="contacts"
@@ -238,25 +264,11 @@ export default function BarbershopDashboard() {
               <span>{language === "es" ? "Clientes" : "Clients"}</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="marketing"
+              value="settings"
               className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
             >
-              <Megaphone className="w-4 h-4" />
-              <span>Marketing</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="productivity"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
-            >
-              <Brain className="w-4 h-4" />
-              <span>{language === "es" ? "Tareas" : "Tasks"}</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="share"
-              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-barbershop-section data-[state=active]:text-barbershop-header text-[10px] text-barbershop-muted"
-            >
-              <Share2 className="w-4 h-4" />
-              <span>{language === "es" ? "Compartir" : "Share"}</span>
+              <Settings className="w-4 h-4" />
+              <span>{language === "es" ? "Config" : "Settings"}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -353,6 +365,21 @@ export default function BarbershopDashboard() {
             </Collapsible>
           </TabsContent>
 
+          {/* Services Tab */}
+          <TabsContent value="services" className="mt-4">
+            <ServicesManager language={language} />
+          </TabsContent>
+
+          {/* Gallery Tab */}
+          <TabsContent value="gallery" className="mt-4">
+            <GalleryManager language={language} />
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products" className="mt-4">
+            <ProductsManager language={language} />
+          </TabsContent>
+
           {/* Contacts Tab - Kanban */}
           <TabsContent value="contacts" className="mt-4 space-y-4">
             <ConsultantKanban 
@@ -361,19 +388,26 @@ export default function BarbershopDashboard() {
             />
           </TabsContent>
 
-          {/* Marketing Tab */}
-          <TabsContent value="marketing" className="mt-4">
-            <MarketingTab />
-          </TabsContent>
-
-          {/* Productivity Tab */}
-          <TabsContent value="productivity" className="mt-4">
-            <ProductivityTab />
-          </TabsContent>
-
-          {/* Share Tab */}
-          <TabsContent value="share" className="mt-4">
-            <ShareLinksTab />
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-4 space-y-4">
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="p-4">
+                  <Link to="/settings" className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-barbershop-header">
+                        {language === "es" ? "Perfil del Negocio" : "Business Profile"}
+                      </h4>
+                      <p className="text-sm text-barbershop-muted">
+                        {language === "es" ? "Nombre, dirección, horarios, contacto" : "Name, address, hours, contact"}
+                      </p>
+                    </div>
+                    <Settings className="w-5 h-5 text-barbershop-muted" />
+                  </Link>
+                </CardContent>
+              </Card>
+              <ShareLinksTab />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
