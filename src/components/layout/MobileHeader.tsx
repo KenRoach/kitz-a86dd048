@@ -1,9 +1,8 @@
-import { Moon, Sun, LogOut, Award } from "lucide-react";
+import { Moon, Sun, LogOut, Settings } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 
 export function MobileHeader() {
   const { theme, setTheme } = useTheme();
@@ -31,10 +30,10 @@ export function MobileHeader() {
         </div>
         <div className="flex items-center gap-1">
           <Link
-            to="/profile"
+            to="/settings"
             className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all active:scale-95"
           >
-            <Award className="w-4 h-4" />
+            <Settings className="w-4 h-4" />
           </Link>
           <button
             onClick={toggleLanguage}
