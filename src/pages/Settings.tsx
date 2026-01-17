@@ -9,13 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useConsultantTheme, COLOR_SCHEMES } from "@/hooks/useConsultantTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   User, MapPin, Bell, Shield, Globe, Image, Save, Loader2, 
-  RotateCcw, Languages, Clock
+  RotateCcw, Languages, Clock, Palette, Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const COUNTRIES = [
   { code: "PA", name: "Panama", phoneCode: "+507" },
@@ -37,6 +39,7 @@ const TIMEZONES = [
 export default function Settings() {
   const { user, profile, loading } = useAuth();
   const { language, setLanguage } = useLanguage();
+  const { schemeId, schemes, setScheme } = useConsultantTheme();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   
@@ -329,7 +332,60 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
+        {/* Color Scheme */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Palette className="w-4 h-4 text-primary" />
+              {language === "es" ? "Esquema de Colores" : "Color Scheme"}
+            </CardTitle>
+            <CardDescription className="text-xs">
+              {language === "es" 
+                ? "Personaliza los colores de tu perfil de consultor" 
+                : "Customize your consultant profile colors"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-3">
+              {schemes.map((scheme) => (
+                <button
+                  key={scheme.id}
+                  onClick={() => setScheme(scheme.id)}
+                  className={cn(
+                    "relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all",
+                    schemeId === scheme.id
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {/* Color preview circles */}
+                  <div className="flex items-center gap-1">
+                    <div 
+                      className="w-5 h-5 rounded-full border border-border/50"
+                      style={{ backgroundColor: `hsl(${scheme.colors.header})` }}
+                    />
+                    <div 
+                      className="w-5 h-5 rounded-full border border-border/50"
+                      style={{ backgroundColor: `hsl(${scheme.colors.cta})` }}
+                    />
+                    <div 
+                      className="w-5 h-5 rounded-full border border-border/50"
+                      style={{ backgroundColor: `hsl(${scheme.colors.accent})` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-medium text-center leading-tight">
+                    {language === "es" ? scheme.nameEs : scheme.name}
+                  </span>
+                  {schemeId === scheme.id && (
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
