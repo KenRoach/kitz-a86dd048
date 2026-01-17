@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Award, Lightbulb, Users } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -7,10 +7,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
+  { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
-  { icon: Users, labelKey: "customers" as const, path: "/profile?tab=crm" },
   { icon: Lightbulb, labelKey: "suggestions" as const, path: "/suggestions" },
 ];
 
@@ -30,6 +30,14 @@ export function Sidebar() {
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "es" : "en");
+  };
+
+  // Custom labels for nav items
+  const getLabel = (labelKey: string) => {
+    if (labelKey === "consultant") {
+      return language === "es" ? "Mi Trabajo" : "My Work";
+    }
+    return (t as any)[labelKey];
   };
 
   return (
@@ -52,10 +60,7 @@ export function Sidebar() {
           const isActive = location.pathname === item.path || 
             (item.path.includes("?") && location.pathname + location.search === item.path);
           
-          // Custom label for customers
-          const label = item.labelKey === "customers" 
-            ? (language === "es" ? "Clientes" : "Customers")
-            : (t as any)[item.labelKey];
+          const label = getLabel(item.labelKey);
           
           return (
             <Link
@@ -76,36 +81,23 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4 space-y-2">
-        {/* Profile link */}
+        {/* Settings link */}
         <Link
-          to="/profile"
+          to="/settings"
           className={cn(
             "flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200",
-            location.pathname === "/profile" 
-              ? "bg-primary text-primary-foreground shadow-md" 
-              : "hover:bg-muted hover:text-foreground"
-          )}
-        >
-          <Award className="w-5 h-5" />
-          <span className="font-medium">{language === "es" ? "Mi Perfil" : "My Profile"}</span>
-        </Link>
-        
-        {/* Admin link */}
-        <Link
-          to="/admin"
-          className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200",
-            location.pathname === "/admin" 
+            location.pathname === "/settings" 
               ? "bg-primary text-primary-foreground shadow-md" 
               : "hover:bg-muted hover:text-foreground"
           )}
         >
           <Settings className="w-5 h-5" />
-          <span className="font-medium">{t.admin}</span>
+          <span className="font-medium">{language === "es" ? "Ajustes" : "Settings"}</span>
         </Link>
         
-        {/* Separator after Admin */}
+        {/* Separator */}
         <div className="h-px bg-foreground/10 mx-3 my-3" />
+
         {/* Language toggle */}
         <button
           onClick={toggleLanguage}
@@ -114,6 +106,7 @@ export function Sidebar() {
           <Globe className="w-5 h-5" />
           <span className="font-medium">{language === "en" ? "Español" : "English"}</span>
         </button>
+
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
@@ -122,6 +115,8 @@ export function Sidebar() {
           {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           <span className="font-medium">{theme === "dark" ? t.lightMode : t.darkMode}</span>
         </button>
+
+        {/* Sign out */}
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive w-full"

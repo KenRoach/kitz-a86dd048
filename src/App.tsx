@@ -19,7 +19,7 @@ const Storefronts = lazy(() => import("./pages/Storefronts"));
 const Products = lazy(() => import("./pages/Products"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Admin = lazy(() => import("./pages/Admin"));
-const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
 const Suggestions = lazy(() => import("./pages/Suggestions"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PublicStorefront = lazy(() => import("./pages/PublicStorefront"));
@@ -106,8 +106,10 @@ function AppRoutes() {
         <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+        {/* Redirect old profile route to consultant */}
+        <Route path="/profile" element={<Navigate to="/consultant" replace />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/delete-account" element={<ProtectedRoute><DeleteAccount /></ProtectedRoute>} />

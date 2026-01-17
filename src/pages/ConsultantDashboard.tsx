@@ -9,17 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Plus, Mail, Store, ShoppingBag, Package, DollarSign, 
-  LayoutDashboard, Users, Calendar
+  LayoutDashboard, Users, Megaphone, Brain, Share2, ChevronDown
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+
+// Lazy load business tool tabs
+import { ProductivityTab } from "@/components/profile/ProductivityTab";
+import { MarketingTab } from "@/components/profile/MarketingTab";
+import { ShareLinksTab } from "@/components/profile/ShareLinksTab";
 
 // Demo contacts for test user
 const DEMO_CONTACTS = [
@@ -39,6 +43,7 @@ export default function ConsultantDashboard() {
   const [isBulkEmailOpen, setIsBulkEmailOpen] = useState(false);
   const [seeded, setSeeded] = useState(false);
   const [activeTab, setActiveTab] = useState("panel");
+  const [secondaryExpanded, setSecondaryExpanded] = useState(false);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["consultant-contacts", user?.id],
@@ -135,25 +140,15 @@ export default function ConsultantDashboard() {
     return "Good evening";
   };
 
-  // Get member since date
-  const getMemberSince = () => {
-    if (!user?.created_at) return "";
-    const date = new Date(user.created_at);
-    if (language === "es") {
-      return `Desde ${format(date, "MMMM 'de' yyyy", { locale: es })}`;
-    }
-    return `Since ${format(date, "MMMM yyyy")}`;
-  };
-
   if (isLoading) {
     return (
       <AppLayout>
         <div className="space-y-6">
           <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <div className="grid grid-cols-4 gap-4">
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <div className="grid grid-cols-4 gap-2">
             {[1, 2, 3, 4].map(i => (
-              <Skeleton key={i} className="h-[300px] rounded-2xl" />
+              <Skeleton key={i} className="h-20 rounded-xl" />
             ))}
           </div>
         </div>
@@ -163,14 +158,14 @@ export default function ConsultantDashboard() {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
-        {/* Header with greeting and profile */}
+      <div className="space-y-4 pb-4">
+        {/* Header - Minimal */}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-primary uppercase tracking-wide">
               {getGreeting()}
             </p>
-            <h1 className="text-xl font-semibold text-foreground">
+            <h1 className="text-lg font-semibold text-foreground">
               {profile?.business_name || "Consultant"}
             </h1>
           </div>
@@ -180,18 +175,15 @@ export default function ConsultantDashboard() {
                 variant="outline"
                 onClick={() => setIsBulkEmailOpen(true)} 
                 size="sm"
-                className="gap-1.5"
+                className="gap-1.5 h-9"
               >
                 <Mail className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  {language === "es" ? "Email Masivo" : "Bulk Email"}
-                </span>
               </Button>
             )}
             <Button 
               onClick={() => setIsAddDialogOpen(true)} 
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 h-9"
             >
               <Plus className="w-4 h-4" />
               {language === "es" ? "Nuevo" : "New"}
@@ -199,93 +191,80 @@ export default function ConsultantDashboard() {
           </div>
         </div>
 
-        {/* Profile Card */}
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary-foreground/20 flex items-center justify-center text-lg font-bold shrink-0">
-                {profile?.business_name?.split(" ").map(w => w[0]).join("").slice(0, 2) || "C"}
-              </div>
-              <div className="min-w-0">
-                <h2 className="font-semibold truncate">
-                  {profile?.business_name || "Consultant"}
-                </h2>
-                <p className="text-sm text-primary-foreground/80">
-                  {profile?.business_type || (language === "es" ? "Consultoría" : "Consulting")}
-                </p>
-                <p className="text-xs text-primary-foreground/60 flex items-center gap-1 mt-0.5">
-                  <Calendar className="w-3 h-3" />
-                  {getMemberSince()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Funnel Overview - Always Visible */}
+        <div className="grid grid-cols-4 gap-2">
+          <div className="bg-blue-500/10 rounded-xl p-3 text-center border border-blue-500/20">
+            <p className="text-xl font-bold text-blue-600">{stats.atraccion}</p>
+            <p className="text-[9px] text-muted-foreground font-medium">
+              {language === "es" ? "Atracción" : "Attraction"}
+            </p>
+          </div>
+          <div className="bg-amber-500/10 rounded-xl p-3 text-center border border-amber-500/20">
+            <p className="text-xl font-bold text-amber-600">{stats.nutricion}</p>
+            <p className="text-[9px] text-muted-foreground font-medium">
+              {language === "es" ? "Nutrición" : "Nurturing"}
+            </p>
+          </div>
+          <div className="bg-purple-500/10 rounded-xl p-3 text-center border border-purple-500/20">
+            <p className="text-xl font-bold text-purple-600">{stats.conversacion}</p>
+            <p className="text-[9px] text-muted-foreground font-medium">
+              {language === "es" ? "Conversación" : "Conversation"}
+            </p>
+          </div>
+          <div className="bg-emerald-500/10 rounded-xl p-3 text-center border border-emerald-500/20">
+            <p className="text-xl font-bold text-emerald-600">{stats.retencion}</p>
+            <p className="text-[9px] text-muted-foreground font-medium">
+              {language === "es" ? "Retención" : "Retention"}
+            </p>
+          </div>
+        </div>
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 w-full h-auto p-1 bg-muted/50">
+          <TabsList className="grid grid-cols-5 w-full h-auto p-1 bg-muted/50">
             <TabsTrigger 
               value="panel" 
-              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span className="text-xs">Panel</span>
+              <span>Panel</span>
             </TabsTrigger>
             <TabsTrigger 
               value="contacts"
-              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
             >
               <Users className="w-4 h-4" />
-              <span className="text-xs">
-                {language === "es" ? "Contactos" : "Contacts"}
-              </span>
+              <span>{language === "es" ? "Contactos" : "Contacts"}</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="tools"
-              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+              value="marketing"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
             >
-              <Store className="w-4 h-4" />
-              <span className="text-xs">
-                {language === "es" ? "Herramientas" : "Tools"}
-              </span>
+              <Megaphone className="w-4 h-4" />
+              <span>Marketing</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="productivity"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+            >
+              <Brain className="w-4 h-4" />
+              <span>{language === "es" ? "Tareas" : "Tasks"}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="share"
+              className="flex flex-col items-center gap-0.5 py-2 px-1 data-[state=active]:bg-background text-[10px]"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>{language === "es" ? "Compartir" : "Share"}</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Panel Tab - Overview */}
+          {/* Panel Tab - Overview with Daily Focus */}
           <TabsContent value="panel" className="mt-4 space-y-4">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-4 gap-2">
-              <div className="bg-card rounded-xl p-3 text-center border border-border">
-                <p className="text-xl font-bold text-foreground">{stats.total}</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {language === "es" ? "Total" : "Total"}
-                </p>
-              </div>
-              <div className="bg-blue-500/5 rounded-xl p-3 text-center border border-blue-500/20">
-                <p className="text-xl font-bold text-blue-600">{stats.atraccion}</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {language === "es" ? "Atracción" : "Attraction"}
-                </p>
-              </div>
-              <div className="bg-purple-500/5 rounded-xl p-3 text-center border border-purple-500/20">
-                <p className="text-xl font-bold text-purple-600">{stats.conversacion}</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {language === "es" ? "Conversación" : "Conversation"}
-                </p>
-              </div>
-              <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/20">
-                <p className="text-xl font-bold text-emerald-600">{stats.retencion}</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {language === "es" ? "Retención" : "Retention"}
-                </p>
-              </div>
-            </div>
-
-            {/* Daily Assistant */}
+            {/* Daily Assistant - Primary Focus */}
             <DailyAssistantPanel contacts={contacts} language={language} />
 
-            {/* Kitz Tools Grid */}
+            {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-3">
               <Link 
                 to="/storefronts"
@@ -336,24 +315,38 @@ export default function ConsultantDashboard() {
               </div>
             </div>
 
-            {/* Total Revenue Card */}
-            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {language === "es" ? "Ingresos totales" : "Total Revenue"}
-                    </p>
-                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                      ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Secondary Content - Collapsible on Mobile */}
+            <Collapsible open={secondaryExpanded} onOpenChange={setSecondaryExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform ${secondaryExpanded ? "rotate-180" : ""}`} />
+                  {language === "es" ? "Ver más" : "View more"}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 mt-4">
+                {/* Total Revenue Card */}
+                <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
+                        <DollarSign className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {language === "es" ? "Ingresos totales" : "Total Revenue"}
+                        </p>
+                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                          ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           {/* Contacts Tab - Kanban */}
@@ -364,112 +357,30 @@ export default function ConsultantDashboard() {
             />
           </TabsContent>
 
-          {/* Tools Tab - Kitz Tools */}
-          <TabsContent value="tools" className="mt-4 space-y-4">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <Link 
-                to="/storefronts"
-                className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Store className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{kitzStats?.storefronts || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === "es" ? "Vitrinas" : "Storefronts"}
-                  </p>
-                </div>
-              </Link>
-              <Link 
-                to="/products"
-                className="flex items-center gap-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 hover:bg-purple-500/10 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                  <Package className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{kitzStats?.products || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === "es" ? "Productos" : "Products"}
-                  </p>
-                </div>
-              </Link>
-              <Link 
-                to="/order-history"
-                className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <ShoppingBag className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{kitzStats?.orders || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === "es" ? "Pedidos" : "Orders"}
-                  </p>
-                </div>
-              </Link>
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <DollarSign className="w-6 h-6 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-amber-600">
-                    ${(kitzStats?.revenue || 0).toFixed(0)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === "es" ? "Ingresos" : "Revenue"}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Marketing Tab */}
+          <TabsContent value="marketing" className="mt-4">
+            <MarketingTab />
+          </TabsContent>
 
-            {/* Revenue Card */}
-            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
-                    <DollarSign className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {language === "es" ? "Ingresos totales" : "Total Revenue"}
-                    </p>
-                    <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                      ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Productivity Tab */}
+          <TabsContent value="productivity" className="mt-4">
+            <ProductivityTab />
+          </TabsContent>
 
-            {/* Link to full profile */}
-            <Link 
-              to="/profile"
-              className="block w-full text-center text-sm text-primary hover:underline py-2"
-            >
-              {language === "es" ? "Ver perfil completo →" : "View full profile →"}
-            </Link>
+          {/* Share Tab */}
+          <TabsContent value="share" className="mt-4">
+            <ShareLinksTab />
           </TabsContent>
         </Tabs>
-
-        {/* Version Stamp */}
-        <div className="text-center pt-4">
-          <p className="text-[10px] text-muted-foreground">
-            Consultant Mode v1.0.0 — Test
-          </p>
-        </div>
       </div>
 
-      {/* Add Contact Dialog */}
-      <AddContactDialog 
-        open={isAddDialogOpen} 
+      {/* Dialogs */}
+      <AddContactDialog
+        open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         language={language}
       />
-
-      {/* Bulk Email Dialog */}
+      
       <BulkEmailDialog
         open={isBulkEmailOpen}
         onClose={() => setIsBulkEmailOpen(false)}

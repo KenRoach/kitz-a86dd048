@@ -1,24 +1,24 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Package, User } from "lucide-react";
+import { LayoutDashboard, Store, History, Package, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "home" as const, path: "/dashboard" },
+  { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orders" as const, path: "/order-history" },
-  { icon: User, labelKey: "profile" as const, path: "/profile" },
 ];
 
 export function MobileNav() {
   const location = useLocation();
   const { t, language } = useLanguage();
 
-  // Custom labels since "profile" key might not exist
+  // Custom labels for nav items
   const getLabel = (labelKey: string) => {
-    if (labelKey === "profile") {
-      return language === "es" ? "Perfil" : "Profile";
+    if (labelKey === "consultant") {
+      return language === "es" ? "Mi Trabajo" : "My Work";
     }
     return (t as any)[labelKey] || labelKey;
   };
