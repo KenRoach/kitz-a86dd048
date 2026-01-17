@@ -10,7 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Mail } from "lucide-react";
+import { Plus, Mail, Store, ShoppingBag, Package } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
 
 // Demo contacts for test user
@@ -163,6 +164,48 @@ export default function ConsultantDashboard() {
           <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/20">
             <p className="text-2xl font-semibold text-emerald-600">{stats.retencion}</p>
             <p className="text-xs text-muted-foreground">{language === "es" ? "Retención" : "Retention"}</p>
+          </div>
+        </div>
+
+        {/* Core Kitz Tools */}
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <h3 className="font-medium text-foreground mb-3 text-sm">
+            {language === "es" ? "Herramientas Kitz" : "Kitz Tools"}
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <Link 
+              to="/storefronts"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Store className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-foreground">
+                {language === "es" ? "Vitrinas" : "Storefronts"}
+              </span>
+            </Link>
+            <Link 
+              to="/order-history"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 hover:bg-amber-500/10 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-amber-600" />
+              </div>
+              <span className="text-sm font-medium text-foreground">
+                {language === "es" ? "Pedidos" : "Orders"}
+              </span>
+            </Link>
+            <Link 
+              to="/products"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <Package className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="text-sm font-medium text-foreground">
+                {language === "es" ? "Productos" : "Products"}
+              </span>
+            </Link>
           </div>
         </div>
 
