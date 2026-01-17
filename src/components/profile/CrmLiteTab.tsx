@@ -10,16 +10,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useConsultantRole } from "@/hooks/useConsultantRole";
 import { 
   Users, Plus, Search, Phone, Mail, Trash2, 
   UserPlus, DollarSign, ShoppingBag, Clock,
-  ChevronRight, X, Send, MessageSquare
+  ChevronRight, X, Send, MessageSquare, Kanban
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface Customer {
   id: string;
@@ -43,6 +45,7 @@ const LIFECYCLE_OPTIONS = [
 export function CrmLiteTab() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { isConsultant } = useConsultantRole();
   const queryClient = useQueryClient();
   
   const [search, setSearch] = useState("");
@@ -229,6 +232,35 @@ export function CrmLiteTab() {
         </Card>
       </div>
 
+      {/* Consultant Funnel Link */}
+      {isConsultant && (
+        <Card className="bg-gradient-to-r from-primary/5 to-purple-500/5 border-primary/20">
+          <CardContent className="p-4">
+            <Link 
+              to="/consultant"
+              className="flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Kanban className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">
+                    {language === "es" ? "Vista de Embudo" : "Funnel View"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "es" 
+                      ? "Gestiona contactos por etapa" 
+                      : "Manage contacts by stage"}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Main CRM Card */}
       <Card>
         <CardHeader className="pb-3">
@@ -237,10 +269,22 @@ export function CrmLiteTab() {
               <Users className="w-5 h-5 text-primary" />
               CRM Lite
             </CardTitle>
-            <Button size="sm" onClick={() => setIsDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-1" />
-              {language === "es" ? "Agregar" : "Add"}
-            </Button>
+            <div className="flex items-center gap-2">
+              {isConsultant && (
+                <Link to="/consultant">
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <Kanban className="w-4 h-4" />
+                    <span className="hidden sm:inline">
+                      {language === "es" ? "Embudo" : "Funnel"}
+                    </span>
+                  </Button>
+                </Link>
+              )}
+              <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-1" />
+                {language === "es" ? "Agregar" : "Add"}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

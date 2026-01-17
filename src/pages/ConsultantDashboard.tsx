@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Mail, Store, ShoppingBag, Package } from "lucide-react";
+import { Plus, Mail, Store, ShoppingBag, Package, User, DollarSign, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
 
@@ -83,7 +83,7 @@ export default function ConsultantDashboard() {
     }
   }, [user, isLoading, contacts.length, seeded, queryClient]);
 
-  // Stats
+  // Funnel stats
   const stats = {
     total: contacts.length,
     atraccion: contacts.filter(c => c.funnel_stage === "atraccion").length,
@@ -91,6 +91,30 @@ export default function ConsultantDashboard() {
     conversacion: contacts.filter(c => c.funnel_stage === "conversacion").length,
     retencion: contacts.filter(c => c.funnel_stage === "retencion").length,
   };
+
+  // Fetch Kitz tools stats
+  const { data: kitzStats } = useQuery({
+    queryKey: ["kitz-stats", user?.id],
+    queryFn: async () => {
+      if (!user) return { storefronts: 0, products: 0, orders: 0, revenue: 0 };
+      
+      const [storefronts, products] = await Promise.all([
+        supabase.from("storefronts").select("id, status, price"),
+        supabase.from("products").select("id"),
+      ]);
+
+      const paidOrders = storefronts.data?.filter(s => s.status === "paid") || [];
+      const revenue = paidOrders.reduce((sum, s) => sum + (s.price || 0), 0);
+
+      return {
+        storefronts: storefronts.data?.length || 0,
+        products: products.data?.length || 0,
+        orders: paidOrders.length,
+        revenue,
+      };
+    },
+    enabled: !!user,
+  });
 
   if (isLoading) {
     return (
@@ -167,45 +191,92 @@ export default function ConsultantDashboard() {
           </div>
         </div>
 
-        {/* Core Kitz Tools */}
+        {/* Core Kitz Tools with Stats */}
         <div className="bg-card border border-border rounded-2xl p-4">
-          <h3 className="font-medium text-foreground mb-3 text-sm">
-            {language === "es" ? "Herramientas Kitz" : "Kitz Tools"}
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium text-foreground text-sm">
+              {language === "es" ? "Herramientas Kitz" : "Kitz Tools"}
+            </h3>
+            <Link 
+              to="/profile"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
+            >
+              <User className="w-3 h-3" />
+              {language === "es" ? "Ver perfil completo" : "View full profile"}
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <Link 
               to="/storefronts"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
+              className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Store className="w-5 h-5 text-primary" />
               </div>
-              <span className="text-sm font-medium text-foreground">
-                {language === "es" ? "Vitrinas" : "Storefronts"}
-              </span>
-            </Link>
-            <Link 
-              to="/order-history"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 hover:bg-amber-500/10 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-amber-600" />
+              <div>
+                <p className="text-xl font-bold text-foreground">{kitzStats?.storefronts || 0}</p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" ? "Vitrinas" : "Storefronts"}
+                </p>
               </div>
-              <span className="text-sm font-medium text-foreground">
-                {language === "es" ? "Pedidos" : "Orders"}
-              </span>
             </Link>
             <Link 
               to="/products"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+              className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/5 border border-purple-500/20 hover:bg-purple-500/10 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <Package className="w-5 h-5 text-emerald-600" />
+              <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                <Package className="w-5 h-5 text-purple-600" />
               </div>
-              <span className="text-sm font-medium text-foreground">
-                {language === "es" ? "Productos" : "Products"}
-              </span>
+              <div>
+                <p className="text-xl font-bold text-foreground">{kitzStats?.products || 0}</p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" ? "Productos" : "Products"}
+                </p>
+              </div>
             </Link>
+            <Link 
+              to="/order-history"
+              className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <ShoppingBag className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-foreground">{kitzStats?.orders || 0}</p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" ? "Pedidos" : "Orders"}
+                </p>
+              </div>
+            </Link>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                <DollarSign className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-amber-600">
+                  ${(kitzStats?.revenue || 0).toFixed(0)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" ? "Ingresos" : "Revenue"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Advisor Quick Access */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/5 to-purple-500/5 border border-primary/20">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                {language === "es" ? "Pregunta sobre ingresos" : "Ask about revenue"}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {language === "es" ? "Tu asesor de IA está listo" : "Your AI advisor is ready"}
+              </p>
+            </div>
           </div>
         </div>
 
