@@ -8,13 +8,19 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Globe } from "lucide-react";
+import { ArrowLeft, Globe, Phone } from "lucide-react";
+
+const phoneRegex = /^[+]?[\d\s-]{7,15}$/;
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   businessName: z.string().min(1, "Business name is required"),
   businessType: z.string().optional(),
+  phone: z.string().optional().refine(
+    (val) => !val || phoneRegex.test(val),
+    { message: "Please enter a valid phone number" }
+  ),
 });
 
 const signInSchema = z.object({
@@ -35,6 +41,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
+  const [phone, setPhone] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const { signUp, signIn } = useAuth();
   const { language, setLanguage, t } = useLanguage();
@@ -64,14 +71,14 @@ export default function Auth() {
           toast.success(t.checkEmail);
         }
       } else if (mode === "signup") {
-        const validation = signUpSchema.safeParse({ email, password, businessName, businessType });
+        const validation = signUpSchema.safeParse({ email, password, businessName, businessType, phone });
         if (!validation.success) {
           toast.error(validation.error.errors[0].message);
           setLoading(false);
           return;
         }
 
-        const { error } = await signUp(email, password, businessName, businessType || undefined);
+        const { error } = await signUp(email, password, businessName, businessType || undefined, phone || undefined);
         if (error) {
           if (error.message.includes("already registered")) {
             toast.error("This email is already registered. Please sign in instead.");
@@ -237,7 +244,21 @@ export default function Auth() {
                     type="text"
                     value={businessType}
                     onChange={(e) => setBusinessType(e.target.value)}
-                    placeholder="Restaurant, Salon, Retail..."
+                    placeholder="Consultant, Salon, Retail..."
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" />
+                    WhatsApp ({language === "es" ? "recomendado" : "recommended"})
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+507 6620-0120"
                     className="mt-1.5"
                   />
                 </div>
