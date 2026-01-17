@@ -87,6 +87,15 @@
     --sidebar-accent-foreground: 262 83% 50%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 262 83% 58%;
+
+    /* Consultant Theme - Myrja Palette */
+    --consultant-header: 233 38% 17%;
+    --consultant-section: 0 0% 100%;
+    --consultant-section-alt: 0 0% 96%;
+    --consultant-cta: 41 65% 55%;
+    --consultant-cta-foreground: 0 0% 100%;
+    --consultant-accent: 16 51% 52%;
+    --consultant-muted: 0 0% 42%;
   }
 
   .dark {
