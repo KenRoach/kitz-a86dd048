@@ -35,10 +35,10 @@ const sourceIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   email: <Mail className="w-3 h-3 text-blue-500" />,
-  link: <Link2 className="w-3 h-3 text-purple-500" />,
+  link: <Link2 className="w-3 h-3 text-consultant-accent" />,
   instagram: <Instagram className="w-3 h-3 text-pink-500" />,
-  referral: <Users className="w-3 h-3 text-amber-500" />,
-  other: <MoreHorizontal className="w-3 h-3 text-muted-foreground" />,
+  referral: <Users className="w-3 h-3 text-consultant-cta" />,
+  other: <MoreHorizontal className="w-3 h-3 text-consultant-muted" />,
 };
 
 export function ConsultantContactCard({ contact, onClick, language = "es" }: ConsultantContactCardProps) {
@@ -58,47 +58,47 @@ export function ConsultantContactCard({ contact, onClick, language = "es" }: Con
     <div
       onClick={onClick}
       className={cn(
-        "bg-card rounded-xl p-3 border border-border cursor-pointer transition-all",
-        "hover:border-primary/50 hover:shadow-sm",
-        contact.is_high_attention && "ring-2 ring-action/30"
+        "bg-consultant-section rounded-xl p-3 border border-consultant-accent/20 cursor-pointer transition-all",
+        "hover:border-consultant-cta/50 hover:shadow-sm",
+        contact.is_high_attention && "ring-2 ring-consultant-accent/30"
       )}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm shrink-0">
+          <div className="w-8 h-8 rounded-full bg-consultant-cta/10 flex items-center justify-center text-consultant-cta font-medium text-sm shrink-0">
             {contact.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <h4 className="font-medium text-sm text-foreground truncate">{contact.name}</h4>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <h4 className="font-medium text-sm text-consultant-header truncate">{contact.name}</h4>
+            <div className="flex items-center gap-1 text-[10px] text-consultant-muted">
               {sourceIcons[contact.source] || sourceIcons.other}
               <span className="capitalize">{contact.source}</span>
             </div>
           </div>
         </div>
         {contact.payment_pending && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-action/10 text-action font-medium shrink-0">
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-consultant-cta/10 text-consultant-cta font-medium shrink-0">
             💰
           </span>
         )}
       </div>
 
       {/* Time in stage */}
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-2">
+      <div className="flex items-center gap-1.5 text-[11px] text-consultant-muted mb-2">
         <Clock className="w-3 h-3" />
         <span>{language === "es" ? "En etapa:" : "In stage:"} {timeInStage}</span>
       </div>
 
       {/* Last interaction */}
-      <p className="text-[11px] text-muted-foreground truncate">
+      <p className="text-[11px] text-consultant-muted truncate">
         {language === "es" ? "Última:" : "Last:"} {lastInteraction}
       </p>
 
       {/* High attention badge */}
       {contact.is_high_attention && (
-        <div className="mt-2 text-[10px] text-action font-medium flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-action animate-pulse" />
+        <div className="mt-2 text-[10px] text-consultant-accent font-medium flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-consultant-accent animate-pulse" />
           {language === "es" ? "Alta atención" : "High attention"}
         </div>
       )}
