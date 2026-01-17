@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ConsultantKanban } from "@/components/consultant/ConsultantKanban";
 import { DailyAssistantPanel } from "@/components/consultant/DailyAssistantPanel";
@@ -9,13 +9,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
+
+// Demo contacts for test user
+const DEMO_CONTACTS = [
+  { name: "María García", phone: "+507 6123-4567", source: "whatsapp", funnel_stage: "atraccion" },
+  { name: "Carlos Rodríguez", phone: "+507 6234-5678", source: "instagram", funnel_stage: "atraccion" },
+  { name: "Ana Martínez", phone: "+507 6345-6789", email: "ana@example.com", source: "email", funnel_stage: "nutricion" },
+  { name: "Luis Pérez", phone: "+507 6456-7890", source: "referral", funnel_stage: "nutricion" },
+  { name: "Sofia López", phone: "+507 6567-8901", source: "whatsapp", funnel_stage: "conversacion", payment_pending: true, is_high_attention: true },
+  { name: "Diego Hernández", phone: "+507 6678-9012", source: "link", funnel_stage: "retencion", paid_at: new Date().toISOString(), attendance_confirmed: true },
+];
 
 export default function ConsultantDashboard() {
   const { user, profile } = useAuth();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [seeded, setSeeded] = useState(false);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["consultant-contacts", user?.id],
@@ -31,6 +43,42 @@ export default function ConsultantDashboard() {
     },
     enabled: !!user,
   });
+
+  // Seed demo data for consultant demo user
+  useEffect(() => {
+    async function seedDemoData() {
+      if (!user || seeded || contacts.length > 0) return;
+      
+      // Check if this is the demo user or any consultant
+      const demoSeeded = localStorage.getItem(`consultant_demo_seeded_${user.id}`);
+      if (demoSeeded) {
+        setSeeded(true);
+        return;
+      }
+
+      // Insert demo contacts
+      const contactsToInsert = DEMO_CONTACTS.map(c => ({
+        ...c,
+        user_id: user.id,
+        stage_entered_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        last_interaction: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from("consultant_contacts")
+        .insert(contactsToInsert);
+
+      if (!error) {
+        localStorage.setItem(`consultant_demo_seeded_${user.id}`, "true");
+        queryClient.invalidateQueries({ queryKey: ["consultant-contacts"] });
+      }
+      setSeeded(true);
+    }
+
+    if (!isLoading && contacts.length === 0) {
+      seedDemoData();
+    }
+  }, [user, isLoading, contacts.length, seeded, queryClient]);
 
   // Stats
   const stats = {
