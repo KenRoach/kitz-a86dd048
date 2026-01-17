@@ -191,6 +191,72 @@ export type Database = {
         }
         Relationships: []
       }
+      consultant_contacts: {
+        Row: {
+          attendance_confirmed: boolean | null
+          calendar_reminder_sent: boolean | null
+          created_at: string
+          email: string | null
+          funnel_stage: string
+          id: string
+          is_high_attention: boolean | null
+          last_interaction: string | null
+          name: string
+          notes: string | null
+          paid_at: string | null
+          payment_pending: boolean | null
+          payment_sent_at: string | null
+          phone: string | null
+          source: string | null
+          stage_entered_at: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendance_confirmed?: boolean | null
+          calendar_reminder_sent?: boolean | null
+          created_at?: string
+          email?: string | null
+          funnel_stage?: string
+          id?: string
+          is_high_attention?: boolean | null
+          last_interaction?: string | null
+          name: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_pending?: boolean | null
+          payment_sent_at?: string | null
+          phone?: string | null
+          source?: string | null
+          stage_entered_at?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendance_confirmed?: boolean | null
+          calendar_reminder_sent?: boolean | null
+          created_at?: string
+          email?: string | null
+          funnel_stage?: string
+          id?: string
+          is_high_attention?: boolean | null
+          last_interaction?: string | null
+          name?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_pending?: boolean | null
+          payment_sent_at?: string | null
+          phone?: string | null
+          source?: string | null
+          stage_entered_at?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_calendar: {
         Row: {
           content_type: string | null
@@ -1069,7 +1135,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "consultant"
       badge_category: "usage" | "growth" | "consistency" | "milestone"
     }
     CompositeTypes: {
@@ -1198,7 +1264,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "consultant"],
       badge_category: ["usage", "growth", "consistency", "milestone"],
     },
   },
