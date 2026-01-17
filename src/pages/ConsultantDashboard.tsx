@@ -6,13 +6,20 @@ import { DailyAssistantPanel } from "@/components/consultant/DailyAssistantPanel
 import { AddContactDialog } from "@/components/consultant/AddContactDialog";
 import { BulkEmailDialog } from "@/components/consultant/BulkEmailDialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Mail, Store, ShoppingBag, Package, User, DollarSign, Sparkles } from "lucide-react";
+import { 
+  Plus, Mail, Store, ShoppingBag, Package, DollarSign, 
+  LayoutDashboard, Users, Calendar
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { ConsultantContact } from "@/components/consultant/ConsultantContactCard";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 // Demo contacts for test user
 const DEMO_CONTACTS = [
@@ -31,6 +38,7 @@ export default function ConsultantDashboard() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkEmailOpen, setIsBulkEmailOpen] = useState(false);
   const [seeded, setSeeded] = useState(false);
+  const [activeTab, setActiveTab] = useState("panel");
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["consultant-contacts", user?.id],
@@ -52,14 +60,12 @@ export default function ConsultantDashboard() {
     async function seedDemoData() {
       if (!user || seeded || contacts.length > 0) return;
       
-      // Check if this is the demo user or any consultant
       const demoSeeded = localStorage.getItem(`consultant_demo_seeded_${user.id}`);
       if (demoSeeded) {
         setSeeded(true);
         return;
       }
 
-      // Insert demo contacts
       const contactsToInsert = DEMO_CONTACTS.map(c => ({
         ...c,
         user_id: user.id,
@@ -116,6 +122,29 @@ export default function ConsultantDashboard() {
     enabled: !!user,
   });
 
+  // Get greeting based on time
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (language === "es") {
+      if (hour < 12) return "Buenos días";
+      if (hour < 18) return "Buenas tardes";
+      return "Buenas noches";
+    }
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  // Get member since date
+  const getMemberSince = () => {
+    if (!user?.created_at) return "";
+    const date = new Date(user.created_at);
+    if (language === "es") {
+      return `Desde ${format(date, "MMMM 'de' yyyy", { locale: es })}`;
+    }
+    return `Since ${format(date, "MMMM yyyy")}`;
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -134,16 +163,16 @@ export default function ConsultantDashboard() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
+      <div className="space-y-4">
+        {/* Header with greeting and profile */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">
-              {language === "es" ? "Mis Contactos" : "My Contacts"}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {profile?.business_name || "Consultant Demo"}
+            <p className="text-xs font-medium text-primary uppercase tracking-wide">
+              {getGreeting()}
             </p>
+            <h1 className="text-xl font-semibold text-foreground">
+              {profile?.business_name || "Consultant"}
+            </h1>
           </div>
           <div className="flex items-center gap-2">
             {stats.nutricion > 0 && (
@@ -154,7 +183,9 @@ export default function ConsultantDashboard() {
                 className="gap-1.5"
               >
                 <Mail className="w-4 h-4" />
-                {language === "es" ? "Email Masivo" : "Bulk Email"}
+                <span className="hidden sm:inline">
+                  {language === "es" ? "Email Masivo" : "Bulk Email"}
+                </span>
               </Button>
             )}
             <Button 
@@ -168,93 +199,135 @@ export default function ConsultantDashboard() {
           </div>
         </div>
 
-        {/* Daily Assistant */}
-        <DailyAssistantPanel contacts={contacts} language={language} />
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-3">
-          <div className="bg-card rounded-xl p-3 text-center border border-border">
-            <p className="text-2xl font-semibold text-foreground">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">{language === "es" ? "Total" : "Total"}</p>
-          </div>
-          <div className="bg-blue-500/5 rounded-xl p-3 text-center border border-blue-500/20">
-            <p className="text-2xl font-semibold text-blue-600">{stats.atraccion}</p>
-            <p className="text-xs text-muted-foreground">{language === "es" ? "Atracción" : "Attraction"}</p>
-          </div>
-          <div className="bg-purple-500/5 rounded-xl p-3 text-center border border-purple-500/20">
-            <p className="text-2xl font-semibold text-purple-600">{stats.conversacion}</p>
-            <p className="text-xs text-muted-foreground">{language === "es" ? "Conversación" : "Conversation"}</p>
-          </div>
-          <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/20">
-            <p className="text-2xl font-semibold text-emerald-600">{stats.retencion}</p>
-            <p className="text-xs text-muted-foreground">{language === "es" ? "Retención" : "Retention"}</p>
-          </div>
-        </div>
-
-        {/* Core Kitz Tools with Stats */}
-        <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium text-foreground text-sm">
-              {language === "es" ? "Herramientas Kitz" : "Kitz Tools"}
-            </h3>
-            <Link 
-              to="/profile"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
-            >
-              <User className="w-3 h-3" />
-              {language === "es" ? "Ver perfil completo" : "View full profile"}
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <Link 
-              to="/storefronts"
-              className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Store className="w-5 h-5 text-primary" />
+        {/* Profile Card */}
+        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary-foreground/20 flex items-center justify-center text-lg font-bold shrink-0">
+                {profile?.business_name?.split(" ").map(w => w[0]).join("").slice(0, 2) || "C"}
               </div>
-              <div>
+              <div className="min-w-0">
+                <h2 className="font-semibold truncate">
+                  {profile?.business_name || "Consultant"}
+                </h2>
+                <p className="text-sm text-primary-foreground/80">
+                  {profile?.business_type || (language === "es" ? "Consultoría" : "Consulting")}
+                </p>
+                <p className="text-xs text-primary-foreground/60 flex items-center gap-1 mt-0.5">
+                  <Calendar className="w-3 h-3" />
+                  {getMemberSince()}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 w-full h-auto p-1 bg-muted/50">
+            <TabsTrigger 
+              value="panel" 
+              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span className="text-xs">Panel</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="contacts"
+              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+            >
+              <Users className="w-4 h-4" />
+              <span className="text-xs">
+                {language === "es" ? "Contactos" : "Contacts"}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tools"
+              className="flex flex-col items-center gap-1 py-2 px-2 data-[state=active]:bg-background"
+            >
+              <Store className="w-4 h-4" />
+              <span className="text-xs">
+                {language === "es" ? "Herramientas" : "Tools"}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Panel Tab - Overview */}
+          <TabsContent value="panel" className="mt-4 space-y-4">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-card rounded-xl p-3 text-center border border-border">
+                <p className="text-xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {language === "es" ? "Total" : "Total"}
+                </p>
+              </div>
+              <div className="bg-blue-500/5 rounded-xl p-3 text-center border border-blue-500/20">
+                <p className="text-xl font-bold text-blue-600">{stats.atraccion}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {language === "es" ? "Atracción" : "Attraction"}
+                </p>
+              </div>
+              <div className="bg-purple-500/5 rounded-xl p-3 text-center border border-purple-500/20">
+                <p className="text-xl font-bold text-purple-600">{stats.conversacion}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {language === "es" ? "Conversación" : "Conversation"}
+                </p>
+              </div>
+              <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/20">
+                <p className="text-xl font-bold text-emerald-600">{stats.retencion}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {language === "es" ? "Retención" : "Retention"}
+                </p>
+              </div>
+            </div>
+
+            {/* Daily Assistant */}
+            <DailyAssistantPanel contacts={contacts} language={language} />
+
+            {/* Kitz Tools Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <Link 
+                to="/storefronts"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-primary" />
+                </div>
                 <p className="text-xl font-bold text-foreground">{kitzStats?.storefronts || 0}</p>
                 <p className="text-xs text-muted-foreground">
                   {language === "es" ? "Vitrinas" : "Storefronts"}
                 </p>
-              </div>
-            </Link>
-            <Link 
-              to="/products"
-              className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/5 border border-purple-500/20 hover:bg-purple-500/10 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                <Package className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
+              </Link>
+              <Link 
+                to="/products"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-purple-600" />
+                </div>
                 <p className="text-xl font-bold text-foreground">{kitzStats?.products || 0}</p>
                 <p className="text-xs text-muted-foreground">
                   {language === "es" ? "Productos" : "Products"}
                 </p>
-              </div>
-            </Link>
-            <Link 
-              to="/order-history"
-              className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                <ShoppingBag className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
+              </Link>
+              <Link 
+                to="/order-history"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <ShoppingBag className="w-5 h-5 text-emerald-600" />
+                </div>
                 <p className="text-xl font-bold text-foreground">{kitzStats?.orders || 0}</p>
                 <p className="text-xs text-muted-foreground">
                   {language === "es" ? "Pedidos" : "Orders"}
                 </p>
-              </div>
-            </Link>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                <DollarSign className="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-amber-600">
+              </Link>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-emerald-500/5 to-green-500/10 border border-emerald-500/20">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-600" />
+                </div>
+                <p className="text-xl font-bold text-emerald-600">
                   ${(kitzStats?.revenue || 0).toFixed(0)}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -262,29 +335,124 @@ export default function ConsultantDashboard() {
                 </p>
               </div>
             </div>
-          </div>
 
-          {/* AI Advisor Quick Access */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/5 to-purple-500/5 border border-primary/20">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                {language === "es" ? "Pregunta sobre ingresos" : "Ask about revenue"}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {language === "es" ? "Tu asesor de IA está listo" : "Your AI advisor is ready"}
-              </p>
-            </div>
-          </div>
-        </div>
+            {/* Total Revenue Card */}
+            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {language === "es" ? "Ingresos totales" : "Total Revenue"}
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                      ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Kanban Board */}
-        <ConsultantKanban 
-          language={language} 
-          onAddContact={() => setIsAddDialogOpen(true)}
-        />
+          {/* Contacts Tab - Kanban */}
+          <TabsContent value="contacts" className="mt-4 space-y-4">
+            <ConsultantKanban 
+              language={language} 
+              onAddContact={() => setIsAddDialogOpen(true)}
+            />
+          </TabsContent>
+
+          {/* Tools Tab - Kitz Tools */}
+          <TabsContent value="tools" className="mt-4 space-y-4">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <Link 
+                to="/storefronts"
+                className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Store className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{kitzStats?.storefronts || 0}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "es" ? "Vitrinas" : "Storefronts"}
+                  </p>
+                </div>
+              </Link>
+              <Link 
+                to="/products"
+                className="flex items-center gap-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 hover:bg-purple-500/10 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                  <Package className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{kitzStats?.products || 0}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "es" ? "Productos" : "Products"}
+                  </p>
+                </div>
+              </Link>
+              <Link 
+                to="/order-history"
+                className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <ShoppingBag className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{kitzStats?.orders || 0}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "es" ? "Pedidos" : "Orders"}
+                  </p>
+                </div>
+              </Link>
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <DollarSign className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-amber-600">
+                    ${(kitzStats?.revenue || 0).toFixed(0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "es" ? "Ingresos" : "Revenue"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Revenue Card */}
+            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-800">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg">
+                    <DollarSign className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {language === "es" ? "Ingresos totales" : "Total Revenue"}
+                    </p>
+                    <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                      ${(kitzStats?.revenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Link to full profile */}
+            <Link 
+              to="/profile"
+              className="block w-full text-center text-sm text-primary hover:underline py-2"
+            >
+              {language === "es" ? "Ver perfil completo →" : "View full profile →"}
+            </Link>
+          </TabsContent>
+        </Tabs>
 
         {/* Version Stamp */}
         <div className="text-center pt-4">
