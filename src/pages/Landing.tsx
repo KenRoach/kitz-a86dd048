@@ -157,59 +157,62 @@ export default function Landing() {
         <div className="max-w-2xl mx-auto text-center">
           {formState === "idle" && (
             <div className="animate-fade-in">
-              {/* Tagline pill */}
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium px-4 py-2 rounded-full mb-6">
-                <Sparkles className="w-3.5 h-3.5" />
-                {language === "en" ? "CRM + Marketing + Storefronts" : "CRM + Marketing + Tiendas"}
+              {/* Tagline pill with emoji */}
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-white text-xs font-medium px-4 py-2.5 rounded-full mb-6 border border-white/20 shadow-lg">
+                <span className="animate-pulse">✨</span>
+                {language === "en" ? "Your biz command center" : "Tu centro de comando"}
               </div>
 
-              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4 leading-tight">
-                {language === "en" ? "Run your business." : "Maneja tu negocio."}
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-5 leading-[1.1]">
+                {language === "en" ? "Less chaos." : "Menos caos."}
                 <br />
-                <span className="text-white/70">
-                  {language === "en" ? "Without the noise." : "Sin complicaciones."}
+                <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
+                  {language === "en" ? "More money. 💸" : "Más plata. 💸"}
                 </span>
               </h1>
               
-              <p className="text-base md:text-lg text-white/80 max-w-sm mx-auto mb-8 leading-relaxed">
+              <p className="text-base md:text-lg text-white/80 max-w-xs mx-auto mb-8 leading-relaxed">
                 {language === "en" 
-                  ? "The all-in-one app for small business owners."
-                  : "La app todo-en-uno para dueños de negocios."}
+                  ? "One app to manage clients, sales & content. No BS."
+                  : "Una app para clientes, ventas y contenido. Sin vueltas."}
               </p>
 
               <Button 
                 onClick={handleGetStarted}
                 size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all font-medium w-full sm:w-auto"
+                className="bg-white text-primary hover:bg-white/90 hover:scale-[1.02] text-base px-8 py-6 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-semibold w-full sm:w-auto group"
               >
-                {language === "en" ? "Get started free" : "Comenzar gratis"}
-                <ArrowRight className="w-5 h-5 ml-2" />
+                {language === "en" ? "Start for free →" : "Empezar gratis →"}
               </Button>
+              
+              <p className="text-xs text-white/50 mt-3">
+                {language === "en" ? "No credit card. Setup in 60 sec ⚡" : "Sin tarjeta. Listo en 60 seg ⚡"}
+              </p>
 
-              {/* Benefit icons */}
-              <div className="mt-10 grid grid-cols-3 gap-4 max-w-sm mx-auto">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <Users className="w-5 h-5 text-white" />
+              {/* Benefit icons with emojis */}
+              <div className="mt-12 grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                <div className="flex flex-col items-center gap-2 group cursor-default">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
+                    👥
                   </div>
-                  <span className="text-xs text-white/70 text-center">
+                  <span className="text-[11px] text-white/60 text-center font-medium">
                     {language === "en" ? "Track clients" : "Clientes"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <Store className="w-5 h-5 text-white" />
+                <div className="flex flex-col items-center gap-2 group cursor-default">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
+                    🔗
                   </div>
-                  <span className="text-xs text-white/70 text-center">
-                    {language === "en" ? "Share links" : "Links de venta"}
+                  <span className="text-[11px] text-white/60 text-center font-medium">
+                    {language === "en" ? "Share links" : "Links"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
+                <div className="flex flex-col items-center gap-2 group cursor-default">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
+                    🤖
                   </div>
-                  <span className="text-xs text-white/70 text-center">
-                    {language === "en" ? "AI marketing" : "Marketing IA"}
+                  <span className="text-[11px] text-white/60 text-center font-medium">
+                    {language === "en" ? "AI magic" : "Magia IA"}
                   </span>
                 </div>
               </div>
