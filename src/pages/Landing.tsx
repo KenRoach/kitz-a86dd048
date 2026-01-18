@@ -157,62 +157,57 @@ export default function Landing() {
         <div className="max-w-2xl mx-auto text-center">
           {formState === "idle" && (
             <div className="animate-fade-in">
-              {/* Tagline pill with emoji */}
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-white text-xs font-medium px-4 py-2.5 rounded-full mb-6 border border-white/20 shadow-lg">
-                <span className="animate-pulse">✨</span>
-                {language === "en" ? "Your biz command center" : "Tu centro de comando"}
-              </div>
-
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-5 leading-[1.1]">
-                {language === "en" ? "Less chaos." : "Menos caos."}
+              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4 leading-tight">
+                {language === "en" ? "Manage your business." : "Gestiona tu negocio."}
                 <br />
-                <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
-                  {language === "en" ? "More money. 💸" : "Más plata. 💸"}
+                <span className="text-white/70">
+                  {language === "en" ? "Simply." : "Simple."}
                 </span>
               </h1>
               
-              <p className="text-base md:text-lg text-white/80 max-w-xs mx-auto mb-8 leading-relaxed">
+              <p className="text-base text-white/70 max-w-xs mx-auto mb-8">
                 {language === "en" 
-                  ? "One app to manage clients, sales & content. No BS."
-                  : "Una app para clientes, ventas y contenido. Sin vueltas."}
+                  ? "Clients, sales, and marketing in one place."
+                  : "Clientes, ventas y marketing en un solo lugar."}
               </p>
 
               <Button 
                 onClick={handleGetStarted}
                 size="lg" 
-                className="bg-white text-primary hover:bg-white/90 hover:scale-[1.02] text-base px-8 py-6 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-semibold w-full sm:w-auto group"
+                className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl shadow-lg transition-all font-medium w-full sm:w-auto"
               >
-                {language === "en" ? "Start for free →" : "Empezar gratis →"}
+                {language === "en" ? "Get started" : "Comenzar"}
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               
-              <p className="text-xs text-white/50 mt-3">
-                {language === "en" ? "No credit card. Setup in 60 sec ⚡" : "Sin tarjeta. Listo en 60 seg ⚡"}
+              <p className="text-xs text-white/40 mt-3">
+                {language === "en" ? "Free to use" : "Gratis"}
               </p>
 
-              {/* Benefit icons with emojis */}
-              <div className="mt-12 grid grid-cols-3 gap-3 max-w-xs mx-auto">
-                <div className="flex flex-col items-center gap-2 group cursor-default">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
-                    👥
+              {/* Benefit icons */}
+              <div className="mt-10 grid grid-cols-3 gap-4 max-w-xs mx-auto">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white/80" />
                   </div>
-                  <span className="text-[11px] text-white/60 text-center font-medium">
-                    {language === "en" ? "Track clients" : "Clientes"}
+                  <span className="text-[11px] text-white/50">
+                    {language === "en" ? "Clients" : "Clientes"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center gap-2 group cursor-default">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
-                    🔗
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                    <Store className="w-5 h-5 text-white/80" />
                   </div>
-                  <span className="text-[11px] text-white/60 text-center font-medium">
-                    {language === "en" ? "Share links" : "Links"}
+                  <span className="text-[11px] text-white/50">
+                    {language === "en" ? "Sales" : "Ventas"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center gap-2 group cursor-default">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 group-hover:scale-105 transition-all text-2xl">
-                    🤖
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white/80" />
                   </div>
-                  <span className="text-[11px] text-white/60 text-center font-medium">
-                    {language === "en" ? "AI magic" : "Magia IA"}
+                  <span className="text-[11px] text-white/50">
+                    {language === "en" ? "Marketing" : "Marketing"}
                   </span>
                 </div>
               </div>
