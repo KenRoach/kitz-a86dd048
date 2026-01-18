@@ -358,6 +358,70 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* How it works section - only show when idle */}
+      {formState === "idle" && (
+        <section className="pb-32 px-4 relative z-10">
+          <div className="max-w-sm mx-auto">
+            <h2 className="text-lg font-semibold text-white/90 text-center mb-8">
+              {language === "en" ? "How it works" : "Cómo funciona"}
+            </h2>
+            
+            <div className="space-y-4">
+              {/* Step 1 */}
+              <div className="flex items-start gap-4 bg-white/5 rounded-xl p-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-white/80">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">
+                    {language === "en" ? "Create your profile" : "Crea tu perfil"}
+                  </h3>
+                  <p className="text-xs text-white/50">
+                    {language === "en" 
+                      ? "Add your business info and products in minutes."
+                      : "Agrega tu info y productos en minutos."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex items-start gap-4 bg-white/5 rounded-xl p-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-white/80">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">
+                    {language === "en" ? "Share your link" : "Comparte tu link"}
+                  </h3>
+                  <p className="text-xs text-white/50">
+                    {language === "en" 
+                      ? "Send your storefront link via WhatsApp or social media."
+                      : "Envía tu link por WhatsApp o redes sociales."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex items-start gap-4 bg-white/5 rounded-xl p-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-white/80">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">
+                    {language === "en" ? "Manage and grow" : "Gestiona y crece"}
+                  </h3>
+                  <p className="text-xs text-white/50">
+                    {language === "en" 
+                      ? "Track clients and orders from one dashboard."
+                      : "Sigue clientes y pedidos desde un panel."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/20 to-transparent backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-4 py-5">
