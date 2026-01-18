@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Check, MessageCircle, Globe } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Globe, Store, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -157,7 +157,13 @@ export default function Landing() {
         <div className="max-w-2xl mx-auto text-center">
           {formState === "idle" && (
             <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-6 leading-tight">
+              {/* Tagline pill */}
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium px-4 py-2 rounded-full mb-6">
+                <Sparkles className="w-3.5 h-3.5" />
+                {language === "en" ? "CRM + Marketing + Storefronts" : "CRM + Marketing + Tiendas"}
+              </div>
+
+              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4 leading-tight">
                 {language === "en" ? "Run your business." : "Maneja tu negocio."}
                 <br />
                 <span className="text-white/70">
@@ -165,20 +171,48 @@ export default function Landing() {
                 </span>
               </h1>
               
-              <p className="text-lg text-white/80 max-w-md mx-auto mb-10 leading-relaxed">
+              <p className="text-base md:text-lg text-white/80 max-w-sm mx-auto mb-8 leading-relaxed">
                 {language === "en" 
-                  ? "A simple system to stay organized and in control."
-                  : "Un sistema simple para mantenerte organizado y en control."}
+                  ? "The all-in-one app for small business owners."
+                  : "La app todo-en-uno para dueños de negocios."}
               </p>
 
               <Button 
                 onClick={handleGetStarted}
                 size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all font-medium"
+                className="bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all font-medium w-full sm:w-auto"
               >
-                {language === "en" ? "Get started" : "Comenzar"}
+                {language === "en" ? "Get started free" : "Comenzar gratis"}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+
+              {/* Benefit icons */}
+              <div className="mt-10 grid grid-cols-3 gap-4 max-w-sm mx-auto">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-xs text-white/70 text-center">
+                    {language === "en" ? "Track clients" : "Clientes"}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-xs text-white/70 text-center">
+                    {language === "en" ? "Share links" : "Links de venta"}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-xs text-white/70 text-center">
+                    {language === "en" ? "AI marketing" : "Marketing IA"}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
