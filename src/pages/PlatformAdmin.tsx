@@ -64,17 +64,14 @@ import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { 
-  ChartTooltip, 
-  ChartTooltipContent 
-} from "@/components/ui/chart";
-import { 
   AreaChart, 
   Area, 
   XAxis, 
   YAxis, 
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
+  Tooltip
 } from "recharts";
 
 interface PlatformStats {
@@ -771,7 +768,7 @@ export default function PlatformAdmin() {
                         </defs>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                         <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Tooltip formatter={(value: number) => [`$${value}`, 'Revenue']} />
                         <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -792,7 +789,7 @@ export default function PlatformAdmin() {
                       <BarChart data={dailyMetrics}>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                         <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Tooltip />
                         <Bar dataKey="users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="orders" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
                       </BarChart>
