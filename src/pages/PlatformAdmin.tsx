@@ -49,7 +49,13 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  Sparkles
+  Sparkles,
+  Bell,
+  Mail,
+  AlertTriangle,
+  UserPlus,
+  Coins,
+  UserX
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -126,6 +132,13 @@ interface ChatMessage {
   content: string;
 }
 
+interface AlertLog {
+  id: string;
+  type: string;
+  message: string;
+  created_at: string;
+}
+
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export default function PlatformAdmin() {
@@ -164,6 +177,10 @@ export default function PlatformAdmin() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Alerts state
+  const [alertLogs, setAlertLogs] = useState<AlertLog[]>([]);
+  const [sendingAlert, setSendingAlert] = useState<string | null>(null);
   
   // User detail dialog
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -207,6 +224,7 @@ export default function PlatformAdmin() {
       loadDailyMetrics(),
       loadBusinessTypeBreakdown(),
       loadCountryBreakdown(),
+      loadAlertLogs(),
     ]);
     setLoading(false);
   };
@@ -345,10 +363,116 @@ export default function PlatformAdmin() {
     setCountries(sorted);
   };
 
+  const loadAlertLogs = async () => {
+    const { data } = await supabase
+      .from("activity_log")
+      .select("id, type, message, created_at")
+      .in("type", ["admin_alert", "revenue_milestone", "daily_summary", "new_signup_alert"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setAlertLogs(data || []);
+  };
+
+  const handleSendAlert = async (alertType: "new_signup" | "revenue_milestone" | "inactive_users" | "daily_summary") => {
+    setSendingAlert(alertType);
+    try {
+      const alertData: Record<string, any> = {};
+      
+      if (alertType === "daily_summary") {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+        
+        const [newProfilesRes, ordersRes, activeRes] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", yesterdayStr),
+          supabase.from("storefronts").select("price").gte("ordered_at", yesterdayStr),
+          supabase.from("user_stats").select("user_id").gte("last_active_date", yesterdayStr),
+        ]);
+        
+        alertData.newUsers = newProfilesRes.count || 0;
+        alertData.totalOrders = ordersRes.data?.length || 0;
+        alertData.revenue = ordersRes.data?.reduce((sum, s) => sum + Number(s.price || 0), 0) || 0;
+        alertData.activeUsers = activeRes.data?.length || 0;
+      } else if (alertType === "revenue_milestone") {
+        const { data: paidStorefronts } = await supabase
+          .from("storefronts")
+          .select("price")
+          .eq("status", "paid");
+        alertData.totalRevenue = paidStorefronts?.reduce((sum, s) => sum + Number(s.price || 0), 0) || 0;
+        alertData.milestone = alertData.totalRevenue;
+        alertData.period = "All time";
+      } else if (alertType === "inactive_users") {
+        const inactiveDate = new Date();
+        inactiveDate.setDate(inactiveDate.getDate() - 7);
+        
+        const { data: inactiveStats } = await supabase
+          .from("user_stats")
+          .select("user_id, last_active_date")
+          .or(`last_active_date.lt.${inactiveDate.toISOString()},last_active_date.is.null`);
+        
+        const userIds = inactiveStats?.map(s => s.user_id) || [];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, business_name")
+          .in("user_id", userIds);
+        
+        alertData.users = profiles?.map(p => ({
+          business_name: p.business_name,
+          last_active: inactiveStats?.find(s => s.user_id === p.user_id)?.last_active_date,
+        })) || [];
+        alertData.inactiveDays = 7;
+      } else if (alertType === "new_signup") {
+        alertData.businessName = "Test Signup";
+        alertData.email = "test@example.com";
+        alertData.businessType = "Demo";
+      }
+      
+      const response = await supabase.functions.invoke("admin-alerts", {
+        body: { type: alertType, data: alertData },
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      toast.success(language === "es" ? "Alerta enviada" : "Alert sent successfully");
+      loadAlertLogs();
+    } catch (error: any) {
+      console.error("Alert error:", error);
+      toast.error(language === "es" ? "Error al enviar alerta" : "Failed to send alert");
+    } finally {
+      setSendingAlert(null);
+    }
+  };
+
+  const handleRunCheckAlerts = async () => {
+    setSendingAlert("check");
+    try {
+      const response = await supabase.functions.invoke("check-alerts");
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      const result = response.data;
+      toast.success(
+        language === "es" 
+          ? `${result.alertsSent || 0} alertas procesadas` 
+          : `${result.alertsSent || 0} alerts processed`
+      );
+      loadAlertLogs();
+    } catch (error: any) {
+      console.error("Check alerts error:", error);
+      toast.error(language === "es" ? "Error al verificar alertas" : "Failed to check alerts");
+    } finally {
+      setSendingAlert(null);
+    }
+  };
+
   const handleViewUser = async (userData: UserData) => {
     setSelectedUser(userData);
     setUserDialogOpen(true);
-    
     // Fetch user's storefronts and roles
     const [sfRes, rolesRes] = await Promise.all([
       supabase.from("storefronts").select("*").eq("user_id", userData.user_id).order("created_at", { ascending: false }).limit(10),
@@ -598,7 +722,7 @@ export default function PlatformAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-6 w-full max-w-3xl">
             <TabsTrigger value="overview" className="gap-1 text-xs">
               <BarChart3 className="w-3 h-3" />
               Overview
@@ -614,6 +738,10 @@ export default function PlatformAdmin() {
             <TabsTrigger value="activity" className="gap-1 text-xs">
               <Activity className="w-3 h-3" />
               Activity
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-1 text-xs">
+              <Bell className="w-3 h-3" />
+              Alerts
             </TabsTrigger>
             <TabsTrigger value="ai" className="gap-1 text-xs">
               <Sparkles className="w-3 h-3" />
@@ -859,6 +987,205 @@ export default function PlatformAdmin() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts" className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Manual Alert Triggers */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {language === "es" ? "Enviar Alertas Manuales" : "Send Manual Alerts"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => handleSendAlert("daily_summary")}
+                    disabled={sendingAlert !== null}
+                  >
+                    <div className="p-2 rounded-lg bg-purple-500/10">
+                      <BarChart3 className="w-4 h-4 text-purple-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium">{language === "es" ? "Resumen Diario" : "Daily Summary"}</p>
+                      <p className="text-xs text-muted-foreground">{language === "es" ? "Enviar resumen de métricas" : "Send metrics summary email"}</p>
+                    </div>
+                    {sendingAlert === "daily_summary" && <RefreshCw className="w-4 h-4 animate-spin ml-auto" />}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => handleSendAlert("revenue_milestone")}
+                    disabled={sendingAlert !== null}
+                  >
+                    <div className="p-2 rounded-lg bg-green-500/10">
+                      <Coins className="w-4 h-4 text-green-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium">{language === "es" ? "Hito de Ingresos" : "Revenue Milestone"}</p>
+                      <p className="text-xs text-muted-foreground">{language === "es" ? "Notificar logro de ingresos" : "Notify revenue achievement"}</p>
+                    </div>
+                    {sendingAlert === "revenue_milestone" && <RefreshCw className="w-4 h-4 animate-spin ml-auto" />}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => handleSendAlert("inactive_users")}
+                    disabled={sendingAlert !== null}
+                  >
+                    <div className="p-2 rounded-lg bg-yellow-500/10">
+                      <UserX className="w-4 h-4 text-yellow-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium">{language === "es" ? "Usuarios Inactivos" : "Inactive Users"}</p>
+                      <p className="text-xs text-muted-foreground">{language === "es" ? "Alertar sobre usuarios inactivos" : "Alert about inactive users"}</p>
+                    </div>
+                    {sendingAlert === "inactive_users" && <RefreshCw className="w-4 h-4 animate-spin ml-auto" />}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => handleSendAlert("new_signup")}
+                    disabled={sendingAlert !== null}
+                  >
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <UserPlus className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium">{language === "es" ? "Nuevo Registro (Test)" : "New Signup (Test)"}</p>
+                      <p className="text-xs text-muted-foreground">{language === "es" ? "Enviar alerta de prueba" : "Send test signup alert"}</p>
+                    </div>
+                    {sendingAlert === "new_signup" && <RefreshCw className="w-4 h-4 animate-spin ml-auto" />}
+                  </Button>
+
+                  <div className="pt-3 border-t">
+                    <Button
+                      className="w-full gap-2"
+                      onClick={handleRunCheckAlerts}
+                      disabled={sendingAlert !== null}
+                    >
+                      {sendingAlert === "check" ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Bell className="w-4 h-4" />
+                      )}
+                      {language === "es" ? "Ejecutar Verificación Automática" : "Run Automated Check"}
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      {language === "es" 
+                        ? "Verifica hitos, usuarios inactivos y genera resumen" 
+                        : "Checks milestones, inactive users, and generates summary"}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Alert Types Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    {language === "es" ? "Tipos de Alertas" : "Alert Types"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <UserPlus className="w-5 h-5 text-blue-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">{language === "es" ? "Nuevos Registros" : "New Signups"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "es" 
+                          ? "Notificación automática cuando un usuario se registra" 
+                          : "Automatic notification when a user signs up"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Coins className="w-5 h-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">{language === "es" ? "Hitos de Ingresos" : "Revenue Milestones"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "es" 
+                          ? "Alertas al alcanzar $100, $500, $1K, $5K, etc." 
+                          : "Alerts when reaching $100, $500, $1K, $5K, etc."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <UserX className="w-5 h-5 text-yellow-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">{language === "es" ? "Usuarios Inactivos" : "Inactive Users"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "es" 
+                          ? "Reporte semanal de usuarios sin actividad por 7+ días" 
+                          : "Weekly report of users inactive for 7+ days"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <BarChart3 className="w-5 h-5 text-purple-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">{language === "es" ? "Resumen Diario" : "Daily Summary"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "es" 
+                          ? "Métricas clave del día anterior" 
+                          : "Key metrics from the previous day"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Alert History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  {language === "es" ? "Historial de Alertas" : "Alert History"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[300px]">
+                  <div className="divide-y divide-border">
+                    {alertLogs.length === 0 ? (
+                      <div className="p-8 text-center text-muted-foreground">
+                        <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">{language === "es" ? "No hay alertas recientes" : "No recent alerts"}</p>
+                      </div>
+                    ) : (
+                      alertLogs.map((log) => (
+                        <div key={log.id} className="flex items-start gap-3 p-4">
+                          <div className="mt-0.5">
+                            {log.type === "admin_alert" ? <Mail className="w-4 h-4 text-blue-500" /> :
+                             log.type === "revenue_milestone" ? <Coins className="w-4 h-4 text-green-500" /> :
+                             log.type === "daily_summary" ? <BarChart3 className="w-4 h-4 text-purple-500" /> :
+                             log.type === "new_signup_alert" ? <UserPlus className="w-4 h-4 text-blue-500" /> :
+                             <Bell className="w-4 h-4 text-muted-foreground" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm">{log.message}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(log.created_at), "MMM dd, h:mm a")}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
