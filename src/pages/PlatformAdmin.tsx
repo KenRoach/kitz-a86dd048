@@ -55,7 +55,8 @@ import {
   AlertTriangle,
   UserPlus,
   Coins,
-  UserX
+  UserX,
+  MessageSquare
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,6 +64,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
+import { EngagementDashboard } from "@/components/admin/EngagementDashboard";
 import { 
   AreaChart, 
   Area, 
@@ -719,7 +721,7 @@ export default function PlatformAdmin() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-6 w-full max-w-3xl">
+          <TabsList className="grid grid-cols-7 w-full max-w-4xl">
             <TabsTrigger value="overview" className="gap-1 text-xs">
               <BarChart3 className="w-3 h-3" />
               Overview
@@ -732,6 +734,10 @@ export default function PlatformAdmin() {
               <Store className="w-3 h-3" />
               Orders
             </TabsTrigger>
+            <TabsTrigger value="engagement" className="gap-1 text-xs">
+              <MessageSquare className="w-3 h-3" />
+              Feedback
+            </TabsTrigger>
             <TabsTrigger value="activity" className="gap-1 text-xs">
               <Activity className="w-3 h-3" />
               Activity
@@ -742,11 +748,14 @@ export default function PlatformAdmin() {
             </TabsTrigger>
             <TabsTrigger value="ai" className="gap-1 text-xs">
               <Sparkles className="w-3 h-3" />
-              AI Control
+              AI
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
+          {/* Engagement Tab */}
+          <TabsContent value="engagement">
+            <EngagementDashboard />
+          </TabsContent>
           <TabsContent value="overview" className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
