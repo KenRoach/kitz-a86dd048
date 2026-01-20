@@ -23,12 +23,9 @@ import {
   Eye,
   RefreshCw,
   Search,
-  ChevronRight,
   BarChart3,
   Globe,
-  Smartphone,
   ArrowUp,
-  ArrowDown,
   Shield
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +34,6 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { 
-  ChartContainer, 
   ChartTooltip, 
   ChartTooltipContent 
 } from "@/components/ui/chart";
@@ -48,10 +44,7 @@ import {
   YAxis, 
   ResponsiveContainer,
   BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell
+  Bar
 } from "recharts";
 
 interface PlatformStats {
