@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.chat-support]
 verify_jwt = false
+
+[functions.admin-alerts]
+verify_jwt = false
+
+[functions.check-alerts]
+verify_jwt = false
