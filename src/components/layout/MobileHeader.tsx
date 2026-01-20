@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export function MobileHeader() {
   const { theme, setTheme } = useTheme();
@@ -59,6 +60,7 @@ export function MobileHeader() {
           </p>
         </div>
         <div className="flex items-center gap-1">
+          <NotificationBell />
           {isAdmin && (
             <Link
               to="/platform-admin"
