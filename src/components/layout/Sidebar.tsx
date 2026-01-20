@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
@@ -16,9 +18,24 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t, getGreeting } = useLanguage();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    checkAdmin();
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -81,6 +98,22 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4 space-y-2">
+        {/* Admin link - only for admins */}
+        {isAdmin && (
+          <Link
+            to="/platform-admin"
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200",
+              location.pathname === "/platform-admin" 
+                ? "bg-primary text-primary-foreground shadow-md" 
+                : "hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <Shield className="w-5 h-5" />
+            <span className="font-medium">{language === "es" ? "Control Center" : "Control Center"}</span>
+          </Link>
+        )}
+        
         {/* Settings link */}
         <Link
           to="/settings"
