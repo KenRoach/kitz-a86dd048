@@ -12,7 +12,7 @@ interface ProductImageEditorProps {
   onImageChange: (file: File | null, preview: string | null) => void;
   onEnhanceWithAI?: () => Promise<void>;
   enhancing?: boolean;
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 interface ImageFilter {

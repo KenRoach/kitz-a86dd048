@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ConsultantKanbanProps {
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
   onAddContact?: () => void;
 }
 

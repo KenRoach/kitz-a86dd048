@@ -15,7 +15,7 @@ interface ProfileQRCodeProps {
   url: string;
   businessName: string;
   logoUrl?: string | null;
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 export function ProfileQRCode({ url, businessName, logoUrl, language = "en" }: ProfileQRCodeProps) {

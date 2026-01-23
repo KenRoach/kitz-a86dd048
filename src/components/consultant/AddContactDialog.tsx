@@ -13,7 +13,7 @@ import { toast } from "sonner";
 interface AddContactDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 const SOURCE_OPTIONS = [

@@ -15,7 +15,7 @@ import { GoogleCalendarConnect } from "./GoogleCalendarConnect";
 import { CalendarInviteDialog } from "./CalendarInviteDialog";
 interface ConsultantContactPanelProps {
   contact: ConsultantContact;
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
   onClose: () => void;
   onStageChange: (stage: string) => void;
 }
