@@ -30,6 +30,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const ConsultantDashboard = lazy(() => import("./pages/ConsultantDashboard"));
 const BarbershopDashboard = lazy(() => import("./pages/BarbershopDashboard"));
+const StudioDashboard = lazy(() => import("./pages/StudioDashboard"));
 const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
 
 // Optimized QueryClient with caching
@@ -105,6 +106,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/consultant" element={<ProtectedRoute><ConsultantDashboard /></ProtectedRoute>} />
         <Route path="/barbershop" element={<ProtectedRoute><BarbershopDashboard /></ProtectedRoute>} />
+        <Route path="/studio" element={<ProtectedRoute><StudioDashboard /></ProtectedRoute>} />
         <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
         <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />

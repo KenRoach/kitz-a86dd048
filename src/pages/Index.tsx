@@ -21,14 +21,14 @@ const Index = () => {
       const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["consultant", "barbershop", "studio"]);
+        .eq("user_id", user.id);
 
       if (data && data.length > 0) {
         // Prioritize studio > barbershop > consultant
-        const hasStudio = data.some(r => r.role === "studio");
-        const hasBarbershop = data.some(r => r.role === "barbershop");
-        const hasConsultant = data.some(r => r.role === "consultant");
+        const roles = data.map(r => r.role as string);
+        const hasStudio = roles.includes("studio");
+        const hasBarbershop = roles.includes("barbershop");
+        const hasConsultant = roles.includes("consultant");
         
         if (hasStudio) {
           setUserRole("studio");
