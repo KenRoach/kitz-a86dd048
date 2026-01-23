@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MomentumScore } from "@/components/dashboard/MomentumScore";
-import { AttentionCard } from "@/components/dashboard/AttentionCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { EarningsToday } from "@/components/dashboard/EarningsToday";
 import { ProfileShareButton } from "@/components/dashboard/ProfileShareButton";
 import { ContextualTip, useContextualTips } from "@/components/dashboard/ContextualTip";
 import { ProfileSetupWizard } from "@/components/onboarding/ProfileSetupWizard";
+import { QuickStartChecklist } from "@/components/onboarding/QuickStartChecklist";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -258,6 +258,13 @@ export default function Dashboard() {
               {language === "es" ? "Nuevo" : "New"}
             </Button>
           </div>
+
+          {/* Quick Start Checklist - Shows for new users */}
+          <QuickStartChecklist 
+            hasProducts={productCount > 0}
+            hasStorefronts={storefronts.length > 0}
+            hasSentStorefronts={sentStorefronts.length > 0 || paidStorefronts.length > 0}
+          />
 
           {/* Balance Card - Primary focus */}
           <div className="bg-primary rounded-2xl p-6 text-primary-foreground animate-calm-in hover-calm">
