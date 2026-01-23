@@ -4,7 +4,7 @@ import { differenceInDays } from "date-fns";
 
 interface DailyAssistantPanelProps {
   contacts: ConsultantContact[];
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 interface AttentionItem {

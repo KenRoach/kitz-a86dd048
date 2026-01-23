@@ -15,7 +15,7 @@ interface BulkEmailDialogProps {
   open: boolean;
   onClose: () => void;
   contacts: ConsultantContact[];
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 export function BulkEmailDialog({ open, onClose, contacts, language = "es" }: BulkEmailDialogProps) {

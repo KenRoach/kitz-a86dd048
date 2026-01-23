@@ -25,7 +25,7 @@ export interface ConsultantContact {
 interface ConsultantContactCardProps {
   contact: ConsultantContact;
   onClick?: () => void;
-  language?: "en" | "es";
+  language?: "en" | "es" | "pt";
 }
 
 const sourceIcons: Record<string, React.ReactNode> = {
