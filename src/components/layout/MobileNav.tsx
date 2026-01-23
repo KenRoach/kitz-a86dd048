@@ -8,7 +8,7 @@ const consultantNavItems = [
   { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
-  { icon: History, labelKey: "orders" as const, path: "/order-history" },
+  { icon: Settings, labelKey: "settings" as const, path: "/settings" },
 ];
 
 const barbershopNavItems = [
