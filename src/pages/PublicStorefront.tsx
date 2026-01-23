@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { PaymentProofUpload } from "@/components/storefront/PaymentProofUpload";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 const BUYER_INFO_KEY = "kitz_buyer_info";
 const BUYER_INFO_EXPIRY_DAYS = 120;
@@ -277,29 +278,33 @@ export default function PublicStorefront() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
+      <PublicLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      </PublicLayout>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
-            <ImageIcon className="w-10 h-10 text-muted-foreground/50" />
+      <PublicLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <div className="text-center max-w-md">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+              <ImageIcon className="w-10 h-10 text-muted-foreground/50" />
+            </div>
+            <h1 className="text-2xl font-semibold text-foreground mb-2">Storefront not found</h1>
+            <p className="text-muted-foreground mb-6">This link may have expired or doesn't exist.</p>
+            <Link to="/">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Go home
+              </Button>
+            </Link>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Storefront not found</h1>
-          <p className="text-muted-foreground mb-6">This link may have expired or doesn't exist.</p>
-          <Link to="/">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go home
-            </Button>
-          </Link>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
@@ -317,6 +322,7 @@ export default function PublicStorefront() {
   ].filter(m => m.enabled);
 
   return (
+    <PublicLayout>
     <div className="min-h-screen bg-background">
       {/* Header - Clean, trust-building */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
@@ -757,5 +763,6 @@ export default function PublicStorefront() {
       {/* Chat Widget */}
       <ChatWidget />
     </div>
+    </PublicLayout>
   );
 }

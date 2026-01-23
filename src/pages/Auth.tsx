@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Globe, Phone } from "lucide-react";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 const phoneRegex = /^[+]?[\d\s-]{7,15}$/;
 
@@ -149,6 +150,7 @@ export default function Auth() {
 
   if (mode === "forgot" && resetEmailSent) {
     return (
+      <PublicLayout showNavForLoggedIn={false}>
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="flex items-center justify-between mb-8 animate-fade-in">
@@ -183,10 +185,12 @@ export default function Auth() {
           </div>
         </div>
       </div>
+      </PublicLayout>
     );
   }
 
   return (
+    <PublicLayout showNavForLoggedIn={false}>
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between mb-8 animate-fade-in">
@@ -340,5 +344,6 @@ export default function Auth() {
         </div>
       </div>
     </div>
+    </PublicLayout>
   );
 }

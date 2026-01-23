@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight, Check, MessageCircle, Globe, Store, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 type FormState = "idle" | "form" | "success";
 
@@ -83,6 +84,7 @@ export default function Landing() {
   }, [firstName]);
 
   return (
+    <PublicLayout>
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-primary-soft relative overflow-hidden">
       {/* Language Selection Modal */}
       {showLanguageModal && (
@@ -455,5 +457,6 @@ export default function Landing() {
         </div>
       </footer>
     </div>
+    </PublicLayout>
   );
 }
