@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 // Saved contact info for repeat visitors
 const CONTACT_INFO_KEY = "kitz_contact_info";
@@ -370,29 +371,34 @@ export default function PublicProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="animate-pulse">
-          <Sparkles className="w-8 h-8 text-white/50" />
+      <PublicLayout>
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+          <div className="animate-pulse">
+            <Sparkles className="w-8 h-8 text-white/50" />
+          </div>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-        <div className="text-center">
-          <p className="text-6xl mb-4">🔍</p>
-          <h1 className="text-2xl font-bold text-white mb-2">Not found</h1>
-          <p className="text-white/60">This profile doesn't exist or has been removed.</p>
+      <PublicLayout>
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+          <div className="text-center">
+            <p className="text-6xl mb-4">🔍</p>
+            <h1 className="text-2xl font-bold text-white mb-2">Not found</h1>
+            <p className="text-white/60">This profile doesn't exist or has been removed.</p>
+          </div>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
   const headerImage = profile?.storefront_image_url || profile?.logo_url;
 
   return (
+    <PublicLayout>
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Compact Header */}
       <div className="relative">
@@ -781,5 +787,6 @@ export default function PublicProfile() {
         </div>
       )}
     </div>
+    </PublicLayout>
   );
 }
