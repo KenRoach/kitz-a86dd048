@@ -101,6 +101,15 @@ export default {
           accent: "hsl(var(--barbershop-accent))",
           muted: "hsl(var(--barbershop-muted))",
         },
+        studio: {
+          header: "hsl(var(--studio-header))",
+          section: "hsl(var(--studio-section))",
+          "section-alt": "hsl(var(--studio-section-alt))",
+          cta: "hsl(var(--studio-cta))",
+          "cta-foreground": "hsl(var(--studio-cta-foreground))",
+          accent: "hsl(var(--studio-accent))",
+          muted: "hsl(var(--studio-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

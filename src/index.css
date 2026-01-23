@@ -105,6 +105,15 @@
     --barbershop-cta-foreground: 0 0% 100%;
     --barbershop-accent: 35 60% 50%;
     --barbershop-muted: 30 5% 45%;
+
+    /* Studio CEO Theme - Creative professional palette */
+    --studio-header: 240 20% 12%;
+    --studio-section: 0 0% 100%;
+    --studio-section-alt: 240 10% 97%;
+    --studio-cta: 262 83% 58%;
+    --studio-cta-foreground: 0 0% 100%;
+    --studio-accent: 172 66% 50%;
+    --studio-muted: 240 5% 46%;
   }
 
   .dark {
