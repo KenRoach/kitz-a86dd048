@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Check, MessageCircle, Globe, Store, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Store, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { PublicLayout } from "@/components/layout/PublicLayout";
@@ -29,7 +29,6 @@ const DecorativeCircles = memo(function DecorativeCircles() {
 
 export default function Landing() {
   const { language, setLanguage } = useLanguage();
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [formState, setFormState] = useState<FormState>("idle");
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "email">("whatsapp");
   const [firstName, setFirstName] = useState("");
@@ -37,23 +36,9 @@ export default function Landing() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    // Show language modal on first visit (if no language preference saved)
-    const hasSeenLanguageModal = localStorage.getItem("language-modal-shown");
-    if (!hasSeenLanguageModal) {
-      // Small delay for smooth appearance
-      const timer = setTimeout(() => {
-        setShowLanguageModal(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleLanguageSelect = (lang: "en" | "es") => {
-    setLanguage(lang);
-    localStorage.setItem("language-modal-shown", "true");
-    setShowLanguageModal(false);
-  };
+  const toggleLanguage = useCallback(() => {
+    setLanguage(language === "en" ? "es" : "en");
+  }, [language, setLanguage]);
 
   const handleGetStarted = useCallback(() => {
     // Navigate directly to auth page for signup
@@ -86,48 +71,6 @@ export default function Landing() {
   return (
     <PublicLayout>
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-primary-soft relative overflow-hidden">
-      {/* Language Selection Modal */}
-      {showLanguageModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => handleLanguageSelect("en")}
-          />
-          
-          {/* Modal */}
-          <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4 animate-scale-in">
-            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-primary/10 flex items-center justify-center">
-              <Globe className="w-7 h-7 text-primary" />
-            </div>
-            
-            <h2 className="text-xl font-semibold tracking-tight text-foreground mb-2 text-center">
-              Choose your language
-            </h2>
-            <p className="text-muted-foreground mb-6 text-sm text-center">
-              Elige tu idioma
-            </p>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => handleLanguageSelect("en")}
-                className="w-full py-4 px-6 rounded-xl text-left font-medium transition-all bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-between group"
-              >
-                <span>🇺🇸 English</span>
-                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-              
-              <button
-                onClick={() => handleLanguageSelect("es")}
-                className="w-full py-4 px-6 rounded-xl text-left font-medium transition-all bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-between group"
-              >
-                <span>🇪🇸 Español</span>
-                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <DecorativeCircles />
 
@@ -139,11 +82,11 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowLanguageModal(true)}
-              className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-              title={language === "en" ? "Change language" : "Cambiar idioma"}
+              onClick={toggleLanguage}
+              className="text-white/80 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
+              title={language === "en" ? "Cambiar a Español" : "Switch to English"}
             >
-              <Globe className="w-5 h-5" />
+              {language === "en" ? "ES" : "EN"}
             </button>
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10">
