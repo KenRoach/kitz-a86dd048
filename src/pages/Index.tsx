@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "./Dashboard";
 
-type UserRole = "consultant" | "barbershop" | "default";
+type UserRole = "consultant" | "barbershop" | "studio" | "default";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -17,19 +17,22 @@ const Index = () => {
         return;
       }
 
-      // Check for consultant or barbershop role
+      // Check for consultant, barbershop, or studio role
       const { data } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .in("role", ["consultant", "barbershop"]);
+        .in("role", ["consultant", "barbershop", "studio"]);
 
       if (data && data.length > 0) {
-        // Prioritize barbershop if user has both roles
+        // Prioritize studio > barbershop > consultant
+        const hasStudio = data.some(r => r.role === "studio");
         const hasBarbershop = data.some(r => r.role === "barbershop");
         const hasConsultant = data.some(r => r.role === "consultant");
         
-        if (hasBarbershop) {
+        if (hasStudio) {
+          setUserRole("studio");
+        } else if (hasBarbershop) {
           setUserRole("barbershop");
         } else if (hasConsultant) {
           setUserRole("consultant");
@@ -58,6 +61,10 @@ const Index = () => {
   }
 
   // Redirect based on role
+  if (userRole === "studio") {
+    return <Navigate to="/studio" replace />;
+  }
+
   if (userRole === "barbershop") {
     return <Navigate to="/barbershop" replace />;
   }
