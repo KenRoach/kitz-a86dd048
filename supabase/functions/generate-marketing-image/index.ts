@@ -5,13 +5,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ContactInfo {
+  businessName?: string;
+  phone?: string;
+  instagram?: string;
+  cta?: string;
+  email?: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, contactInfo } = await req.json() as { prompt: string; contactInfo?: ContactInfo };
 
     if (!prompt || typeof prompt !== "string") {
       return new Response(
@@ -38,7 +46,22 @@ serve(async (req) => {
       );
     }
 
-    const enhancedPrompt = `Professional marketing image: ${sanitizedPrompt}. High quality, commercial photography style, clean and modern.`;
+    // Build contact overlay instructions if provided
+    let contactOverlay = "";
+    if (contactInfo) {
+      const parts: string[] = [];
+      if (contactInfo.businessName) parts.push(`Business name: "${contactInfo.businessName}"`);
+      if (contactInfo.phone) parts.push(`Phone: "${contactInfo.phone}"`);
+      if (contactInfo.instagram) parts.push(`Instagram: "${contactInfo.instagram}"`);
+      if (contactInfo.email) parts.push(`Email: "${contactInfo.email}"`);
+      if (contactInfo.cta) parts.push(`Call to action: "${contactInfo.cta}"`);
+      
+      if (parts.length > 0) {
+        contactOverlay = ` Include a professional contact info section at the bottom of the image with: ${parts.join(", ")}. The contact info should be clearly legible with good contrast, styled like a professional social media post or flyer.`;
+      }
+    }
+
+    const enhancedPrompt = `Professional marketing image for Instagram: ${sanitizedPrompt}. High quality, commercial photography style, clean and modern, vertical 9:16 aspect ratio suitable for Instagram stories or posts.${contactOverlay}`;
 
     console.log("Generating image with prompt length:", enhancedPrompt.length);
 

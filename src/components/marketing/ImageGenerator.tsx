@@ -2,14 +2,27 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus, Loader2, Download, Sparkles, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ImagePlus, Loader2, Download, Sparkles, AlertCircle, User, Phone, Instagram, Mail } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const MAX_PROMPT_LENGTH = 500;
+
+interface ContactInfo {
+  businessName: string;
+  phone: string;
+  instagram: string;
+  cta: string;
+  email: string;
+}
 
 export function ImageGenerator() {
   const { language } = useLanguage();
@@ -18,6 +31,19 @@ export function ImageGenerator() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [includeContact, setIncludeContact] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    businessName: "",
+    phone: "",
+    instagram: "",
+    cta: "",
+    email: "",
+  });
+
+  const updateContactInfo = (field: keyof ContactInfo, value: string) => {
+    setContactInfo(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleGenerate = useCallback(async () => {
     const trimmedPrompt = prompt.trim();
@@ -26,19 +52,26 @@ export function ImageGenerator() {
       return;
     }
 
-    if (isGenerating) return; // Prevent double-click
+    if (isGenerating) return;
 
     setIsGenerating(true);
     setGeneratedImage(null);
     setImageError(false);
 
     try {
+      const requestBody: { prompt: string; contactInfo?: ContactInfo } = {
+        prompt: trimmedPrompt.slice(0, MAX_PROMPT_LENGTH),
+      };
+
+      if (includeContact) {
+        requestBody.contactInfo = contactInfo;
+      }
+
       const { data, error } = await supabase.functions.invoke("generate-marketing-image", {
-        body: { prompt: trimmedPrompt.slice(0, MAX_PROMPT_LENGTH) },
+        body: requestBody,
       });
 
       if (error) {
-        // Check for specific error types from the edge function response
         if (error.message?.includes("429") || error.message?.includes("rate limit")) {
           toast.error(language === "en" 
             ? "Too many requests. Please wait a moment." 
@@ -55,7 +88,6 @@ export function ImageGenerator() {
       }
 
       if (data?.error) {
-        // Handle errors returned in the response body
         if (data.error.includes("rate limit") || data.error.includes("429")) {
           toast.error(language === "en" 
             ? "Too many requests. Please wait a moment." 
@@ -84,13 +116,12 @@ export function ImageGenerator() {
     } finally {
       setIsGenerating(false);
     }
-  }, [prompt, isGenerating, language]);
+  }, [prompt, isGenerating, language, includeContact, contactInfo]);
 
   const handleDownload = useCallback(async () => {
     if (!generatedImage) return;
     
     try {
-      // For base64 images, we need to convert to blob for reliable download
       if (generatedImage.startsWith("data:")) {
         const response = await fetch(generatedImage);
         const blob = await response.blob();
@@ -103,10 +134,8 @@ export function ImageGenerator() {
         link.click();
         document.body.removeChild(link);
         
-        // Clean up the object URL
         URL.revokeObjectURL(url);
       } else {
-        // For regular URLs, fetch and download as blob
         const response = await fetch(generatedImage);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -149,6 +178,8 @@ export function ImageGenerator() {
     language === "en" ? "Sale banner with vibrant colors" : "Banner de oferta con colores vibrantes",
     language === "en" ? "Social media post for new arrival" : "Post de redes sociales para nuevo producto",
   ];
+
+  const hasContactInfo = contactInfo.businessName || contactInfo.phone || contactInfo.instagram || contactInfo.cta || contactInfo.email;
 
   return (
     <Card>
@@ -194,6 +225,120 @@ export function ImageGenerator() {
             ))}
           </div>
         </div>
+
+        {/* Contact Info Toggle */}
+        <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">
+              {language === "en" ? "Add contact info" : "Agregar info de contacto"}
+            </span>
+          </div>
+          <Switch 
+            checked={includeContact} 
+            onCheckedChange={(checked) => {
+              setIncludeContact(checked);
+              if (checked) setContactOpen(true);
+            }} 
+          />
+        </div>
+
+        {/* Contact Info Fields */}
+        <Collapsible open={includeContact && contactOpen} onOpenChange={setContactOpen}>
+          <CollapsibleTrigger asChild>
+            <button
+              className={cn(
+                "w-full flex items-center justify-between py-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                !includeContact && "hidden"
+              )}
+            >
+              <span>
+                {language === "en" ? "Contact details" : "Datos de contacto"}
+                {hasContactInfo && (
+                  <span className="ml-2 text-xs text-primary">
+                    ({language === "en" ? "configured" : "configurado"})
+                  </span>
+                )}
+              </span>
+              <ChevronDown className={cn("w-4 h-4 transition-transform", contactOpen && "rotate-180")} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-2">
+            <div className="grid gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <User className="w-3 h-3" />
+                  {language === "en" ? "Business/Name" : "Negocio/Nombre"}
+                </Label>
+                <Input
+                  value={contactInfo.businessName}
+                  onChange={(e) => updateContactInfo("businessName", e.target.value)}
+                  placeholder={language === "en" ? "Your business name" : "Nombre de tu negocio"}
+                  className="h-9"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Phone className="w-3 h-3" />
+                  {language === "en" ? "Phone" : "Teléfono"}
+                </Label>
+                <Input
+                  value={contactInfo.phone}
+                  onChange={(e) => updateContactInfo("phone", e.target.value)}
+                  placeholder="261-7275"
+                  className="h-9"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Instagram className="w-3 h-3" />
+                  Instagram
+                </Label>
+                <Input
+                  value={contactInfo.instagram}
+                  onChange={(e) => updateContactInfo("instagram", e.target.value)}
+                  placeholder="@tu_negocio"
+                  className="h-9"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Mail className="w-3 h-3" />
+                  {language === "en" ? "Email (optional)" : "Email (opcional)"}
+                </Label>
+                <Input
+                  value={contactInfo.email}
+                  onChange={(e) => updateContactInfo("email", e.target.value)}
+                  placeholder="tu@email.com"
+                  type="email"
+                  className="h-9"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3" />
+                  {language === "en" ? "Call to Action" : "Llamada a la acción"}
+                </Label>
+                <Input
+                  value={contactInfo.cta}
+                  onChange={(e) => updateContactInfo("cta", e.target.value)}
+                  placeholder={language === "en" ? "Book your appointment today" : "Agenda tu cita hoy"}
+                  className="h-9"
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              {language === "en" 
+                ? "This info will appear as text overlay on your image"
+                : "Esta info aparecerá como texto en tu imagen"}
+            </p>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Button
           onClick={handleGenerate}
