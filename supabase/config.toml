@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.check-alerts]
 verify_jwt = false
+
+[functions.generate-marketing-image]
+verify_jwt = false
+
+[functions.edit-marketing-image]
+verify_jwt = false
