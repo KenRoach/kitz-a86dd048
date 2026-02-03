@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
   { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
+  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
@@ -53,6 +54,9 @@ export function Sidebar() {
   const getLabel = (labelKey: string) => {
     if (labelKey === "consultant") {
       return language === "es" ? "Mi Trabajo" : "My Work";
+    }
+    if (labelKey === "agent") {
+      return language === "es" ? "Agente IA" : "AI Agent";
     }
     return (t as any)[labelKey];
   };

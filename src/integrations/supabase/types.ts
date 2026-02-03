@@ -41,6 +41,227 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_configs: {
+        Row: {
+          channel: string
+          config: Json | null
+          created_at: string
+          id: string
+          is_enabled: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_conversations: {
+        Row: {
+          channel: string
+          contact_identifier: string | null
+          contact_name: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          last_message_at: string | null
+          metadata: Json | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          contact_identifier?: string | null
+          contact_name?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          metadata?: Json | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          contact_identifier?: string | null
+          contact_name?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          metadata?: Json | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_messages: {
+        Row: {
+          ai_generated: boolean | null
+          approval_status: string | null
+          channel: string
+          content: string
+          conversation_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          sent_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          approval_status?: string | null
+          channel: string
+          content: string
+          conversation_id?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          sent_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          approval_status?: string | null
+          channel?: string
+          content?: string
+          conversation_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_pending_actions: {
+        Row: {
+          action_data: Json
+          action_type: string
+          conversation_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          processed_at: string | null
+          rule_id: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_data: Json
+          action_type: string
+          conversation_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          processed_at?: string | null
+          rule_id?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_data?: Json
+          action_type?: string
+          conversation_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          processed_at?: string | null
+          rule_id?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_pending_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_pending_actions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "agent_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_rules: {
+        Row: {
+          action_config: Json | null
+          action_type: string
+          approval_required: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          priority: number | null
+          trigger_config: Json | null
+          trigger_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_config?: Json | null
+          action_type: string
+          approval_required?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          priority?: number | null
+          trigger_config?: Json | null
+          trigger_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_config?: Json | null
+          action_type?: string
+          approval_required?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority?: number | null
+          trigger_config?: Json | null
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       autopilot_actions: {
         Row: {
           action_type: string
