@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +21,37 @@ serve(async (req) => {
   }
 
   try {
+    // Require authenticated user (prevents anonymous AI credit abuse)
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } },
+    );
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limit per user (best-effort)
+    if (isRateLimited(`generate-marketing-image:${user.id}`, 6, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { prompt, contactInfo } = await req.json() as { prompt: string; contactInfo?: ContactInfo };
 
     if (!prompt || typeof prompt !== "string") {
@@ -49,12 +82,20 @@ serve(async (req) => {
     // Build contact overlay instructions if provided
     let contactOverlay = "";
     if (contactInfo) {
+      // Light sanitization/limits for contact fields (prevent very large prompts)
+      const safe = (v: unknown, max = 120) => (typeof v === "string" ? v.trim().slice(0, max) : "");
       const parts: string[] = [];
-      if (contactInfo.businessName) parts.push(`Business name: "${contactInfo.businessName}"`);
-      if (contactInfo.phone) parts.push(`Phone: "${contactInfo.phone}"`);
-      if (contactInfo.instagram) parts.push(`Instagram: "${contactInfo.instagram}"`);
-      if (contactInfo.email) parts.push(`Email: "${contactInfo.email}"`);
-      if (contactInfo.cta) parts.push(`Call to action: "${contactInfo.cta}"`);
+      const businessName = safe(contactInfo.businessName, 80);
+      const phone = safe(contactInfo.phone, 40);
+      const instagram = safe(contactInfo.instagram, 60);
+      const email = safe(contactInfo.email, 120);
+      const cta = safe(contactInfo.cta, 80);
+
+      if (businessName) parts.push(`Business name: "${businessName}"`);
+      if (phone) parts.push(`Phone: "${phone}"`);
+      if (instagram) parts.push(`Instagram: "${instagram}"`);
+      if (email) parts.push(`Email: "${email}"`);
+      if (cta) parts.push(`Call to action: "${cta}"`);
       
       if (parts.length > 0) {
         contactOverlay = ` Include a professional contact info section at the bottom of the image with: ${parts.join(", ")}. The contact info should be clearly legible with good contrast, styled like a professional social media post or flyer.`;
@@ -133,3 +174,4 @@ serve(async (req) => {
     );
   }
 });
+

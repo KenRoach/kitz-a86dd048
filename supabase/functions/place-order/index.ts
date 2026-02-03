@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { getClientIp, isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +29,18 @@ serve(async (req) => {
   }
 
   try {
+    // Public endpoint by design, but rate limit to reduce abuse.
+    const ip = getClientIp(req);
     const { slug, buyerName, buyerPhone, buyerEmail, buyerNote } = await req.json();
+
+    if (typeof slug === "string") {
+      if (isRateLimited(`place-order:${ip}:${slug}`, 5, 5 * 60_000)) {
+        return new Response(
+          JSON.stringify({ error: "Too many requests. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // Log without sensitive data
     console.log("Place order request received for slug:", slug);

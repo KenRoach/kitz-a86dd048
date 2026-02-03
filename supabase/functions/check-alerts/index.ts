@@ -11,10 +11,31 @@ const corsHeaders = {
 const REVENUE_MILESTONES = [100, 500, 1000, 5000, 10000, 25000, 50000, 100000];
 const INACTIVE_DAYS = 7;
 
+function requireInternalSecret(req: Request): Response | null {
+  const expected = Deno.env.get("ALERTS_INTERNAL_SECRET");
+  if (!expected) {
+    return new Response(
+      JSON.stringify({ error: "Service not configured" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  const provided = req.headers.get("x-internal-secret");
+  if (!provided || provided !== expected) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  return null;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const secretResp = requireInternalSecret(req);
+  if (secretResp) return secretResp;
 
   try {
     const supabaseClient = createClient(
@@ -23,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const internalSecret = Deno.env.get("ALERTS_INTERNAL_SECRET") ?? "";
 
     const alerts: Array<{ type: string; data: any }> = [];
 
@@ -172,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${supabaseAnonKey}`,
+            "x-internal-secret": internalSecret,
           },
           body: JSON.stringify(alert),
         });
@@ -196,3 +217,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 serve(handler);
+

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,23 +24,57 @@ serve(async (req) => {
   }
 
   try {
-    const { message, userId, conversationHistory = [] } = await req.json();
-    
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { message, userId, conversationHistory = [] } = await req.json();
+
+    if (userId && userId !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (isRateLimited(`agent-support:${user.id}`, 20, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const effectiveUserId = user.id;
 
     // Fetch relevant knowledge base entries
     const { data: knowledgeBase } = await supabase
       .from("knowledge_base")
       .select("question, answer, category")
-      .eq("user_id", userId)
+      .eq("user_id", effectiveUserId)
       .eq("is_active", true)
       .limit(20);
 
@@ -52,7 +87,7 @@ serve(async (req) => {
     }
 
     console.log("Support Agent request:", { 
-      userId, 
+      userId: effectiveUserId,
       messagePreview: message?.substring(0, 50),
       kbEntries: knowledgeBase?.length || 0
     });
@@ -102,3 +137,4 @@ serve(async (req) => {
     });
   }
 });
+

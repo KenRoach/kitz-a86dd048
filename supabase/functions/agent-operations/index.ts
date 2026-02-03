@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,17 +28,51 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { action, userId, threshold = 5 } = await req.json();
-    
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (userId && userId !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (isRateLimited(`agent-operations:${user.id}`, 15, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const effectiveUserId = user.id;
 
     let operationsContext = "";
     let toolConfig: any = null;
@@ -47,7 +82,7 @@ serve(async (req) => {
       const { data: products } = await supabase
         .from("products")
         .select("id, title, price, is_active, category")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .eq("is_active", true);
 
       operationsContext = "\n\nPRODUCT INVENTORY:\n" + JSON.stringify(products, null, 2);
@@ -90,7 +125,7 @@ serve(async (req) => {
       const { data: orders } = await supabase
         .from("storefronts")
         .select("id, title, price, status, fulfillment_status, ordered_at, paid_at, buyer_name")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .in("status", ["active", "ordered"])
         .order("ordered_at", { ascending: true })
         .limit(30);
@@ -137,18 +172,18 @@ serve(async (req) => {
       const { data: products } = await supabase
         .from("products")
         .select("title, is_active")
-        .eq("user_id", userId);
+        .eq("user_id", effectiveUserId);
 
       const { data: orders } = await supabase
         .from("storefronts")
         .select("title, status, fulfillment_status")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       const { data: customers } = await supabase
         .from("customers")
         .select("name, lifecycle, last_interaction")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .limit(20);
 
       operationsContext = `\n\nBUSINESS STATE:\nProducts: ${JSON.stringify(products)}\nRecent Orders: ${JSON.stringify(orders)}\nCustomers: ${JSON.stringify(customers)}`;
@@ -191,7 +226,7 @@ serve(async (req) => {
       const { data: expiring } = await supabase
         .from("storefronts")
         .select("id, title, valid_until, status, buyer_name")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .eq("status", "active")
         .lt("valid_until", tomorrow)
         .order("valid_until", { ascending: true });
@@ -232,7 +267,7 @@ serve(async (req) => {
       };
     }
 
-    console.log("Operations Agent request:", { action, userId });
+    console.log("Operations Agent request:", { action, userId: effectiveUserId });
 
     const requestBody: any = {
       model: "google/gemini-2.5-flash",
@@ -288,3 +323,4 @@ serve(async (req) => {
     });
   }
 });
+

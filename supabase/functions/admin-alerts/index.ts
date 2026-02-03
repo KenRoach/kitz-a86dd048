@@ -17,10 +17,31 @@ interface AlertRequest {
 
 const ADMIN_EMAIL = "admin@kitz.app"; // Will be fetched from admin profiles
 
+function requireInternalSecret(req: Request): Response | null {
+  const expected = Deno.env.get("ALERTS_INTERNAL_SECRET");
+  if (!expected) {
+    return new Response(
+      JSON.stringify({ success: false, error: "Service not configured" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    );
+  }
+  const provided = req.headers.get("x-internal-secret");
+  if (!provided || provided !== expected) {
+    return new Response(
+      JSON.stringify({ success: false, error: "Unauthorized" }),
+      { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    );
+  }
+  return null;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const secretResp = requireInternalSecret(req);
+  if (secretResp) return secretResp;
 
   try {
     const supabaseClient = createClient(
@@ -213,3 +234,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 serve(handler);
+
