@@ -14,13 +14,15 @@ import { toast } from "sonner";
 import { 
   Bot, MessageSquare, Mail, Phone, Zap, Settings2, 
   Bell, CheckCircle2, XCircle, Clock, Sparkles, 
-  Plus, LayoutDashboard, AlertTriangle
+  Plus, LayoutDashboard, AlertTriangle, Cpu, BookOpen
 } from "lucide-react";
 import { ChannelConfigCard } from "@/components/agent/ChannelConfigCard";
 import { RuleBuilder, type Rule } from "@/components/agent/RuleBuilder";
 import { PendingActionsQueue, type PendingAction } from "@/components/agent/PendingActionsQueue";
 import { ConversationsPanel } from "@/components/agent/ConversationsPanel";
 import { AISetupWizard } from "@/components/agent/AISetupWizard";
+import { AgentTypeSelector } from "@/components/agent/AgentTypeSelector";
+import { KnowledgeBaseManager } from "@/components/agent/KnowledgeBaseManager";
 import type { Json } from "@/integrations/supabase/types";
 
 type Channel = "whatsapp" | "email" | "voice";
@@ -175,10 +177,18 @@ export default function AgentCommander() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-7 w-full">
             <TabsTrigger value="overview" className="gap-1.5 text-xs">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">{t.overview}</span>
+            </TabsTrigger>
+            <TabsTrigger value="agents" className="gap-1.5 text-xs">
+              <Cpu className="w-4 h-4" />
+              <span className="hidden sm:inline">{language === "es" ? "Agentes" : "Agents"}</span>
+            </TabsTrigger>
+            <TabsTrigger value="knowledge" className="gap-1.5 text-xs">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">{language === "es" ? "FAQ" : "FAQ"}</span>
             </TabsTrigger>
             <TabsTrigger value="channels" className="gap-1.5 text-xs">
               <Zap className="w-4 h-4" />
@@ -285,6 +295,16 @@ export default function AgentCommander() {
                 </Card>
               </div>
             )}
+          </TabsContent>
+
+          {/* Agents Tab */}
+          <TabsContent value="agents" className="mt-6">
+            {user && <AgentTypeSelector language={language} userId={user.id} />}
+          </TabsContent>
+
+          {/* Knowledge Base Tab */}
+          <TabsContent value="knowledge" className="mt-6">
+            <KnowledgeBaseManager language={language} />
           </TabsContent>
 
           {/* Channels Tab */}
