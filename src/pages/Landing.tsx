@@ -394,7 +394,7 @@ export default function Landing() {
               </span>
             </div>
             
-            <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+            <div className="flex items-center justify-center gap-2 sm:gap-4">
               <a 
                 href="mailto:hello@kitz.app" 
                 className="text-xs text-white/50 hover:text-white/80 transition-colors"
