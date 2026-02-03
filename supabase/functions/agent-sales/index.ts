@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,17 +29,51 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { action, userId, customerId, query } = await req.json();
-    
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (userId && userId !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (isRateLimited(`agent-sales:${user.id}`, 15, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const effectiveUserId = user.id;
 
     let customerContext = "";
     let toolConfig: any = null;
@@ -48,7 +83,7 @@ serve(async (req) => {
       const { data: customers } = await supabase
         .from("customers")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .order("last_interaction", { ascending: false })
         .limit(20);
 
@@ -95,7 +130,7 @@ serve(async (req) => {
       const { data: storefronts } = await supabase
         .from("storefronts")
         .select("title, price, status, ordered_at")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .eq("buyer_phone", customer?.phone)
         .order("ordered_at", { ascending: false })
         .limit(10);
@@ -134,7 +169,7 @@ serve(async (req) => {
       const { data: customers } = await supabase
         .from("customers")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .order("last_interaction", { ascending: true })
         .limit(10);
 
@@ -173,7 +208,7 @@ serve(async (req) => {
       };
     }
 
-    console.log("Sales Agent request:", { action, userId, customerId });
+    console.log("Sales Agent request:", { action, userId: effectiveUserId, customerId });
 
     const requestBody: any = {
       model: "google/gemini-2.5-flash",
@@ -229,3 +264,4 @@ serve(async (req) => {
     });
   }
 });
+
