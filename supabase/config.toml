@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.edit-marketing-image]
 verify_jwt = false
+
+[functions.agent-support]
+verify_jwt = false
+
+[functions.agent-sales]
+verify_jwt = false
+
+[functions.agent-operations]
+verify_jwt = false

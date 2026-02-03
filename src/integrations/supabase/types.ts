@@ -218,6 +218,7 @@ export type Database = {
         Row: {
           action_config: Json | null
           action_type: string
+          agent_type: string | null
           approval_required: boolean | null
           created_at: string
           description: string | null
@@ -233,6 +234,7 @@ export type Database = {
         Insert: {
           action_config?: Json | null
           action_type: string
+          agent_type?: string | null
           approval_required?: boolean | null
           created_at?: string
           description?: string | null
@@ -248,6 +250,7 @@ export type Database = {
         Update: {
           action_config?: Json | null
           action_type?: string
+          agent_type?: string | null
           approval_required?: boolean | null
           created_at?: string
           description?: string | null
@@ -792,6 +795,45 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          keywords: string[] | null
+          question: string
+          updated_at: string
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          question: string
+          updated_at?: string
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          question?: string
+          updated_at?: string
+          usage_count?: number | null
           user_id?: string
         }
         Relationships: []
