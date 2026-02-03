@@ -383,10 +383,9 @@ export default function Landing() {
       {/* Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/20 to-transparent backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-4 py-5">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <span className="font-medium text-white/90 text-sm">kitz</span>
-              <span className="text-white/40 hidden sm:inline">·</span>
               <span className="text-xs text-white/50">
                 {txt(language, 
                   "Simple management system for smart businesses",
@@ -395,7 +394,7 @@ export default function Landing() {
               </span>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
               <a 
                 href="mailto:hello@kitz.app" 
                 className="text-xs text-white/50 hover:text-white/80 transition-colors"
