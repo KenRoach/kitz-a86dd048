@@ -395,13 +395,6 @@ export default function Landing() {
             </div>
             
             <div className="flex items-center justify-center gap-2 sm:gap-4">
-              <a 
-                href="mailto:hello@kitz.app" 
-                className="text-xs text-white/50 hover:text-white/80 transition-colors"
-              >
-                {txt(language, "Contact", "Contacto", "Contato")}
-              </a>
-              <span className="text-white/30">·</span>
               <Link 
                 to="/auth" 
                 className="text-xs text-white/50 hover:text-white/80 transition-colors"
