@@ -10,8 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
   { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
-  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
+  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
   { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
   { icon: Lightbulb, labelKey: "suggestions" as const, path: "/suggestions" },
