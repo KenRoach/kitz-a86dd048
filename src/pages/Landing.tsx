@@ -394,16 +394,7 @@ export default function Landing() {
               </span>
             </div>
             
-            <div className="flex items-center justify-center gap-2 sm:gap-4">
-              <Link 
-                to="/auth" 
-                className="text-xs text-white/50 hover:text-white/80 transition-colors"
-              >
-                {txt(language, "Sign in", "Ingresar", "Entrar")}
-              </Link>
-              <span className="text-white/30">·</span>
-              <span className="text-xs text-white/40">© {new Date().getFullYear()}</span>
-            </div>
+            <span className="text-xs text-white/40">© {new Date().getFullYear()}</span>
           </div>
         </div>
       </footer>
