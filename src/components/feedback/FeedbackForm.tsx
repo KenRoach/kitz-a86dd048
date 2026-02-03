@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { Send, MessageSquare } from "lucide-react";
 
 interface FeedbackFormProps {
-  storefrontId?: string;
+  /** storefrontId is REQUIRED – feedback is only allowed for paid storefronts */
+  storefrontId: string;
   sellerId: string;
   onSuccess?: () => void;
   language?: "en" | "es";
@@ -33,7 +34,7 @@ export function FeedbackForm({ storefrontId, sellerId, onSuccess, language = "en
     setSubmitting(true);
     try {
       const { error } = await supabase.from("customer_feedback").insert({
-        storefront_id: storefrontId || null,
+        storefront_id: storefrontId,
         seller_id: sellerId,
         buyer_name: buyerName || null,
         rating,
