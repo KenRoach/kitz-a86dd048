@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Package, Users, Scissors, Megaphone, ShoppingBag, Settings } from "lucide-react";
+import { LayoutDashboard, Store, Package, Users, Scissors, Megaphone, ShoppingBag, Settings, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
-const consultantNavItems = [
+const defaultNavItems = [
   { icon: LayoutDashboard, labelKey: "home" as const, path: "/dashboard" },
   { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
-  { icon: Package, labelKey: "products" as const, path: "/products" },
+  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
   { icon: Settings, labelKey: "settings" as const, path: "/settings" },
 ];
 
@@ -24,12 +24,15 @@ export function MobileNav() {
   const { t, language } = useLanguage();
 
   const isBarbershop = location.pathname.startsWith("/barbershop");
-  const navItems = isBarbershop ? barbershopNavItems : consultantNavItems;
+  const navItems = isBarbershop ? barbershopNavItems : defaultNavItems;
 
   // Custom labels for nav items
   const getLabel = (labelKey: string) => {
     if (labelKey === "consultant") {
       return language === "es" ? "Mi Trabajo" : "My Work";
+    }
+    if (labelKey === "agent") {
+      return language === "es" ? "Agente" : "Agent";
     }
     if (labelKey === "panel") {
       return language === "es" ? "Inicio" : "Home";
