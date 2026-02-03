@@ -410,7 +410,7 @@ export default function Landing() {
                 {txt(language, "Sign in", "Ingresar", "Entrar")}
               </Link>
               <span className="text-white/30">·</span>
-              <span className="text-xs text-white/40">© 2025</span>
+              <span className="text-xs text-white/40">© {new Date().getFullYear()}</span>
             </div>
           </div>
         </div>
