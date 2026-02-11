@@ -1,0 +1,52 @@
+{
+  "name": "Kitz",
+  "description": "Simple storefront sales platform for small businesses in Panama. Helps owners create shareable storefronts, manage orders, track customers, and get paid faster.",
+  "url": "https://kitz.lovable.app",
+  "logo": "https://kitz.lovable.app/favicon.png",
+  "contact": {
+    "email": "hello@kitz.app"
+  },
+  "target_users": [
+    "Small business owners in Panama",
+    "Freelancers and service providers",
+    "Home bakers, crafters, and artisans",
+    "Anyone selling through WhatsApp or social media"
+  ],
+  "capabilities": {
+    "storefronts": {
+      "description": "Create shareable product pages with title, description, price, images, and multiple payment options. Customers can view, order, and pay via shared links.",
+      "features": ["Shareable links", "Product bundles", "Order tracking", "Payment proof upload"]
+    },
+    "payments": {
+      "description": "Accept payments through Panama's most popular methods.",
+      "methods": ["Yappy (mobile payments)", "Credit/Debit cards (Visa, Mastercard)", "Cash on delivery", "Pluxee (corporate vouchers)"]
+    },
+    "customer_management": {
+      "description": "CRM-lite for tracking customer lifecycle, order history, spending, and follow-ups.",
+      "features": ["Lifecycle tracking (new, active, loyal)", "Order history", "Contact management", "Follow-up reminders"]
+    },
+    "ai_agent": {
+      "description": "Omnichannel AI agent commander for WhatsApp, Email, and Voice. Supports three specialized roles: Support (FAQ/knowledge base), Sales (lead scoring, upsells), and Operations (inventory, tasks).",
+      "features": ["Knowledge base / FAQ management", "Automated customer support", "Rule-based automation", "Pending action approval queue", "Multi-channel conversations"]
+    },
+    "ai_tools": {
+      "description": "AI-powered business tools for growth.",
+      "features": ["Business advisor with personalized recommendations", "Marketing image generator", "Product description generator", "Instagram post ideas"]
+    },
+    "productivity": {
+      "description": "Built-in productivity suite for business owners.",
+      "features": ["Eisenhower Matrix (task prioritization)", "Habit tracker", "Pomodoro timer", "Weekly review system", "Content calendar", "SWOT analysis"]
+    },
+    "consultant_crm": {
+      "description": "Kanban-style contact pipeline for consultants and service providers.",
+      "features": ["Funnel stage tracking", "Bulk email", "Calendar invites", "Daily assistant"]
+    }
+  },
+  "tech_stack": {
+    "frontend": "React + TypeScript + Tailwind CSS + Vite",
+    "backend": "Supabase (database, auth, edge functions, storage)",
+    "features": ["Real-time order notifications", "Responsive mobile-first design", "PWA-ready", "Bilingual (English/Spanish)"]
+  },
+  "locales": ["en", "es"],
+  "region": "Panama"
+}
