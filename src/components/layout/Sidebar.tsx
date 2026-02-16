@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield, Bot } from "lucide-react";
+import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
@@ -9,12 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
-  { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
+  { icon: Users, labelKey: "crm" as const, path: "/crm" },
+  { icon: ShoppingCart, labelKey: "orders" as const, path: "/orders" },
+  { icon: BarChart3, labelKey: "insights" as const, path: "/insights" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
-  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
   { icon: Package, labelKey: "products" as const, path: "/products" },
-  { icon: History, labelKey: "orderHistory" as const, path: "/order-history" },
-  { icon: Lightbulb, labelKey: "suggestions" as const, path: "/suggestions" },
+  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
 ];
 
 export function Sidebar() {
@@ -52,13 +52,10 @@ export function Sidebar() {
 
   // Custom labels for nav items
   const getLabel = (labelKey: string) => {
-    if (labelKey === "consultant") {
-      return language === "es" ? "Mi Trabajo" : "My Work";
-    }
-    if (labelKey === "agent") {
-      return language === "es" ? "Agente IA" : "AI Agent";
-    }
-    return (t as any)[labelKey];
+    const labels: Record<string, string> = language === "es"
+      ? { dashboard: "Inicio", crm: "CRM", orders: "Órdenes", insights: "Métricas", storefronts: "Vitrinas", products: "Productos", agent: "Agente IA" }
+      : { dashboard: "Home", crm: "CRM", orders: "Orders", insights: "Insights", storefronts: "Storefronts", products: "Products", agent: "AI Agent" };
+    return labels[labelKey] || (t as any)[labelKey];
   };
 
   return (

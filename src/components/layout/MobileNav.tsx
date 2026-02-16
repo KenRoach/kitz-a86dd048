@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Package, Users, Scissors, Megaphone, ShoppingBag, Settings, Bot } from "lucide-react";
+import { LayoutDashboard, Store, Users, ShoppingCart, BarChart3, Settings, Scissors, Megaphone, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const defaultNavItems = [
   { icon: LayoutDashboard, labelKey: "home" as const, path: "/dashboard" },
-  { icon: Users, labelKey: "consultant" as const, path: "/consultant" },
-  { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
-  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
+  { icon: Users, labelKey: "crm" as const, path: "/crm" },
+  { icon: ShoppingCart, labelKey: "orders" as const, path: "/orders" },
+  { icon: BarChart3, labelKey: "insights" as const, path: "/insights" },
   { icon: Settings, labelKey: "settings" as const, path: "/settings" },
 ];
 
@@ -28,25 +28,10 @@ export function MobileNav() {
 
   // Custom labels for nav items
   const getLabel = (labelKey: string) => {
-    if (labelKey === "consultant") {
-      return language === "es" ? "Mi Trabajo" : "My Work";
-    }
-    if (labelKey === "agent") {
-      return language === "es" ? "Agente" : "Agent";
-    }
-    if (labelKey === "panel") {
-      return language === "es" ? "Inicio" : "Home";
-    }
-    if (labelKey === "services") {
-      return language === "es" ? "Servicios" : "Services";
-    }
-    if (labelKey === "marketing") {
-      return "Marketing";
-    }
-    if (labelKey === "contacts") {
-      return language === "es" ? "Clientes" : "Clients";
-    }
-    return (t as any)[labelKey] || labelKey;
+    const labels: Record<string, string> = language === "es"
+      ? { home: "Inicio", crm: "CRM", orders: "Órdenes", insights: "Métricas", settings: "Ajustes", panel: "Inicio", services: "Servicios", marketing: "Marketing", products: "Productos", contacts: "Clientes" }
+      : { home: "Home", crm: "CRM", orders: "Orders", insights: "Insights", settings: "Settings", panel: "Home", services: "Services", marketing: "Marketing", products: "Products", contacts: "Clients" };
+    return labels[labelKey] || (t as any)[labelKey] || labelKey;
   };
 
   // Check if nav item is active
