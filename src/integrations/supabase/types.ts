@@ -265,6 +265,66 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_actions: {
+        Row: {
+          action_type: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          related_contact_id: string | null
+          related_order_id: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          related_contact_id?: string | null
+          related_order_id?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          related_contact_id?: string | null
+          related_order_id?: string | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_actions_related_contact_id_fkey"
+            columns: ["related_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_actions_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       autopilot_actions: {
         Row: {
           action_type: string
@@ -535,6 +595,45 @@ export type Database = {
         }
         Relationships: []
       }
+      business_events: {
+        Row: {
+          actor_id: string | null
+          actor_type: string
+          channel: string
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type?: string
+          channel?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string
+          channel?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       consultant_contacts: {
         Row: {
           attendance_confirmed: boolean | null
@@ -601,6 +700,44 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_timeline: {
+        Row: {
+          contact_id: string
+          content: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          contact_id: string
+          content: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          contact_id?: string
+          content?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_timeline_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_calendar: {
         Row: {
           content_type: string | null
@@ -638,6 +775,57 @@ export type Database = {
           scheduled_time?: string | null
           status?: string | null
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      crm_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_interaction_at: string | null
+          lead_score: string
+          lifetime_value: number
+          name: string
+          notes: string | null
+          phone: string | null
+          source_channel: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_interaction_at?: string | null
+          lead_score?: string
+          lifetime_value?: number
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source_channel?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_interaction_at?: string | null
+          lead_score?: string
+          lifetime_value?: number
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source_channel?: string | null
+          status?: string
+          tags?: string[] | null
           updated_at?: string
           user_id?: string
         }
@@ -772,6 +960,60 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_ups: {
+        Row: {
+          channel: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          due_at: string
+          id: string
+          order_id: string | null
+          reason: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at: string
+          id?: string
+          order_id?: string | null
+          reason: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          order_id?: string | null
+          reason?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habits: {
         Row: {
           completed_dates: string[]
@@ -870,6 +1112,136 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          order_id: string
+          quantity: number
+          title: string
+          total: number | null
+          unit_cost: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          order_id: string
+          quantity?: number
+          title: string
+          total?: number | null
+          unit_cost?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          order_id?: string
+          quantity?: number
+          title?: string
+          total?: number | null
+          unit_cost?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          channel: string | null
+          contact_id: string | null
+          cost: number
+          created_at: string
+          delivered_at: string | null
+          delivery_provider: string | null
+          delivery_tracking: string | null
+          fulfillment_status: string
+          id: string
+          margin: number | null
+          notes: string | null
+          order_number: string | null
+          paid_at: string | null
+          payment_link: string | null
+          payment_method: string | null
+          payment_status: string
+          risk_flag: boolean
+          risk_reason: string | null
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string | null
+          contact_id?: string | null
+          cost?: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_provider?: string | null
+          delivery_tracking?: string | null
+          fulfillment_status?: string
+          id?: string
+          margin?: number | null
+          notes?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          risk_flag?: boolean
+          risk_reason?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string | null
+          contact_id?: string | null
+          cost?: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_provider?: string | null
+          delivery_tracking?: string | null
+          fulfillment_status?: string
+          id?: string
+          margin?: number | null
+          notes?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          risk_flag?: boolean
+          risk_reason?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {

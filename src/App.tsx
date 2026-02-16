@@ -15,6 +15,10 @@ import Auth from "./pages/Auth";
 
 // Lazy load protected routes for code splitting
 const Index = lazy(() => import("./pages/Index"));
+const BusinessHome = lazy(() => import("./pages/BusinessHome"));
+const CRM = lazy(() => import("./pages/CRM"));
+const OrdersPage = lazy(() => import("./pages/Orders"));
+const InsightsPage = lazy(() => import("./pages/Insights"));
 const Storefronts = lazy(() => import("./pages/Storefronts"));
 const Products = lazy(() => import("./pages/Products"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
@@ -104,7 +108,10 @@ function AppRoutes() {
         <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><BusinessHome /></ProtectedRoute>} />
+        <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+        <Route path="/insights" element={<ProtectedRoute><InsightsPage /></ProtectedRoute>} />
         <Route path="/consultant" element={<ProtectedRoute><ConsultantDashboard /></ProtectedRoute>} />
         <Route path="/barbershop" element={<ProtectedRoute><BarbershopDashboard /></ProtectedRoute>} />
         <Route path="/studio" element={<ProtectedRoute><StudioDashboard /></ProtectedRoute>} />
