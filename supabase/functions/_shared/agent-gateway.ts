@@ -100,6 +100,14 @@ export async function agentGateway(
         risk_score: injection.severity === "critical" ? 100 : injection.severity === "high" ? 75 : 50,
       });
 
+      // Breach containment: auto-kill agent on critical injection spike
+      if (injection.severity === "critical") {
+        await autoBreachContainment(supabase, userId, agentType, "injection_spike", {
+          detection_type: injection.type,
+          pattern: injection.pattern,
+        });
+      }
+
       return {
         allowed: false,
         response: new Response(
@@ -340,6 +348,43 @@ async function logAudit(
     });
   } catch (e) {
     console.error("Audit log write failed:", e);
+  }
+}
+
+
+/**
+ * Auto-trigger breach containment when anomaly detected.
+ */
+async function autoBreachContainment(
+  supabase: SupabaseClient,
+  userId: string,
+  agentType: string,
+  triggerType: string,
+  detail: Record<string, unknown>
+) {
+  try {
+    // Find agent
+    const { data: agent } = await supabase
+      .from("agent_identities")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("agent_type", agentType)
+      .eq("is_active", true)
+      .limit(1)
+      .single();
+
+    if (!agent) return;
+
+    await supabase.rpc("trigger_breach_containment", {
+      p_user_id: userId,
+      p_agent_id: agent.id,
+      p_trigger_type: triggerType,
+      p_trigger_detail: detail,
+    });
+
+    console.warn(`[BREACH] Containment triggered for agent ${agent.id}: ${triggerType}`);
+  } catch (e) {
+    console.error("Breach containment failed:", e);
   }
 }
 

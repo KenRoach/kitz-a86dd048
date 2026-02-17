@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.kitz-agent]
 verify_jwt = false
+
+[functions.agent-vault]
+verify_jwt = false
