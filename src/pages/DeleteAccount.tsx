@@ -81,8 +81,6 @@ export default function DeleteAccount() {
         supabase.from("autopilot_actions").delete().eq("user_id", user.id),
         supabase.from("autopilot_queue").delete().eq("user_id", user.id),
         supabase.from("content_calendar").delete().eq("user_id", user.id),
-        supabase.from("eisenhower_tasks").delete().eq("user_id", user.id),
-        supabase.from("habits").delete().eq("user_id", user.id),
         supabase.from("user_badges").delete().eq("user_id", user.id),
         supabase.from("user_commitments").delete().eq("user_id", user.id),
         supabase.from("user_goals").delete().eq("user_id", user.id),
