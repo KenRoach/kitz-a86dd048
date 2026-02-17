@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { AIBatteryIndicator } from "@/components/ai/AIBatteryIndicator";
 
 const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
@@ -61,6 +62,7 @@ export function Sidebar() {
         {profile?.business_type && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">{profile.business_type}</p>
         )}
+        <AIBatteryIndicator />
       </div>
 
       <nav className="flex-1 space-y-2">

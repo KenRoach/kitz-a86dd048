@@ -3,11 +3,14 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useBusinessOS } from "@/hooks/useBusinessOS";
+import { useAICredits } from "@/hooks/useAICredits";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
+import { AIGated } from "@/components/ai/AIGated";
+import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import {
   TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart,
   AlertTriangle, Zap, ArrowRight, Clock, CheckCircle2, Flame, Bot
@@ -19,6 +22,7 @@ export default function BusinessHome() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { loading: aiLoading, summary, actions, runMyBusiness } = useBusinessOS();
+  const { hasCredits, consume } = useAICredits();
   const [stats, setStats] = useState({
     todayRevenue: 0, activeOrders: 0, pendingFollowUps: 0,
     totalContacts: 0, hotLeads: 0, riskyOrders: 0,
@@ -91,16 +95,21 @@ export default function BusinessHome() {
               {language === "es" ? "Tu centro de operaciones" : "Your operating center"}
             </p>
           </div>
-          <Button
-            onClick={runMyBusiness}
-            disabled={aiLoading}
-            className="gap-2 bg-primary hover:bg-primary/90"
-          >
-            <Bot className="w-4 h-4" />
-            {aiLoading
-              ? (language === "es" ? "Analizando..." : "Analyzing...")
-              : (language === "es" ? "Ejecutar" : "Run My Business")}
-          </Button>
+          <AIGated>
+            <Button
+              onClick={async () => {
+                const ok = await consume();
+                if (ok) runMyBusiness();
+              }}
+              disabled={aiLoading}
+              className="gap-2 bg-primary hover:bg-primary/90"
+            >
+              <Bot className="w-4 h-4" />
+              {aiLoading
+                ? (language === "es" ? "Analizando..." : "Analyzing...")
+                : (language === "es" ? "Ejecutar" : "Run My Business")}
+            </Button>
+          </AIGated>
         </div>
 
         {/* Key Metrics */}
@@ -162,6 +171,9 @@ export default function BusinessHome() {
             </div>
           </Card>
         )}
+
+        {/* AI Empty Banner */}
+        {!hasCredits && <AIEmptyBanner />}
 
         {/* AI Actions */}
         {(actions.length > 0 || recentActions.length > 0) && (

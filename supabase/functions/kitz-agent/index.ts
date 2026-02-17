@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isRateLimited } from "../_shared/rate-limit.ts";
 import { trackUsage } from "../_shared/track.ts";
+import { requireAICredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,13 @@ serve(async (req) => {
     }
 
     const { action, payload } = await req.json();
+
+    // Backend credit enforcement for AI actions
+    if (action === "run_my_business" || action === "get_insights") {
+      const creditCheck = await requireAICredits(supabase, user.id);
+      if (!creditCheck.allowed) return insufficientCreditsResponse(corsHeaders);
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     // Tool definitions for structured output

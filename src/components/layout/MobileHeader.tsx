@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { AIBatteryIndicator } from "@/components/ai/AIBatteryIndicator";
 
 export function MobileHeader() {
   const { profile, user } = useAuth();
@@ -38,6 +39,7 @@ export function MobileHeader() {
           </p>
         </div>
         <div className="flex items-center gap-1">
+          <AIBatteryIndicator />
           <NotificationBell />
           {isAdmin && (
             <Link

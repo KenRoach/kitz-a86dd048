@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAICredits } from "@/hooks/useAICredits";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
@@ -23,6 +24,8 @@ import { ConversationsPanel } from "@/components/agent/ConversationsPanel";
 import { AISetupWizard } from "@/components/agent/AISetupWizard";
 import { AgentTypeSelector } from "@/components/agent/AgentTypeSelector";
 import { KnowledgeBaseManager } from "@/components/agent/KnowledgeBaseManager";
+import { AIGated } from "@/components/ai/AIGated";
+import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import type { Json } from "@/integrations/supabase/types";
 
 type Channel = "whatsapp" | "email" | "voice";
@@ -38,6 +41,7 @@ export default function AgentCommander() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const { hasCredits } = useAICredits();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAISetup, setShowAISetup] = useState(false);
 
@@ -144,13 +148,15 @@ export default function AgentCommander() {
               <p className="text-sm text-muted-foreground">{t.subtitle}</p>
             </div>
           </div>
-          <Button 
-            onClick={() => setShowAISetup(true)}
-            className="gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            {t.setupAI}
-          </Button>
+          <AIGated>
+            <Button 
+              onClick={() => setShowAISetup(true)}
+              className="gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              {t.setupAI}
+            </Button>
+          </AIGated>
         </div>
 
         {/* Stats Cards */}
@@ -215,6 +221,7 @@ export default function AgentCommander() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-6 space-y-6">
+            {!hasCredits && <AIEmptyBanner />}
             {enabledChannels === 0 ? (
               <Card className="border-dashed">
                 <CardContent className="py-12 text-center">
