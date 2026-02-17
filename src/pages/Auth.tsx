@@ -154,7 +154,7 @@ export default function Auth() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="flex items-center justify-between mb-8 animate-fade-in">
-            <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+            <h1 className="text-3xl font-semibold text-foreground">Kitz</h1>
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
@@ -194,7 +194,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between mb-8 animate-fade-in">
-          <h1 className="text-3xl font-semibold text-foreground">kitz.io</h1>
+          <h1 className="text-3xl font-semibold text-foreground">Kitz</h1>
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
