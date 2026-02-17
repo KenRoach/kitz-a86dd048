@@ -41,6 +41,69 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_audit_log: {
+        Row: {
+          action: string
+          agent_id: string | null
+          created_at: string
+          credits_cost: number | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          outcome: string
+          policy_decision: Json | null
+          risk_score: number | null
+          session_id: string | null
+          tool_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          agent_id?: string | null
+          created_at?: string
+          credits_cost?: number | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          outcome?: string
+          policy_decision?: Json | null
+          risk_score?: number | null
+          session_id?: string | null
+          tool_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          agent_id?: string | null
+          created_at?: string
+          credits_cost?: number | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          outcome?: string
+          policy_decision?: Json | null
+          risk_score?: number | null
+          session_id?: string | null
+          tool_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_audit_log_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_audit_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "agent_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_configs: {
         Row: {
           channel: string
@@ -106,6 +169,60 @@ export type Database = {
           last_message_at?: string | null
           metadata?: Json | null
           status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_identities: {
+        Row: {
+          agent_type: string
+          allowed_tables: string[]
+          allowed_tools: string[]
+          created_at: string
+          display_name: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_privilege: string
+          metadata: Json | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_type: string
+          allowed_tables?: string[]
+          allowed_tools?: string[]
+          created_at?: string
+          display_name: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_privilege?: string
+          metadata?: Json | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_type?: string
+          allowed_tables?: string[]
+          allowed_tools?: string[]
+          created_at?: string
+          display_name?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_privilege?: string
+          metadata?: Json | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          role?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -264,6 +381,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      agent_sessions: {
+        Row: {
+          action: string
+          agent_id: string
+          completed_at: string | null
+          credits_consumed: number
+          credits_reserved: number
+          error_message: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          scope: Json
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          agent_id: string
+          completed_at?: string | null
+          credits_consumed?: number
+          credits_reserved?: number
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          scope?: Json
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          agent_id?: string
+          completed_at?: string | null
+          credits_consumed?: number
+          credits_reserved?: number
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          scope?: Json
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_sessions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_actions: {
         Row: {
@@ -1740,6 +1913,63 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_registry: {
+        Row: {
+          allowed_agent_types: string[]
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          max_calls_per_day: number
+          max_calls_per_minute: number
+          required_privilege: string
+          required_role: string
+          requires_approval: boolean
+          risk_level: string
+          signature_hash: string | null
+          tool_id: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          allowed_agent_types?: string[]
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          max_calls_per_day?: number
+          max_calls_per_minute?: number
+          required_privilege?: string
+          required_role?: string
+          requires_approval?: boolean
+          risk_level?: string
+          signature_hash?: string | null
+          tool_id: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          allowed_agent_types?: string[]
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          max_calls_per_day?: number
+          max_calls_per_minute?: number
+          required_privilege?: string
+          required_role?: string
+          requires_approval?: boolean
+          risk_level?: string
+          signature_hash?: string | null
+          tool_id?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       usage_daily_stats: {
         Row: {
           agent_actions: number | null
@@ -2209,6 +2439,10 @@ export type Database = {
       recharge_ai_credits: {
         Args: { p_amount: number; p_user_id: string }
         Returns: number
+      }
+      validate_agent_identity: {
+        Args: { p_agent_type: string; p_tool_id?: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { 
   Bot, MessageSquare, Mail, Phone, Zap, Settings2, 
   Bell, CheckCircle2, XCircle, Clock, Sparkles, 
-  Plus, LayoutDashboard, AlertTriangle, Cpu, BookOpen
+  Plus, LayoutDashboard, AlertTriangle, Cpu, BookOpen, Shield
 } from "lucide-react";
 import { ChannelConfigCard } from "@/components/agent/ChannelConfigCard";
 import { RuleBuilder, type Rule } from "@/components/agent/RuleBuilder";
@@ -24,6 +24,7 @@ import { ConversationsPanel } from "@/components/agent/ConversationsPanel";
 import { AISetupWizard } from "@/components/agent/AISetupWizard";
 import { AgentTypeSelector } from "@/components/agent/AgentTypeSelector";
 import { KnowledgeBaseManager } from "@/components/agent/KnowledgeBaseManager";
+import { SecurityDashboard } from "@/components/agent/SecurityDashboard";
 import { AIGated } from "@/components/ai/AIGated";
 import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import type { Json } from "@/integrations/supabase/types";
@@ -183,7 +184,7 @@ export default function AgentCommander() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-8 w-full">
             <TabsTrigger value="overview" className="gap-1.5 text-xs">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">{t.overview}</span>
@@ -216,6 +217,10 @@ export default function AgentCommander() {
                   {pendingCount}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5 text-xs">
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">{language === "es" ? "Seguridad" : "Security"}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -348,6 +353,11 @@ export default function AgentCommander() {
           {/* Pending Actions Tab */}
           <TabsContent value="pending" className="mt-6">
             <PendingActionsQueue actions={pendingActions} language={language} />
+          </TabsContent>
+
+          {/* Security Tab */}
+          <TabsContent value="security" className="mt-6">
+            <SecurityDashboard />
           </TabsContent>
         </Tabs>
 
