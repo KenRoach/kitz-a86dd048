@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Store, Users, ShoppingCart, BarChart3,
-  Settings, Package, Bot, MessageSquare, Lightbulb
+  Settings, Package, Bot, Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import React from "react";
 
 interface MobileNavMenuProps {
   onClose: () => void;
@@ -25,56 +26,60 @@ const bottomItems = [
   { icon: Settings, labelEn: "Settings", labelEs: "Ajustes", path: "/settings" },
 ];
 
-export function MobileNavMenu({ onClose }: MobileNavMenuProps) {
-  const location = useLocation();
-  const { language } = useLanguage();
+export const MobileNavMenu = React.forwardRef<HTMLDivElement, MobileNavMenuProps>(
+  ({ onClose }, ref) => {
+    const location = useLocation();
+    const { language } = useLanguage();
 
-  const isActive = (path: string) => location.pathname === path;
-  const getLabel = (item: { labelEn: string; labelEs: string }) =>
-    language === "es" ? item.labelEs : item.labelEn;
+    const isActive = (path: string) => location.pathname === path;
+    const getLabel = (item: { labelEn: string; labelEs: string }) =>
+      language === "es" ? item.labelEs : item.labelEn;
 
-  return (
-    <div className="pt-2">
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        {menuItems.map((item) => {
-          const active = isActive(item.path);
-          return (
+    return (
+      <div ref={ref} className="pt-2">
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {menuItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200",
+                  active
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "bg-muted/50 text-foreground hover:bg-muted active:scale-[0.98]"
+                )}
+              >
+                <item.icon className="w-5 h-5 shrink-0" />
+                <span className="text-sm truncate">{getLabel(item)}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="border-t border-border/30 pt-3">
+          {bottomItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200",
-                active
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "bg-muted/50 text-foreground hover:bg-muted active:scale-[0.98]"
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                isActive(item.path)
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className="w-5 h-5 shrink-0" />
-              <span className="text-sm truncate">{getLabel(item)}</span>
+              <item.icon className="w-5 h-5" />
+              <span className="text-sm">{getLabel(item)}</span>
             </Link>
-          );
-        })}
+          ))}
+        </div>
       </div>
+    );
+  }
+);
 
-      <div className="border-t border-border/30 pt-3">
-        {bottomItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            onClick={onClose}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
-              isActive(item.path)
-                ? "text-primary font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <item.icon className="w-5 h-5" />
-            <span className="text-sm">{getLabel(item)}</span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+MobileNavMenu.displayName = "MobileNavMenu";
