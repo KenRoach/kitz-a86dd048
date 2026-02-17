@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isRateLimited } from "../_shared/rate-limit.ts";
+import { trackUsage } from "../_shared/track.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -268,6 +269,12 @@ ALWAYS:
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    trackUsage(supabase, user!.id, "ai", "business_advisor.chat", {
+      message_count: messages.length,
+      language,
+      is_consultant: isConsultant,
+    }, "ai_calls");
 
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },

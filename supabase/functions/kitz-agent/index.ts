@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isRateLimited } from "../_shared/rate-limit.ts";
+import { trackUsage } from "../_shared/track.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -164,6 +165,12 @@ Rules:
         await supabase.from("ai_actions").insert(inserts);
       }
 
+      trackUsage(supabase, user.id, "ai", "kitz_agent.run_my_business", {
+        actions_count: actions.length,
+        overdue_followups: overdueFollowUps.length,
+        unpaid_orders: unpaidOrders.length,
+      }, "ai_calls");
+
       return new Response(JSON.stringify({
         summary: {
           todayRevenue,
@@ -212,6 +219,8 @@ Rules:
         lifetime_value: totalSpent,
         last_interaction_at: new Date().toISOString()
       }).eq("id", contact_id);
+
+      trackUsage(supabase, user.id, "agent", "kitz_agent.score_lead", { score, orderCount }, "agent_actions");
 
       return new Response(JSON.stringify({ score, status, totalSpent, orderCount }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
