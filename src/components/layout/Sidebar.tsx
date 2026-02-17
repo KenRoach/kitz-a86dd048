@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, History, Settings, LogOut, Moon, Sun, Globe, Package, Lightbulb, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Store, Settings, LogOut, Moon, Sun, Globe, Package, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
