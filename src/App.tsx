@@ -69,7 +69,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
 function AuthRoute({ children }: { children: React.ReactNode }) {
