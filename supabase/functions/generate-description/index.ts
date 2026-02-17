@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +13,32 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (isRateLimited(`generate-description:${user.id}`, 15, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { title, category, keywords } = await req.json();
     
     if (!title) {
@@ -49,7 +77,7 @@ Return ONLY the description text, no additional commentary.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           { role: "system", content: "You are an expert copywriter who creates compelling product descriptions that drive sales while being honest and informative." },
           { role: "user", content: prompt }
@@ -59,16 +87,14 @@ Return ONLY the description text, no additional commentary.`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
