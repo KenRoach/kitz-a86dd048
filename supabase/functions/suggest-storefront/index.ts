@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isRateLimited } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +13,32 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (isRateLimited(`suggest-storefront:${user.id}`, 15, 60_000)) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { title, category, existingProducts } = await req.json();
     
     if (!title) {
@@ -25,7 +53,6 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Build context from existing products for pricing reference
     let productsContext = "";
     if (existingProducts && existingProducts.length > 0) {
       productsContext = `\n\nFor pricing reference, here are the seller's existing products:\n${
@@ -51,8 +78,6 @@ Respond in this exact JSON format:
 
 Only respond with the JSON, no additional text.`;
 
-    console.log("Generating storefront suggestions for:", title);
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -60,7 +85,7 @@ Only respond with the JSON, no additional text.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           { role: "system", content: "You are a helpful business assistant. Always respond with valid JSON only." },
           { role: "user", content: prompt }
@@ -70,16 +95,14 @@ Only respond with the JSON, no additional text.`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
@@ -89,11 +112,7 @@ Only respond with the JSON, no additional text.`;
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
     
-    console.log("AI response:", content);
-    
-    // Parse the JSON response
     try {
-      // Clean the response - remove markdown code blocks if present
       const cleanContent = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       const suggestions = JSON.parse(cleanContent);
       
@@ -107,13 +126,8 @@ Only respond with the JSON, no additional text.`;
       );
     } catch (parseError) {
       console.error("Failed to parse AI response:", parseError);
-      // Return a basic response if parsing fails
       return new Response(
-        JSON.stringify({
-          suggestedPriceMin: 0,
-          suggestedPriceMax: 0,
-          description: ""
-        }),
+        JSON.stringify({ suggestedPriceMin: 0, suggestedPriceMax: 0, description: "" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
