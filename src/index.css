@@ -255,6 +255,22 @@
 
   /* Calm empty state */
   .calm-state { @apply text-center py-12 px-6; }
+
+  /* Legacy compat — used across pages */
+  .card-hover { @apply transition-all duration-150; }
+  .card-hover:hover { box-shadow: var(--shadow-md); }
+
+  .hover-calm { @apply transition-colors duration-150; }
+  .hover-calm:hover { @apply bg-muted/50; }
+
+  .suggestion-pill {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer;
+  }
+  .suggestion-pill:hover { @apply bg-primary text-primary-foreground; }
+
+  .momentum-ring { @apply relative inline-flex items-center justify-center; }
+
+  .action-card { @apply bg-card rounded-2xl p-5 cursor-pointer neu-card; }
 }
 
 @layer utilities {

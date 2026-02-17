@@ -147,7 +147,7 @@ export function StorefrontCard({
 
   return (
     <>
-      <div className="bg-card rounded-xl md:rounded-2xl border border-border overflow-hidden card-hover animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
+      <div className="bg-card rounded-xl md:rounded-2xl border border-border overflow-hidden neu-card animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
         <div className="flex">
           <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative">
             <OptimizedImage
@@ -202,7 +202,7 @@ export function StorefrontCard({
             </div>
             <div className="flex items-center justify-between mt-1.5 sm:mt-2">
               <span className="text-base sm:text-lg font-bold text-foreground">{price}</span>
-              {status === "draft" && <button onClick={onSend} className="suggestion-pill text-[10px] sm:text-xs py-1 px-2 sm:py-1.5 sm:px-3"><Send className="w-3 h-3" /><span className="hidden sm:inline">{t.sendNow}</span><span className="sm:hidden">{t.send}</span></button>}
+              {status === "draft" && <button onClick={onSend} className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground rounded-full py-1 px-2 sm:py-1.5 sm:px-3 transition-colors"><Send className="w-3 h-3" /><span className="hidden sm:inline">{t.sendNow}</span><span className="sm:hidden">{t.send}</span></button>}
               {status === "sent" && !hasPaymentProof && link && (
                 <div className="flex gap-1">
                   <button onClick={handleWhatsAppShare} className="p-1.5 sm:p-2 rounded-lg bg-success/10 hover:bg-success/20 transition-colors"><MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" /></button>
