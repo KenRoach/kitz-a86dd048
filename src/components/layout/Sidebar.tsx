@@ -1,8 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Settings, LogOut, Moon, Sun, Globe, Package, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Store, Settings, LogOut, Package, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,8 +19,7 @@ const navItems = [
 export function Sidebar() {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const { language, setLanguage, t, getGreeting } = useLanguage();
+  const { language, t, getGreeting } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -40,14 +38,6 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(language === "en" ? "es" : "en");
   };
 
   // Custom labels for nav items
@@ -111,7 +101,7 @@ export function Sidebar() {
             )}
           >
             <Shield className="w-5 h-5" />
-            <span className="font-medium">{language === "es" ? "Control Center" : "Control Center"}</span>
+            <span className="font-medium">Control Center</span>
           </Link>
         )}
         
@@ -131,24 +121,6 @@ export function Sidebar() {
         
         {/* Separator */}
         <div className="h-px bg-foreground/10 mx-3 my-3" />
-
-        {/* Language toggle */}
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground w-full"
-        >
-          <Globe className="w-5 h-5" />
-          <span className="font-medium">{language === "en" ? "Español" : "English"}</span>
-        </button>
-
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground w-full"
-        >
-          {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          <span className="font-medium">{theme === "dark" ? t.lightMode : t.darkMode}</span>
-        </button>
 
         {/* Sign out */}
         <button

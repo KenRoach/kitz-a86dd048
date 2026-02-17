@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Menu, Mic } from "lucide-react";
+import { LayoutDashboard, Store, Menu, Mic, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileNavMenu } from "./MobileNavMenu";
+import { openCommandPalette } from "./CommandPalette";
 
 export function MobileNav() {
   const location = useLocation();
@@ -59,20 +60,16 @@ export function MobileNav() {
           </SheetContent>
         </Sheet>
 
-        {/* Ask Kitz input bar */}
-        <Link
-          to="/dashboard"
-          className="flex-1 flex items-center gap-2 h-10 px-4 rounded-full bg-muted/60 border border-border/30 text-muted-foreground text-sm transition-all hover:bg-muted"
-        >
-          <span className="truncate">{language === "es" ? "Pregunta a Kitz" : "Ask Kitz"}</span>
-        </Link>
-
-        {/* Mic button */}
+        {/* Ask Kitz - opens command palette */}
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-md active:scale-95 transition-all duration-200"
-          aria-label="Voice"
+          onClick={openCommandPalette}
+          className="flex-1 flex items-center gap-2 h-10 px-4 rounded-full bg-muted/60 border border-border/30 text-muted-foreground text-sm transition-all hover:bg-muted active:scale-[0.98]"
         >
-          <Mic className="w-4 h-4" />
+          <Search className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{language === "es" ? "Buscar o navegar..." : "Search or navigate..."}</span>
+          <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-auto">
+            ⌘K
+          </kbd>
         </button>
       </div>
     </nav>

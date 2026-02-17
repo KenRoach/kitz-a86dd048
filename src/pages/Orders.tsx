@@ -49,6 +49,8 @@ export default function Orders() {
   const [tab, setTab] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ title: "", total: "", cost: "" });
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
@@ -56,10 +58,15 @@ export default function Orders() {
       .from("orders")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setOrders((data as Order[]) || []);
+      .order("created_at", { ascending: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (page === 0) {
+      setOrders((data as Order[]) || []);
+    } else {
+      setOrders(prev => [...prev, ...((data as Order[]) || [])]);
+    }
     setLoading(false);
-  }, [user]);
+  }, [user, page]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -166,11 +173,26 @@ export default function Orders() {
 
         {/* Order List */}
         {filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">
-              {language === "es" ? "No hay órdenes" : "No orders yet"}
+          <div className="text-center py-16">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Package className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="text-base font-medium text-foreground mb-1">
+              {orders.length === 0
+                ? (language === "es" ? "Sin órdenes aún" : "No orders yet")
+                : (language === "es" ? "Sin resultados" : "No matching orders")}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
+              {orders.length === 0
+                ? (language === "es" ? "Crea tu primera orden o recibe una desde una vitrina" : "Create your first order or receive one from a storefront")
+                : (language === "es" ? "Prueba con otro filtro" : "Try a different tab or search")}
             </p>
+            {orders.length === 0 && (
+              <Button onClick={() => setShowCreate(true)} className="gap-1.5">
+                <Plus className="w-4 h-4" />
+                {language === "es" ? "Nueva orden" : "New Order"}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
@@ -218,6 +240,11 @@ export default function Orders() {
                 </div>
               </Card>
             ))}
+            {filtered.length >= PAGE_SIZE && (
+              <Button variant="outline" className="w-full" onClick={() => setPage(p => p + 1)}>
+                {language === "es" ? "Cargar más" : "Load more"}
+              </Button>
+            )}
           </div>
         )}
       </div>
