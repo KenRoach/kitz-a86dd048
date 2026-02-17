@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encrypt, decrypt } from "../_shared/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,7 @@ const corsHeaders = {
 
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") || "";
 const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
+const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY") || "";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -35,7 +37,6 @@ serve(async (req) => {
     const { action, code, redirectUri } = await req.json();
 
     if (action === "get-auth-url") {
-      // Generate OAuth URL for user to authorize
       const scopes = [
         "https://www.googleapis.com/auth/calendar.events",
         "https://www.googleapis.com/auth/calendar"
@@ -57,7 +58,6 @@ serve(async (req) => {
     }
 
     if (action === "exchange-code") {
-      // Exchange authorization code for tokens
       const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -78,13 +78,16 @@ serve(async (req) => {
 
       const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
-      // Upsert tokens for user
+      // Encrypt tokens before storing
+      const encryptedAccess = await encrypt(tokenData.access_token, TOKEN_ENCRYPTION_KEY);
+      const encryptedRefresh = await encrypt(tokenData.refresh_token, TOKEN_ENCRYPTION_KEY);
+
       const { error: upsertError } = await supabase
         .from("user_google_tokens")
         .upsert({
           user_id: user.id,
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
+          access_token: encryptedAccess,
+          refresh_token: encryptedRefresh,
           expires_at: expiresAt.toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });

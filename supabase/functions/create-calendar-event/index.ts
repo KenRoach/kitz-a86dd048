@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encrypt, decrypt } from "../_shared/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,7 @@ const corsHeaders = {
 
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") || "";
 const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
+const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY") || "";
 
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number }> {
   const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -64,18 +66,21 @@ serve(async (req) => {
       throw new Error("Google Calendar not connected. Please connect your Google account first.");
     }
 
-    let accessToken = tokenData.access_token;
+    // Decrypt tokens
+    let accessToken = await decrypt(tokenData.access_token, TOKEN_ENCRYPTION_KEY);
+    const refreshToken = await decrypt(tokenData.refresh_token, TOKEN_ENCRYPTION_KEY);
 
     // Check if token is expired and refresh if needed
     if (new Date(tokenData.expires_at) <= new Date()) {
-      const refreshedTokens = await refreshAccessToken(tokenData.refresh_token);
+      const refreshedTokens = await refreshAccessToken(refreshToken);
       accessToken = refreshedTokens.access_token;
       
-      // Update tokens in database
+      // Encrypt and update tokens in database
+      const encryptedAccess = await encrypt(accessToken, TOKEN_ENCRYPTION_KEY);
       await supabase
         .from("user_google_tokens")
         .update({
-          access_token: accessToken,
+          access_token: encryptedAccess,
           expires_at: new Date(Date.now() + refreshedTokens.expires_in * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -84,7 +89,7 @@ serve(async (req) => {
 
     // Create calendar event
     const startDateTime = new Date(`${eventDate}T${eventTime || "10:00"}:00`);
-    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
 
     const event = {
       summary: eventTitle || `Reunión con ${contactName}`,
@@ -125,7 +130,6 @@ serve(async (req) => {
       throw new Error(calendarData.error.message || "Failed to create calendar event");
     }
 
-    // Update contact with calendar reminder sent flag
     if (contactId) {
       await supabase
         .from("consultant_contacts")
