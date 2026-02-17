@@ -179,15 +179,18 @@ export type Database = {
           allowed_tables: string[]
           allowed_tools: string[]
           created_at: string
+          daily_action_cap: number
           display_name: string
           expires_at: string | null
           id: string
           is_active: boolean
+          kill_switch: boolean
           max_privilege: string
           metadata: Json | null
           revoked_at: string | null
           revoked_reason: string | null
           role: string
+          spend_limit_daily: number
           updated_at: string
           user_id: string
         }
@@ -196,15 +199,18 @@ export type Database = {
           allowed_tables?: string[]
           allowed_tools?: string[]
           created_at?: string
+          daily_action_cap?: number
           display_name: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          kill_switch?: boolean
           max_privilege?: string
           metadata?: Json | null
           revoked_at?: string | null
           revoked_reason?: string | null
           role?: string
+          spend_limit_daily?: number
           updated_at?: string
           user_id: string
         }
@@ -213,19 +219,133 @@ export type Database = {
           allowed_tables?: string[]
           allowed_tools?: string[]
           created_at?: string
+          daily_action_cap?: number
           display_name?: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          kill_switch?: boolean
           max_privilege?: string
           metadata?: Json | null
           revoked_at?: string | null
           revoked_reason?: string | null
           role?: string
+          spend_limit_daily?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      agent_injection_log: {
+        Row: {
+          agent_id: string | null
+          blocked: boolean
+          created_at: string
+          detection_type: string
+          id: string
+          input_text: string
+          pattern_matched: string | null
+          session_id: string | null
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          blocked?: boolean
+          created_at?: string
+          detection_type: string
+          id?: string
+          input_text: string
+          pattern_matched?: string | null
+          session_id?: string | null
+          severity?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          blocked?: boolean
+          created_at?: string
+          detection_type?: string
+          id?: string
+          input_text?: string
+          pattern_matched?: string | null
+          session_id?: string | null
+          severity?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_injection_log_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_injection_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "agent_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_jit_tokens: {
+        Row: {
+          agent_id: string
+          consumed_at: string | null
+          expires_at: string
+          id: string
+          issued_at: string
+          revoked_reason: string | null
+          scope: Json
+          session_id: string
+          status: string
+          tool_id: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          consumed_at?: string | null
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          revoked_reason?: string | null
+          scope?: Json
+          session_id: string
+          status?: string
+          tool_id: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          consumed_at?: string | null
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          revoked_reason?: string | null
+          scope?: Json
+          session_id?: string
+          status?: string
+          tool_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_jit_tokens_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_jit_tokens_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "agent_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_messages: {
         Row: {
@@ -431,6 +551,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agent_sessions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_throttles: {
+        Row: {
+          agent_id: string
+          call_count: number
+          created_at: string
+          daily_count: number
+          daily_date: string
+          id: string
+          tool_id: string
+          updated_at: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          agent_id: string
+          call_count?: number
+          created_at?: string
+          daily_count?: number
+          daily_date?: string
+          id?: string
+          tool_id: string
+          updated_at?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          agent_id?: string
+          call_count?: number
+          created_at?: string
+          daily_count?: number
+          daily_date?: string
+          id?: string
+          tool_id?: string
+          updated_at?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_throttles_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agent_identities"
@@ -2417,6 +2584,17 @@ export type Database = {
     }
     Functions: {
       calculate_level: { Args: { xp: number }; Returns: number }
+      check_and_increment_throttle: {
+        Args: {
+          p_agent_id: string
+          p_daily_cap?: number
+          p_max_per_day?: number
+          p_max_per_minute?: number
+          p_tool_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       consume_ai_credit: {
         Args: { p_amount?: number; p_user_id: string }
         Returns: number

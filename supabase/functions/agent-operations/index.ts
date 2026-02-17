@@ -200,8 +200,8 @@ serve(async (req) => {
       });
     }
 
-    // === AGENT GATEWAY: Identity + Credits + Session + Audit ===
-    const gateway = await agentGateway(supabase, user.id, "operations", action);
+    // === AGENT GATEWAY: Identity + Credits + Session + JIT + Injection Scan ===
+    const gateway = await agentGateway(supabase, user.id, "operations", action, {});
     if (!gateway.allowed) return gateway.response!;
     const ctx = gateway.context!;
 
