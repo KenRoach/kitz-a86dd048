@@ -2,22 +2,35 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useBusinessOS } from "@/hooks/useBusinessOS";
+import { useAICredits } from "@/hooks/useAICredits";
 import { Card } from "@/components/ui/card";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
+import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Target } from "lucide-react";
 
 export default function Insights() {
   const { language } = useLanguage();
   const { getInsights } = useBusinessOS();
+  const { hasCredits, consume } = useAICredits();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getInsights().then(d => { setData(d); setLoading(false); });
-  }, [getInsights]);
+    const load = async () => {
+      if (hasCredits) {
+        const ok = await consume();
+        if (ok) {
+          const d = await getInsights();
+          setData(d);
+        }
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
 
   if (loading) return <AppLayout><DashboardSkeleton /></AppLayout>;
-  if (!data) return <AppLayout><p className="text-center text-muted-foreground py-12">No data available</p></AppLayout>;
+  if (!data) return <AppLayout><div className="space-y-4"><AIEmptyBanner /><p className="text-center text-muted-foreground py-12">No data available</p></div></AppLayout>;
 
   const dailyEntries = Object.entries(data.dailyRevenue || {}) as [string, number][];
   const maxRevenue = Math.max(...dailyEntries.map(([, v]) => v), 1);

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useAICredits } from "./useAICredits";
 import { toast } from "sonner";
 
 export interface BusinessSummary {
@@ -23,6 +24,7 @@ export interface AIAction {
 
 export function useBusinessOS() {
   const { user } = useAuth();
+  const { refresh: refreshCredits } = useAICredits();
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<BusinessSummary | null>(null);
   const [actions, setActions] = useState<AIAction[]>([]);
@@ -34,7 +36,15 @@ export function useBusinessOS() {
       const { data, error } = await supabase.functions.invoke("kitz-agent", {
         body: { action: "run_my_business", payload: {} }
       });
-      if (error) throw error;
+      if (error) {
+        // Handle 402 credit errors from backend
+        if (error.message?.includes("402") || error.message?.includes("INSUFFICIENT_CREDITS")) {
+          toast.error("No AI credits. Recharge to continue.");
+          refreshCredits();
+          return;
+        }
+        throw error;
+      }
       setSummary(data.summary);
       setActions(data.actions || []);
       toast.success("Business scan complete!");

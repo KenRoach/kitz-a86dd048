@@ -15,7 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useElevenLabs } from "@/hooks/useElevenLabs";
+import { useAICredits } from "@/hooks/useAICredits";
 import { AiFloatingButton } from "./AiFloatingButton";
+import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 
 type Message = {
   role: "user" | "assistant";
@@ -40,6 +42,7 @@ const SUGGESTIONS_ES = [
 
 export function BusinessAdvisor() {
   const { language, t } = useLanguage();
+  const { hasCredits, consume } = useAICredits();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -89,6 +92,14 @@ export function BusinessAdvisor() {
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
+    // Gate AI usage
+    if (!hasCredits) {
+      toast.error(language === "es" ? "Sin créditos IA. Recarga para continuar." : "No AI credits. Recharge to continue.");
+      return;
+    }
+    const ok = await consume();
+    if (!ok) return;
+
     const userMessage: Message = { role: "user", content: messageText.trim() };
     setMessages(prev => [...prev, userMessage]);
     setInput("");
@@ -121,6 +132,11 @@ export function BusinessAdvisor() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        if (response.status === 402 || errorData.code === "INSUFFICIENT_CREDITS") {
+          toast.error(language === "es" ? "Sin créditos IA. Recarga para continuar." : "No AI credits. Recharge to continue.");
+          setIsLoading(false);
+          return;
+        }
         throw new Error(errorData.error || `Error: ${response.status}`);
       }
 
@@ -225,6 +241,11 @@ export function BusinessAdvisor() {
         </SheetHeader>
 
         <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          {!hasCredits && (
+            <div className="mb-4">
+              <AIEmptyBanner />
+            </div>
+          )}
           {messages.length === 0 ? (
             <div className="space-y-4">
               <div className="text-center py-6">

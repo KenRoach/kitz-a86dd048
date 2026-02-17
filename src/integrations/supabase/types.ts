@@ -325,6 +325,36 @@ export type Database = {
           },
         ]
       }
+      ai_credits: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          last_recharged_at: string | null
+          lifetime_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_recharged_at?: string | null
+          lifetime_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_recharged_at?: string | null
+          lifetime_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       autopilot_actions: {
         Row: {
           action_type: string
@@ -2157,6 +2187,10 @@ export type Database = {
     }
     Functions: {
       calculate_level: { Args: { xp: number }; Returns: number }
+      consume_ai_credit: {
+        Args: { p_amount?: number; p_user_id: string }
+        Returns: number
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -2171,6 +2205,10 @@ export type Database = {
       increment_daily_stat: {
         Args: { p_increment?: number; p_stat_name: string; p_user_id: string }
         Returns: undefined
+      }
+      recharge_ai_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: number
       }
     }
     Enums: {

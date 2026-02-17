@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
+import { AICreditsProvider } from "@/hooks/useAICredits";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Eager load critical routes
@@ -144,7 +145,9 @@ const App = () => (
             <Sonner position="top-center" />
             <BrowserRouter>
               <AuthProvider>
-                <AppRoutes />
+                <AICreditsProvider>
+                  <AppRoutes />
+                </AICreditsProvider>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
