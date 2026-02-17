@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,7 +13,6 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 
 // Lazy load protected routes for code splitting
-const Index = lazy(() => import("./pages/Index"));
 const BusinessHome = lazy(() => import("./pages/BusinessHome"));
 const CRM = lazy(() => import("./pages/CRM"));
 const OrdersPage = lazy(() => import("./pages/Orders"));
@@ -143,7 +141,6 @@ const App = () => (
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <LanguageProvider>
           <TooltipProvider delayDuration={300}>
-            <Toaster />
             <Sonner position="top-center" />
             <BrowserRouter>
               <AuthProvider>

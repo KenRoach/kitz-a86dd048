@@ -44,17 +44,24 @@ export default function CRM() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [form, setForm] = useState({ name: "", phone: "", email: "", source_channel: "manual", lead_score: "WARM", notes: "" });
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
 
   const fetchContacts = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("crm_contacts")
       .select("*")
       .eq("user_id", user.id)
-      .order("last_interaction_at", { ascending: false, nullsFirst: false });
-    setContacts((data as Contact[]) || []);
+      .order("last_interaction_at", { ascending: false, nullsFirst: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (page === 0) {
+      setContacts((data as Contact[]) || []);
+    } else {
+      setContacts(prev => [...prev, ...((data as Contact[]) || [])]);
+    }
     setLoading(false);
-  }, [user]);
+  }, [user, page]);
 
   useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
@@ -291,11 +298,26 @@ export default function CRM() {
 
         {/* Contact List */}
         {filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">
-              {language === "es" ? "No hay contactos aún" : "No contacts yet"}
+          <div className="text-center py-16">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Users className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="text-base font-medium text-foreground mb-1">
+              {contacts.length === 0
+                ? (language === "es" ? "Tu CRM está vacío" : "Your CRM is empty")
+                : (language === "es" ? "Sin resultados" : "No results")}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
+              {contacts.length === 0
+                ? (language === "es" ? "Agrega tu primer contacto para empezar a hacer seguimiento" : "Add your first contact to start tracking leads")
+                : (language === "es" ? "Intenta con otro filtro" : "Try a different filter")}
             </p>
+            {contacts.length === 0 && (
+              <Button onClick={() => setShowAdd(true)} className="gap-1.5">
+                <Plus className="w-4 h-4" />
+                {language === "es" ? "Agregar contacto" : "Add Contact"}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
@@ -321,6 +343,11 @@ export default function CRM() {
                 </div>
               </Card>
             ))}
+            {filtered.length >= PAGE_SIZE && (
+              <Button variant="outline" className="w-full" onClick={() => setPage(p => p + 1)}>
+                {language === "es" ? "Cargar más" : "Load more"}
+              </Button>
+            )}
           </div>
         )}
       </div>
