@@ -11,14 +11,17 @@ interface MobileNavMenuProps {
   onClose: () => void;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, labelEn: "Dashboard", labelEs: "Inicio", path: "/dashboard" },
+const primaryItems = [
+  { icon: LayoutDashboard, labelEn: "Home", labelEs: "Inicio", path: "/dashboard" },
   { icon: Users, labelEn: "CRM", labelEs: "CRM", path: "/crm" },
-  { icon: Store, labelEn: "Storefronts", labelEs: "Tiendas", path: "/storefronts" },
-  { icon: Bot, labelEn: "AI Agent", labelEs: "Agente IA", path: "/agent" },
-  { icon: Package, labelEn: "Products", labelEs: "Productos", path: "/products" },
   { icon: ShoppingCart, labelEn: "Orders", labelEs: "Órdenes", path: "/orders" },
+  { icon: Store, labelEn: "Storefronts", labelEs: "Tiendas", path: "/storefronts" },
   { icon: BarChart3, labelEn: "Insights", labelEs: "Métricas", path: "/insights" },
+];
+
+const secondaryItems = [
+  { icon: Package, labelEn: "Products", labelEs: "Productos", path: "/products" },
+  { icon: Bot, labelEn: "AI Agent", labelEs: "Agente IA", path: "/agent" },
   { icon: Lightbulb, labelEn: "Suggestions", labelEs: "Sugerencias", path: "/suggestions" },
 ];
 
@@ -37,8 +40,8 @@ export const MobileNavMenu = React.forwardRef<HTMLDivElement, MobileNavMenuProps
 
     return (
       <div ref={ref} className="pt-2">
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {menuItems.map((item) => {
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {primaryItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link
@@ -57,6 +60,28 @@ export const MobileNavMenu = React.forwardRef<HTMLDivElement, MobileNavMenuProps
               </Link>
             );
           })}
+        </div>
+
+        <div className="border-t border-border/30 pt-3 mb-3 space-y-0.5">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground px-4 pb-1 font-medium">
+            {language === "es" ? "Más" : "More"}
+          </p>
+          {secondaryItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className={cn(
+                "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all",
+                isActive(item.path)
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <item.icon className="w-4 h-4" />
+              <span className="text-sm">{getLabel(item)}</span>
+            </Link>
+          ))}
         </div>
 
         <div className="border-t border-border/30 pt-3">

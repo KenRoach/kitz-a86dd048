@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Settings, LogOut, Package, Users, Shield, Bot, ShoppingCart, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Store, Settings, LogOut, Users, Shield, ShoppingCart, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -11,10 +11,8 @@ const navItems = [
   { icon: LayoutDashboard, labelKey: "dashboard" as const, path: "/dashboard" },
   { icon: Users, labelKey: "crm" as const, path: "/crm" },
   { icon: ShoppingCart, labelKey: "orders" as const, path: "/orders" },
-  { icon: BarChart3, labelKey: "insights" as const, path: "/insights" },
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
-  { icon: Package, labelKey: "products" as const, path: "/products" },
-  { icon: Bot, labelKey: "agent" as const, path: "/agent" },
+  { icon: BarChart3, labelKey: "insights" as const, path: "/insights" },
 ];
 
 export function Sidebar() {
@@ -44,8 +42,8 @@ export function Sidebar() {
   // Custom labels for nav items
   const getLabel = (labelKey: string) => {
     const labels: Record<string, string> = language === "es"
-      ? { dashboard: "Inicio", crm: "CRM", orders: "Órdenes", insights: "Métricas", storefronts: "Vitrinas", products: "Productos", agent: "Agente IA" }
-      : { dashboard: "Home", crm: "CRM", orders: "Orders", insights: "Insights", storefronts: "Storefronts", products: "Products", agent: "AI Agent" };
+      ? { dashboard: "Inicio", crm: "CRM", orders: "Órdenes", insights: "Métricas", storefronts: "Vitrinas" }
+      : { dashboard: "Home", crm: "CRM", orders: "Orders", insights: "Insights", storefronts: "Storefronts" };
     return labels[labelKey] || (t as any)[labelKey];
   };
 
