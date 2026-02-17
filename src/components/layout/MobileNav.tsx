@@ -1,96 +1,79 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Users, ShoppingCart, BarChart3, Settings, Scissors, Megaphone, ShoppingBag } from "lucide-react";
+import { LayoutDashboard, Store, Menu, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
-
-const defaultNavItems = [
-  { icon: LayoutDashboard, labelKey: "home" as const, path: "/dashboard" },
-  { icon: Users, labelKey: "crm" as const, path: "/crm" },
-  { icon: ShoppingCart, labelKey: "orders" as const, path: "/orders" },
-  { icon: BarChart3, labelKey: "insights" as const, path: "/insights" },
-  { icon: Settings, labelKey: "settings" as const, path: "/settings" },
-];
-
-const barbershopNavItems = [
-  { icon: LayoutDashboard, labelKey: "panel" as const, path: "/barbershop" },
-  { icon: Scissors, labelKey: "services" as const, path: "/barbershop?tab=services" },
-  { icon: Megaphone, labelKey: "marketing" as const, path: "/barbershop?tab=marketing" },
-  { icon: ShoppingBag, labelKey: "products" as const, path: "/barbershop?tab=products" },
-  { icon: Users, labelKey: "contacts" as const, path: "/barbershop?tab=contacts" },
-];
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { MobileNavMenu } from "./MobileNavMenu";
 
 export function MobileNav() {
   const location = useLocation();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const isBarbershop = location.pathname.startsWith("/barbershop");
-  const navItems = isBarbershop ? barbershopNavItems : defaultNavItems;
+  const isActive = (path: string) => location.pathname === path;
 
-  // Custom labels for nav items
-  const getLabel = (labelKey: string) => {
-    const labels: Record<string, string> = language === "es"
-      ? { home: "Inicio", crm: "CRM", orders: "Órdenes", insights: "Métricas", settings: "Ajustes", panel: "Inicio", services: "Servicios", marketing: "Marketing", products: "Productos", contacts: "Clientes" }
-      : { home: "Home", crm: "CRM", orders: "Orders", insights: "Insights", settings: "Settings", panel: "Home", services: "Services", marketing: "Marketing", products: "Products", contacts: "Clients" };
-    return labels[labelKey] || (t as any)[labelKey] || labelKey;
-  };
-
-  // Check if nav item is active
-  const isItemActive = (item: typeof navItems[0]) => {
-    if (isBarbershop) {
-      const searchParams = new URLSearchParams(location.search);
-      const currentTab = searchParams.get("tab");
-      
-      if (item.path === "/barbershop" && !currentTab) return true;
-      if (item.path.includes("?tab=")) {
-        const itemTab = new URLSearchParams(item.path.split("?")[1]).get("tab");
-        return currentTab === itemTab;
-      }
-      return false;
-    }
-    return location.pathname === item.path;
-  };
-
-  // Theme-aware colors
-  const activeColor = isBarbershop ? "text-barbershop-cta" : "text-primary";
-  const activeBg = isBarbershop ? "bg-barbershop-cta/10" : "bg-primary/10";
-  const activeIconBg = isBarbershop ? "bg-barbershop-cta/15" : "bg-primary/15";
+  const iconTabs = [
+    { icon: LayoutDashboard, path: "/dashboard", label: language === "es" ? "Inicio" : "Home" },
+    { icon: Store, path: "/storefronts", label: language === "es" ? "Tiendas" : "Stores" },
+  ];
 
   return (
-    <nav className="shrink-0 bg-background/95 backdrop-blur-lg border-t border-border/30 md:hidden safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-      <div className="flex items-center justify-around py-2 px-1">
-        {navItems.map((item) => {
-          const isActive = isItemActive(item);
+    <nav className="shrink-0 bg-background/95 backdrop-blur-xl border-t border-border/20 md:hidden safe-area-bottom">
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        {/* Icon tabs */}
+        {iconTabs.map((tab) => {
+          const active = isActive(tab.path);
           return (
             <Link
-              key={item.path}
-              to={item.path}
+              key={tab.path}
+              to={tab.path}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-2xl transition-all duration-200 flex-1 min-w-0",
-                isActive
-                  ? `${activeColor} ${activeBg}`
-                  : "text-muted-foreground active:text-foreground active:scale-95 active:bg-muted/50"
+                "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+                active
+                  ? "text-primary bg-primary/10"
+                  : "text-muted-foreground hover:text-foreground active:scale-95"
               )}
+              aria-label={tab.label}
             >
-              <div className={cn(
-                "p-1.5 rounded-xl transition-all duration-200",
-                isActive && activeIconBg
-              )}>
-                <item.icon 
-                  className={cn(
-                    "w-5 h-5 transition-all duration-200",
-                    isActive && "stroke-[2.5px]"
-                  )} 
-                />
-              </div>
-              <span className={cn(
-                "text-[10px] transition-all leading-tight truncate max-w-full",
-                isActive ? "font-semibold" : "font-medium"
-              )}>
-                {getLabel(item.labelKey)}
-              </span>
+              <tab.icon className={cn("w-5 h-5", active && "stroke-[2.5px]")} />
             </Link>
           );
         })}
+
+        {/* Menu button */}
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <SheetTrigger asChild>
+            <button
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+                "text-muted-foreground hover:text-foreground active:scale-95"
+              )}
+              aria-label="Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-3xl pb-8">
+            <MobileNavMenu onClose={() => setMenuOpen(false)} />
+          </SheetContent>
+        </Sheet>
+
+        {/* Ask Kitz input bar */}
+        <Link
+          to="/dashboard"
+          className="flex-1 flex items-center gap-2 h-10 px-4 rounded-full bg-muted/60 border border-border/30 text-muted-foreground text-sm transition-all hover:bg-muted"
+        >
+          <span className="truncate">{language === "es" ? "Pregunta a Kitz" : "Ask Kitz"}</span>
+        </Link>
+
+        {/* Mic button */}
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-md active:scale-95 transition-all duration-200"
+          aria-label="Voice"
+        >
+          <Mic className="w-4 h-4" />
+        </button>
       </div>
     </nav>
   );
