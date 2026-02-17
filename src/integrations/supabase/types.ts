@@ -104,6 +104,50 @@ export type Database = {
           },
         ]
       }
+      agent_breach_incidents: {
+        Row: {
+          agent_id: string
+          containment_action: string
+          created_at: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          trigger_detail: Json
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          containment_action: string
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trigger_detail?: Json
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          containment_action?: string
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trigger_detail?: Json
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_breach_incidents_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_configs: {
         Row: {
           channel: string
@@ -501,6 +545,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      agent_secrets: {
+        Row: {
+          agent_id: string
+          created_at: string
+          encrypted_value: string
+          id: string
+          key_name: string
+          last_rotated_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          encrypted_value: string
+          id?: string
+          key_name: string
+          last_rotated_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          encrypted_value?: string
+          id?: string
+          key_name?: string
+          last_rotated_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_secrets_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_sessions: {
         Row: {
@@ -2617,6 +2702,15 @@ export type Database = {
       recharge_ai_credits: {
         Args: { p_amount: number; p_user_id: string }
         Returns: number
+      }
+      trigger_breach_containment: {
+        Args: {
+          p_agent_id: string
+          p_trigger_detail?: Json
+          p_trigger_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       validate_agent_identity: {
         Args: { p_agent_type: string; p_tool_id?: string; p_user_id: string }
