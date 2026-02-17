@@ -1710,6 +1710,75 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_daily_stats: {
+        Row: {
+          agent_actions: number | null
+          ai_calls: number | null
+          contacts_added: number | null
+          created_at: string
+          follow_ups_completed: number | null
+          id: string
+          orders_created: number | null
+          stat_date: string
+          storefronts_created: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_actions?: number | null
+          ai_calls?: number | null
+          contacts_added?: number | null
+          created_at?: string
+          follow_ups_completed?: number | null
+          id?: string
+          orders_created?: number | null
+          stat_date: string
+          storefronts_created?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_actions?: number | null
+          ai_calls?: number | null
+          contacts_added?: number | null
+          created_at?: string
+          follow_ups_completed?: number | null
+          id?: string
+          orders_created?: number | null
+          stat_date?: string
+          storefronts_created?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -2098,6 +2167,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_daily_stat: {
+        Args: { p_increment?: number; p_stat_name: string; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
