@@ -27,7 +27,7 @@ const PROACTIVE_TIPS_EN = [
   "Try the Pomodoro timer for focus!",
   "Set your weekly goals with 4DX",
   "Use SWOT to plan your quarter",
-  "Track habits to build consistency",
+  
   "Get Instagram content ideas with AI",
 ];
 
@@ -35,7 +35,7 @@ const PROACTIVE_TIPS_ES = [
   "¡Prueba el Pomodoro para enfocarte!",
   "Establece metas semanales con 4DX",
   "Usa FODA para planificar tu trimestre",
-  "Sigue hábitos para ser consistente",
+  
   "Obtén ideas para Instagram con IA",
 ];
 
@@ -52,7 +52,6 @@ export function AiFloatingButton({ onClick }: AiFloatingButtonProps) {
       !localStorage.getItem("kitz_pomodoro_used"),
       !localStorage.getItem("kitz_goals_set"),
       !localStorage.getItem("kitz_swot_used"),
-      !localStorage.getItem("kitz_habits_used"),
       !localStorage.getItem("kitz_instagram_used"),
     ].filter(Boolean).length;
 

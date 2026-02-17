@@ -1382,39 +1382,6 @@ export type Database = {
         }
         Relationships: []
       }
-      eisenhower_tasks: {
-        Row: {
-          completed: boolean
-          completed_at: string | null
-          created_at: string
-          id: string
-          quadrant: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed?: boolean
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          quadrant: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed?: boolean
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          quadrant?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       follow_ups: {
         Row: {
           channel: string | null
@@ -1468,33 +1435,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      habits: {
-        Row: {
-          completed_dates: string[]
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed_dates?: string[]
-          created_at?: string
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed_dates?: string[]
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       knowledge_base: {
         Row: {
