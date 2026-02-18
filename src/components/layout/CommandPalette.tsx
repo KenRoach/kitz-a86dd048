@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command";
 import {
   LayoutDashboard, Users, ShoppingCart, BarChart3, Store,
-  Package, Bot, Settings, Plus, Search
+  Package, Settings, Plus, Search
 } from "lucide-react";
 
 const ROUTES = [
@@ -21,7 +21,6 @@ const ROUTES = [
   { icon: BarChart3, label: "Insights", labelEs: "Métricas", path: "/insights", keywords: ["insights", "metrics", "revenue", "metricas"] },
   { icon: Store, label: "Storefronts", labelEs: "Vitrinas", path: "/storefronts", keywords: ["storefronts", "vitrinas", "links", "payment links"] },
   { icon: Package, label: "Products", labelEs: "Productos", path: "/products", keywords: ["products", "productos", "catalog", "catalogo"] },
-  { icon: Bot, label: "AI Agent", labelEs: "Agente IA", path: "/agent", keywords: ["agent", "agente", "ai", "bot", "automation"] },
   { icon: Settings, label: "Settings", labelEs: "Ajustes", path: "/settings", keywords: ["settings", "ajustes", "config", "profile"] },
 ];
 

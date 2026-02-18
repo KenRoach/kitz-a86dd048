@@ -3,7 +3,6 @@ import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { MobileHeader } from "./MobileHeader";
 import { PageTransition } from "./PageTransition";
-import { BusinessAdvisor } from "@/components/advisor/BusinessAdvisor";
 import { CommandPalette } from "./CommandPalette";
 
 interface AppLayoutProps {
@@ -30,7 +29,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         <MobileNav />
       </div>
       
-      <BusinessAdvisor />
       <CommandPalette />
     </div>
   );
