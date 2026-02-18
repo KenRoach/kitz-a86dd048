@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Store, Users, ShoppingCart, BarChart3,
-  Settings, Package, Lightbulb
+  LayoutDashboard, Store, Users, ShoppingCart,
+  Settings, Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -13,15 +13,13 @@ interface MobileNavMenuProps {
 
 const primaryItems = [
   { icon: LayoutDashboard, labelEn: "Home", labelEs: "Inicio", path: "/dashboard" },
-  { icon: Users, labelEn: "CRM", labelEs: "CRM", path: "/crm" },
+  { icon: Store, labelEn: "Storefronts", labelEs: "Vitrinas", path: "/storefronts" },
   { icon: ShoppingCart, labelEn: "Orders", labelEs: "Órdenes", path: "/orders" },
-  { icon: Store, labelEn: "Storefronts", labelEs: "Tiendas", path: "/storefronts" },
-  { icon: BarChart3, labelEn: "Insights", labelEs: "Métricas", path: "/insights" },
+  { icon: Users, labelEn: "Customers", labelEs: "Clientes", path: "/crm" },
 ];
 
 const secondaryItems = [
   { icon: Package, labelEn: "Products", labelEs: "Productos", path: "/products" },
-  { icon: Lightbulb, labelEn: "Suggestions", labelEs: "Sugerencias", path: "/suggestions" },
 ];
 
 const bottomItems = [
