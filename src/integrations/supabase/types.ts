@@ -1390,9 +1390,14 @@ export type Database = {
           created_at: string
           due_at: string
           id: string
+          max_steps: number
           order_id: string | null
+          pause_reason: string | null
+          paused_at: string | null
           reason: string
+          sequence_type: string
           status: string
+          step: number
           user_id: string
         }
         Insert: {
@@ -1402,9 +1407,14 @@ export type Database = {
           created_at?: string
           due_at: string
           id?: string
+          max_steps?: number
           order_id?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
           reason: string
+          sequence_type?: string
           status?: string
+          step?: number
           user_id: string
         }
         Update: {
@@ -1414,9 +1424,14 @@ export type Database = {
           created_at?: string
           due_at?: string
           id?: string
+          max_steps?: number
           order_id?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
           reason?: string
+          sequence_type?: string
           status?: string
+          step?: number
           user_id?: string
         }
         Relationships: [
