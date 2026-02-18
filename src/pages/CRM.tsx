@@ -5,16 +5,14 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
-  Plus, Search, Phone, Mail, Flame, Snowflake, Sun, ArrowRight,
-  User, Users, Clock, DollarSign, Tag
+  Plus, Search, Phone, User, Users, Clock, ArrowRight, MessageCircle, Bell
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,15 +20,17 @@ interface Contact {
   id: string;
   name: string;
   phone: string | null;
-  email: string | null;
-  source_channel: string | null;
-  tags: string[];
-  lead_score: string;
+  notes: string | null;
   lifetime_value: number;
   last_interaction_at: string | null;
-  status: string;
-  notes: string | null;
   created_at: string;
+}
+
+interface FollowUp {
+  id: string;
+  reason: string;
+  due_at: string;
+  status: string;
 }
 
 export default function CRM() {
@@ -39,19 +39,20 @@ export default function CRM() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<string>("all");
   const [showAdd, setShowAdd] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", source_channel: "manual", lead_score: "WARM", notes: "" });
+  const [followUps, setFollowUps] = useState<FollowUp[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [form, setForm] = useState({ name: "", phone: "", notes: "" });
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 50;
 
   const fetchContacts = useCallback(async () => {
     if (!user) return;
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("crm_contacts")
-      .select("*")
+      .select("id, name, phone, notes, lifetime_value, last_interaction_at, created_at")
       .eq("user_id", user.id)
       .order("last_interaction_at", { ascending: false, nullsFirst: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
@@ -65,78 +66,67 @@ export default function CRM() {
 
   useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
-  const fetchTimeline = useCallback(async (contactId: string) => {
-    const { data } = await supabase
-      .from("contact_timeline")
-      .select("*")
-      .eq("contact_id", contactId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    setTimeline(data || []);
-  }, []);
+  const fetchContactDetails = useCallback(async (contactId: string) => {
+    if (!user) return;
+    const [timelineRes, followUpsRes, ordersRes] = await Promise.all([
+      supabase.from("contact_timeline").select("*").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("follow_ups").select("*").eq("contact_id", contactId).eq("user_id", user.id).order("due_at", { ascending: true }).limit(10),
+      supabase.from("orders").select("id, order_number, total, payment_status, fulfillment_status, created_at").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(10),
+    ]);
+    setTimeline(timelineRes.data || []);
+    setFollowUps((followUpsRes.data as FollowUp[]) || []);
+    setOrders(ordersRes.data || []);
+  }, [user]);
 
   const handleSelectContact = (c: Contact) => {
     setSelectedContact(c);
-    fetchTimeline(c.id);
+    fetchContactDetails(c.id);
   };
 
   const handleAddContact = async () => {
     if (!user || !form.name.trim()) return;
     const { error } = await supabase.from("crm_contacts").insert({
       user_id: user.id,
-      name: form.name,
+      name: form.name.trim(),
       phone: form.phone || null,
-      email: form.email || null,
-      source_channel: form.source_channel,
-      lead_score: form.lead_score,
       notes: form.notes || null,
       last_interaction_at: new Date().toISOString(),
     });
     if (error) { toast.error("Error adding contact"); return; }
     toast.success(language === "es" ? "Contacto agregado" : "Contact added");
-    setForm({ name: "", phone: "", email: "", source_channel: "manual", lead_score: "WARM", notes: "" });
+    setForm({ name: "", phone: "", notes: "" });
     setShowAdd(false);
     fetchContacts();
   };
 
-  const addTimelineEntry = async (contactId: string, type: string, content: string) => {
+  const addNote = async (contactId: string, note: string) => {
     if (!user) return;
     await supabase.from("contact_timeline").insert({
       user_id: user.id,
       contact_id: contactId,
-      event_type: type,
-      content,
+      event_type: "note",
+      content: note,
     });
-    fetchTimeline(contactId);
+    await supabase.from("crm_contacts").update({ last_interaction_at: new Date().toISOString() }).eq("id", contactId);
+    fetchContactDetails(contactId);
   };
 
-  const scoreIcon = (score: string) => {
-    switch (score) {
-      case "HOT": return <Flame className="w-3.5 h-3.5 text-red-500" />;
-      case "COLD": return <Snowflake className="w-3.5 h-3.5 text-blue-500" />;
-      default: return <Sun className="w-3.5 h-3.5 text-orange-500" />;
-    }
+  const completeFollowUp = async (id: string) => {
+    await supabase.from("follow_ups").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", id);
+    if (selectedContact) fetchContactDetails(selectedContact.id);
+    toast.success(language === "es" ? "Seguimiento completado" : "Follow-up completed");
   };
 
-  const scoreBadgeClass = (score: string) => {
-    switch (score) {
-      case "HOT": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-      case "COLD": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-      default: return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
-    }
-  };
-
-  const filtered = contacts.filter(c => {
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "all" || c.lead_score === filter || c.status === filter;
-    return matchSearch && matchFilter;
-  });
+  const filtered = contacts.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.phone?.includes(search)
+  );
 
   if (loading) return <AppLayout><DashboardSkeleton /></AppLayout>;
 
   // Contact Detail View
   if (selectedContact) {
+    const pendingFollowUps = followUps.filter(f => f.status === "pending");
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -150,48 +140,75 @@ export default function CRM() {
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-semibold">{selectedContact.name}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className={scoreBadgeClass(selectedContact.lead_score)}>
-                  {scoreIcon(selectedContact.lead_score)}
-                  <span className="ml-1">{selectedContact.lead_score}</span>
-                </Badge>
-                {selectedContact.status === "vip" && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">VIP</Badge>
-                )}
-              </div>
+              {selectedContact.phone && (
+                <a href={`https://wa.me/${selectedContact.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mt-1">
+                  <Phone className="w-3.5 h-3.5" />
+                  {selectedContact.phone}
+                  <MessageCircle className="w-3.5 h-3.5 ml-1" />
+                </a>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                ${Number(selectedContact.lifetime_value).toFixed(2)} {language === "es" ? "total" : "lifetime"}
+              </p>
             </div>
           </div>
 
-          {/* Contact Info */}
-          <Card className="p-4 space-y-3">
-            {selectedContact.phone && (
-              <div className="flex items-center gap-3 text-sm">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                <span>{selectedContact.phone}</span>
-              </div>
-            )}
-            {selectedContact.email && (
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <span>{selectedContact.email}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-3 text-sm">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <span>${Number(selectedContact.lifetime_value).toFixed(2)} lifetime</span>
-            </div>
-            {selectedContact.tags?.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Tag className="w-4 h-4 text-muted-foreground" />
-                {selectedContact.tags.map(t => (
-                  <Badge key={t} variant="outline" className="text-xs">{t}</Badge>
-                ))}
-              </div>
-            )}
-            {selectedContact.notes && (
+          {selectedContact.notes && (
+            <Card className="p-3">
               <p className="text-sm text-muted-foreground">{selectedContact.notes}</p>
-            )}
-          </Card>
+            </Card>
+          )}
+
+          {/* Pending Follow-ups */}
+          {pendingFollowUps.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="text-sm font-medium flex items-center gap-2">
+                <Bell className="w-4 h-4 text-orange-500" />
+                {language === "es" ? "Seguimientos pendientes" : "Pending Follow-ups"}
+              </h2>
+              {pendingFollowUps.map(f => (
+                <Card key={f.id} className="p-3 border-orange-200 dark:border-orange-800/30">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm">{f.reason}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "es" ? "Vence" : "Due"}: {new Date(f.due_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => completeFollowUp(f.id)}>
+                      ✓
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </section>
+          )}
+
+          {/* Order History */}
+          {orders.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="text-sm font-medium">{language === "es" ? "Órdenes" : "Orders"}</h2>
+              {orders.map(o => (
+                <Card key={o.id} className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{o.order_number || "Draft"}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">${Number(o.total).toFixed(2)}</p>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {o.fulfillment_status === "DELIVERED" ? (language === "es" ? "Entregada" : "Delivered") :
+                         o.payment_status === "PAID" ? (language === "es" ? "Pagada" : "Paid") :
+                         (language === "es" ? "Nueva" : "New")}
+                      </Badge>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </section>
+          )}
 
           {/* Add Note */}
           <Card className="p-4">
@@ -200,7 +217,7 @@ export default function CRM() {
               const fd = new FormData(e.currentTarget);
               const note = fd.get("note") as string;
               if (!note.trim()) return;
-              await addTimelineEntry(selectedContact.id, "note", note);
+              await addNote(selectedContact.id, note);
               (e.target as HTMLFormElement).reset();
               toast.success(language === "es" ? "Nota agregada" : "Note added");
             }} className="flex gap-2">
@@ -210,31 +227,27 @@ export default function CRM() {
           </Card>
 
           {/* Timeline */}
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {language === "es" ? "Línea de tiempo" : "Timeline"}
-            </h2>
-            {timeline.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{language === "es" ? "Sin actividad" : "No activity yet"}</p>
-            ) : (
-              <div className="space-y-2">
-                {timeline.map(t => (
-                  <Card key={t.id} className="p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm">{t.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {t.event_type} · {new Date(t.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
+          {timeline.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="text-sm font-medium flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                {language === "es" ? "Historial" : "History"}
+              </h2>
+              {timeline.map(t => (
+                <Card key={t.id} className="p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{t.content}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(t.created_at).toLocaleDateString()}
+                      </p>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </section>
+                  </div>
+                </Card>
+              ))}
+            </section>
+          )}
         </div>
       </AppLayout>
     );
@@ -244,56 +257,32 @@ export default function CRM() {
     <AppLayout>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">CRM</h1>
+          <h1 className="text-xl font-semibold">{language === "es" ? "Clientes" : "Customers"}</h1>
           <Dialog open={showAdd} onOpenChange={setShowAdd}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5"><Plus className="w-4 h-4" />{language === "es" ? "Nuevo" : "New"}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{language === "es" ? "Nuevo contacto" : "New Contact"}</DialogTitle>
+                <DialogTitle>{language === "es" ? "Nuevo cliente" : "New Customer"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 <div><Label>{language === "es" ? "Nombre" : "Name"} *</Label>
                   <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>{language === "es" ? "Teléfono" : "Phone"}</Label>
-                  <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
-                <div><Label>Email</Label>
-                  <Input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
-                <div><Label>Lead Score</Label>
-                  <Select value={form.lead_score} onValueChange={v => setForm(p => ({ ...p, lead_score: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="HOT">🔥 Hot</SelectItem>
-                      <SelectItem value="WARM">☀️ Warm</SelectItem>
-                      <SelectItem value="COLD">❄️ Cold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+507..." /></div>
                 <div><Label>{language === "es" ? "Notas" : "Notes"}</Label>
                   <Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
-                <Button onClick={handleAddContact} className="w-full">{language === "es" ? "Agregar" : "Add Contact"}</Button>
+                <Button onClick={handleAddContact} className="w-full">{language === "es" ? "Agregar" : "Add Customer"}</Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Search & Filter */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder={language === "es" ? "Buscar..." : "Search..."} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-          </div>
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{language === "es" ? "Todos" : "All"}</SelectItem>
-              <SelectItem value="HOT">🔥 Hot</SelectItem>
-              <SelectItem value="WARM">☀️ Warm</SelectItem>
-              <SelectItem value="COLD">❄️ Cold</SelectItem>
-              <SelectItem value="vip">⭐ VIP</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Search */}
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder={language === "es" ? "Buscar por nombre o teléfono..." : "Search by name or phone..."} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {/* Contact List */}
@@ -304,18 +293,18 @@ export default function CRM() {
             </div>
             <h3 className="text-base font-medium text-foreground mb-1">
               {contacts.length === 0
-                ? (language === "es" ? "Tu CRM está vacío" : "Your CRM is empty")
+                ? (language === "es" ? "Sin clientes aún" : "No customers yet")
                 : (language === "es" ? "Sin resultados" : "No results")}
             </h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
               {contacts.length === 0
-                ? (language === "es" ? "Agrega tu primer contacto para empezar a hacer seguimiento" : "Add your first contact to start tracking leads")
-                : (language === "es" ? "Intenta con otro filtro" : "Try a different filter")}
+                ? (language === "es" ? "Se agregan automáticamente cuando alguien ordena desde tu vitrina" : "They get added automatically when someone orders from your storefront")
+                : (language === "es" ? "Intenta con otro nombre" : "Try a different search")}
             </p>
             {contacts.length === 0 && (
               <Button onClick={() => setShowAdd(true)} className="gap-1.5">
                 <Plus className="w-4 h-4" />
-                {language === "es" ? "Agregar contacto" : "Add Contact"}
+                {language === "es" ? "Agregar cliente" : "Add Customer"}
               </Button>
             )}
           </div>
@@ -328,15 +317,10 @@ export default function CRM() {
                     <span className="text-sm font-medium text-primary">{c.name.charAt(0).toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium truncate">{c.name}</p>
-                      <Badge variant="secondary" className={`text-[10px] ${scoreBadgeClass(c.lead_score)}`}>
-                        {c.lead_score}
-                      </Badge>
-                      {c.status === "vip" && <Badge variant="secondary" className="text-[10px] bg-yellow-100 text-yellow-700">VIP</Badge>}
-                    </div>
+                    <p className="text-sm font-medium truncate">{c.name}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {c.phone || c.email || c.source_channel} · ${Number(c.lifetime_value).toFixed(2)}
+                      {c.phone || (language === "es" ? "Sin teléfono" : "No phone")}
+                      {c.lifetime_value > 0 && ` · $${Number(c.lifetime_value).toFixed(2)}`}
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
