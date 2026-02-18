@@ -265,17 +265,28 @@ serve(async (req) => {
       related_id: newOrder.id,
     });
 
-    // ── 8. Create follow-up for the seller ───────────────────────────
+    // ── 8. Create auto follow-ups ───────────────────────────────────
     if (contactId) {
-      const followUpDate = new Date();
-      followUpDate.setDate(followUpDate.getDate() + 1);
-      
+      // Trigger 1: Instant — "Order received" (for seller to contact buyer)
       await supabase.from("follow_ups").insert({
         user_id: storefront.user_id,
         contact_id: contactId,
         order_id: newOrder.id,
-        reason: `Follow up on order ${orderKey} — ${storefront.title}`,
-        due_at: followUpDate.toISOString(),
+        reason: `New order #${orderKey} from ${sanitizedName} — confirm receipt`,
+        due_at: new Date().toISOString(),
+        status: "pending",
+        channel: "whatsapp",
+      });
+
+      // Trigger 2: Payment pending reminder (24h)
+      const paymentReminder = new Date();
+      paymentReminder.setHours(paymentReminder.getHours() + 24);
+      await supabase.from("follow_ups").insert({
+        user_id: storefront.user_id,
+        contact_id: contactId,
+        order_id: newOrder.id,
+        reason: `Payment pending for order #${orderKey} — send reminder`,
+        due_at: paymentReminder.toISOString(),
         status: "pending",
         channel: "whatsapp",
       });

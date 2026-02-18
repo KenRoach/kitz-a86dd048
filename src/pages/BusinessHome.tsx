@@ -13,7 +13,8 @@ import { AIGated } from "@/components/ai/AIGated";
 import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import {
   TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Store,
-  AlertTriangle, Zap, ArrowRight, Clock, CheckCircle2, Flame, Bot
+  AlertTriangle, Zap, ArrowRight, Clock, CheckCircle2, Flame, Bot,
+  MessageCircle, Bell
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +29,7 @@ export default function BusinessHome() {
     totalContacts: 0, hotLeads: 0, riskyOrders: 0,
   });
   const [recentActions, setRecentActions] = useState<any[]>([]);
+  const [dueFollowUps, setDueFollowUps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
@@ -35,11 +37,12 @@ export default function BusinessHome() {
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
 
-    const [ordersRes, contactsRes, followUpsRes, actionsRes] = await Promise.all([
+    const [ordersRes, contactsRes, followUpsRes, actionsRes, dueSoonRes] = await Promise.all([
       supabase.from("orders").select("*").eq("user_id", user.id),
       supabase.from("crm_contacts").select("id, lead_score").eq("user_id", user.id),
       supabase.from("follow_ups").select("id").eq("user_id", user.id).eq("status", "pending").lt("due_at", now.toISOString()),
       supabase.from("ai_actions").select("*").eq("user_id", user.id).eq("status", "pending").order("created_at", { ascending: false }).limit(5),
+      supabase.from("follow_ups").select("id, reason, due_at, status, contact_id, order_id, channel").eq("user_id", user.id).eq("status", "pending").lte("due_at", now.toISOString()).order("due_at", { ascending: true }).limit(5),
     ]);
 
     const orders = ordersRes.data || [];
@@ -58,6 +61,7 @@ export default function BusinessHome() {
       riskyOrders,
     });
     setRecentActions(actionsRes.data || []);
+    setDueFollowUps(dueSoonRes.data || []);
     setLoading(false);
   }, [user]);
 
@@ -172,36 +176,37 @@ export default function BusinessHome() {
           </Card>
         )}
 
-        {/* AI Empty Banner */}
-        {!hasCredits && <AIEmptyBanner />}
-
-        {/* AI Actions */}
-        {(actions.length > 0 || recentActions.length > 0) && (
+        {/* Due Follow-ups — the differentiator */}
+        {dueFollowUps.length > 0 && (
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
-              {language === "es" ? "Acciones recomendadas" : "Recommended Actions"}
+              <Bell className="w-4 h-4 text-orange-500" />
+              {language === "es" ? "Seguimientos pendientes" : "Follow-ups due"}
+              <Badge variant="secondary" className="text-[10px]">{dueFollowUps.length}</Badge>
             </h2>
             <div className="space-y-2">
-              {(actions.length > 0 ? actions : recentActions).map((action, i) => (
-                <Card key={i} className="p-4 hover-calm cursor-pointer">
+              {dueFollowUps.map((f: any) => (
+                <Card key={f.id} className="p-4 border-orange-200 dark:border-orange-800/30">
                   <div className="flex items-start gap-3">
+                    <MessageCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-medium text-foreground">{action.title}</p>
-                        <Badge variant="secondary" className={`text-[10px] ${priorityColor(action.priority)}`}>
-                          {action.priority}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{action.description}</p>
+                      <p className="text-sm">{f.reason}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(f.due_at).toLocaleDateString()}
+                      </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                    <Button size="sm" variant="outline" className="text-xs h-7 shrink-0" onClick={() => navigate("/crm")}>
+                      {language === "es" ? "Ver" : "View"}
+                    </Button>
                   </div>
                 </Card>
               ))}
             </div>
           </section>
         )}
+
+        {/* AI Empty Banner */}
+        {!hasCredits && <AIEmptyBanner />}
 
         {/* Quick Navigation */}
         <div className="grid grid-cols-3 gap-3">
