@@ -1436,6 +1436,59 @@ export type Database = {
           },
         ]
       }
+      inbox_messages: {
+        Row: {
+          body: string
+          channel: string
+          contact_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          is_read: boolean
+          metadata: Json | null
+          sender_email: string | null
+          sender_name: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          sender_email?: string | null
+          sender_name?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          sender_email?: string | null
+          sender_name?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base: {
         Row: {
           answer: string
