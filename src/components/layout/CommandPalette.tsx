@@ -10,24 +10,23 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  LayoutDashboard, Users, ShoppingCart, BarChart3, Store,
+  LayoutDashboard, Users, ShoppingCart, Store,
   Package, Settings, Plus, Search
 } from "lucide-react";
 
 const ROUTES = [
   { icon: LayoutDashboard, label: "Home", labelEs: "Inicio", path: "/dashboard", keywords: ["dashboard", "inicio", "home"] },
-  { icon: Users, label: "CRM", labelEs: "CRM", path: "/crm", keywords: ["contacts", "leads", "contactos", "crm"] },
-  { icon: ShoppingCart, label: "Orders", labelEs: "Órdenes", path: "/orders", keywords: ["orders", "ordenes", "payments", "pagos"] },
-  { icon: BarChart3, label: "Insights", labelEs: "Métricas", path: "/insights", keywords: ["insights", "metrics", "revenue", "metricas"] },
   { icon: Store, label: "Storefronts", labelEs: "Vitrinas", path: "/storefronts", keywords: ["storefronts", "vitrinas", "links", "payment links"] },
+  { icon: ShoppingCart, label: "Orders", labelEs: "Órdenes", path: "/orders", keywords: ["orders", "ordenes", "payments", "pagos"] },
+  { icon: Users, label: "Customers", labelEs: "Clientes", path: "/crm", keywords: ["contacts", "leads", "contactos", "crm", "customers", "clientes"] },
   { icon: Package, label: "Products", labelEs: "Productos", path: "/products", keywords: ["products", "productos", "catalog", "catalogo"] },
   { icon: Settings, label: "Settings", labelEs: "Ajustes", path: "/settings", keywords: ["settings", "ajustes", "config", "profile"] },
 ];
 
 const ACTIONS = [
-  { icon: Plus, label: "New Contact", labelEs: "Nuevo Contacto", path: "/crm", keywords: ["add contact", "new contact", "crear contacto"] },
-  { icon: Plus, label: "New Order", labelEs: "Nueva Orden", path: "/orders", keywords: ["add order", "new order", "crear orden"] },
   { icon: Plus, label: "New Storefront", labelEs: "Nueva Vitrina", path: "/storefronts", keywords: ["add storefront", "new storefront", "crear vitrina"] },
+  { icon: Plus, label: "New Order", labelEs: "Nueva Orden", path: "/orders", keywords: ["add order", "new order", "crear orden"] },
+  { icon: Plus, label: "New Customer", labelEs: "Nuevo Cliente", path: "/crm", keywords: ["add contact", "new contact", "crear contacto", "new customer"] },
   { icon: Plus, label: "New Product", labelEs: "Nuevo Producto", path: "/products", keywords: ["add product", "new product", "crear producto"] },
 ];
 
@@ -36,7 +35,6 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  // ⌘K shortcut
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -55,7 +53,6 @@ export function CommandPalette() {
 
   return (
     <>
-      {/* Trigger for external use */}
       <button
         onClick={() => setOpen(true)}
         className="hidden"

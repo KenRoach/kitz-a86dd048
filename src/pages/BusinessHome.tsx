@@ -12,7 +12,7 @@ import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { AIGated } from "@/components/ai/AIGated";
 import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import {
-  TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart,
+  TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Store,
   AlertTriangle, Zap, ArrowRight, Clock, CheckCircle2, Flame, Bot
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -204,24 +204,20 @@ export default function BusinessHome() {
         )}
 
         {/* Quick Navigation */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/crm")}>
-            <Users className="w-5 h-5 text-primary mb-2" />
-            <p className="text-sm font-medium">CRM</p>
-            <p className="text-xs text-muted-foreground">{stats.totalContacts} {language === "es" ? "contactos" : "contacts"}</p>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/storefronts")}>
+            <Store className="w-5 h-5 text-primary mb-2" />
+            <p className="text-sm font-medium">{language === "es" ? "Vitrinas" : "Storefronts"}</p>
           </Card>
           <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/orders")}>
             <ShoppingCart className="w-5 h-5 text-primary mb-2" />
             <p className="text-sm font-medium">{language === "es" ? "Órdenes" : "Orders"}</p>
             <p className="text-xs text-muted-foreground">{stats.activeOrders} {language === "es" ? "activas" : "active"}</p>
           </Card>
-          <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/insights")}>
-            <TrendingUp className="w-5 h-5 text-primary mb-2" />
-            <p className="text-sm font-medium">{language === "es" ? "Métricas" : "Insights"}</p>
-          </Card>
-          <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/storefronts")}>
-            <Zap className="w-5 h-5 text-primary mb-2" />
-            <p className="text-sm font-medium">{language === "es" ? "Vitrinas" : "Storefronts"}</p>
+          <Card className="p-4 hover-calm cursor-pointer" onClick={() => navigate("/crm")}>
+            <Users className="w-5 h-5 text-primary mb-2" />
+            <p className="text-sm font-medium">{language === "es" ? "Clientes" : "Customers"}</p>
+            <p className="text-xs text-muted-foreground">{stats.totalContacts}</p>
           </Card>
         </div>
       </div>

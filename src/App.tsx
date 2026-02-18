@@ -17,13 +17,11 @@ import Auth from "./pages/Auth";
 const BusinessHome = lazy(() => import("./pages/BusinessHome"));
 const CRM = lazy(() => import("./pages/CRM"));
 const OrdersPage = lazy(() => import("./pages/Orders"));
-const InsightsPage = lazy(() => import("./pages/Insights"));
 const Storefronts = lazy(() => import("./pages/Storefronts"));
 const Products = lazy(() => import("./pages/Products"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Suggestions = lazy(() => import("./pages/Suggestions"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PublicStorefront = lazy(() => import("./pages/PublicStorefront"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
@@ -106,14 +104,14 @@ function AppRoutes() {
         <Route path="/dashboard" element={<ProtectedRoute><BusinessHome /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-        <Route path="/insights" element={<ProtectedRoute><InsightsPage /></ProtectedRoute>} />
+        <Route path="/insights" element={<Navigate to="/dashboard" replace />} />
         <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
         <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+        <Route path="/suggestions" element={<Navigate to="/dashboard" replace />} />
         {/* Redirect old profile route to dashboard */}
         <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
         <Route path="/privacy" element={<Privacy />} />

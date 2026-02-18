@@ -1,6 +1,6 @@
 {
   "name": "Kitz",
-  "description": "AI-native Business Management System for small business owners in Panama. Helps owners create shareable storefronts, manage orders, track customers, and get paid faster.",
+  "description": "Simple storefront and auto-follow-up platform for small businesses that sell through WhatsApp. Helps them get paid faster and stop losing customers.",
   "url": "https://kitz.lovable.app",
   "logo": "https://kitz.lovable.app/favicon.png",
   "contact": {
@@ -14,38 +14,34 @@
   ],
   "capabilities": {
     "storefronts": {
-      "description": "Create shareable product pages with title, description, price, images, and multiple payment options. Customers can view, order, and pay via shared links.",
-      "features": ["Shareable links", "Product bundles", "Order tracking", "Payment proof upload", "AI-suggested storefronts"]
+      "description": "Create shareable payment links and product pages in seconds. Share via WhatsApp. Customers view, order, and pay.",
+      "features": ["Shareable links", "Product bundles", "Multiple payment methods", "Payment proof upload", "Order tracking"]
     },
     "payments": {
       "description": "Accept payments through Panama's most popular methods.",
       "methods": ["Yappy (mobile payments)", "Credit/Debit cards (Visa, Mastercard)", "Cash on delivery", "Pluxee (corporate vouchers)"]
     },
     "orders": {
-      "description": "Full order lifecycle management with cost tracking and margin analysis.",
-      "features": ["Order pipeline (draft → paid → fulfilled → delivered)", "Cost and margin tracking", "Risk flagging", "Delivery tracking", "Order history"]
+      "description": "Track every order from creation to delivery. Know who paid, who didn't, and what needs fulfillment.",
+      "features": ["Order pipeline (draft → paid → fulfilled → delivered)", "Payment status tracking", "Risk flagging", "Delivery tracking"]
     },
-    "crm": {
-      "description": "Customer relationship management with lifecycle tracking and follow-ups.",
-      "features": ["Lifecycle tracking (new, active, loyal)", "Lead scoring", "Order history and lifetime value", "Contact management", "Follow-up reminders", "Tags and segmentation"]
+    "auto_follow_ups": {
+      "description": "Never lose a customer again. Automatic follow-up reminders for unpaid orders, inactive customers, and pending deliveries.",
+      "features": ["Automated follow-up scheduling", "WhatsApp follow-up links", "Overdue payment alerts", "Customer re-engagement"]
     },
-    "insights": {
-      "description": "Financial clarity dashboard for revenue, costs, and margins.",
-      "features": ["Revenue tracking", "Cost analysis", "Margin calculations", "Payment method breakdown"]
+    "customers": {
+      "description": "Simple customer list that grows automatically from orders. See who buys, how much they spend, and when to follow up.",
+      "features": ["Auto-created from orders", "Lifecycle tracking (lead, active, repeat)", "Spending history", "Follow-up reminders", "WhatsApp quick-contact"]
     },
     "products": {
-      "description": "Product catalog management.",
-      "features": ["Product creation", "Categories", "Active/inactive toggle", "Image upload"]
-    },
-    "notifications": {
-      "description": "Real-time notification system for orders, follow-ups, and business events.",
-      "features": ["Order notifications", "Follow-up reminders"]
+      "description": "Product catalog for creating storefronts faster.",
+      "features": ["Product creation", "Categories", "Image upload", "Reuse across storefronts"]
     }
   },
   "tech_stack": {
     "frontend": "React + TypeScript + Tailwind CSS + Vite + shadcn/ui",
     "backend": "Lovable Cloud (database, auth, edge functions, storage)",
-    "features": ["Real-time order notifications", "Responsive mobile-first design", "PWA-ready", "Bilingual (English/Spanish)"]
+    "features": ["Real-time order notifications", "Responsive mobile-first design", "Bilingual (English/Spanish)"]
   },
   "locales": ["en", "es"],
   "region": "Panama"
