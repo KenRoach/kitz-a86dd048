@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Store, Settings, LogOut, Users, Shield, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, Store, Settings, LogOut, Users, Shield, ShoppingCart, CalendarDays, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -12,6 +12,8 @@ const navItems = [
   { icon: Store, labelKey: "storefronts" as const, path: "/storefronts" },
   { icon: ShoppingCart, labelKey: "orders" as const, path: "/orders" },
   { icon: Users, labelKey: "crm" as const, path: "/crm" },
+  { icon: CalendarDays, labelKey: "calendar" as const, path: "/calendar" },
+  { icon: Inbox, labelKey: "inbox" as const, path: "/inbox" },
 ];
 
 export function Sidebar() {
@@ -41,8 +43,8 @@ export function Sidebar() {
   // Custom labels for nav items
   const getLabel = (labelKey: string) => {
     const labels: Record<string, string> = language === "es"
-      ? { dashboard: "Inicio", crm: "Clientes", orders: "Órdenes", storefronts: "Vitrinas" }
-      : { dashboard: "Home", crm: "Customers", orders: "Orders", storefronts: "Storefronts" };
+      ? { dashboard: "Inicio", crm: "Clientes", orders: "Órdenes", storefronts: "Vitrinas", calendar: "Calendario", inbox: "Bandeja" }
+      : { dashboard: "Home", crm: "Customers", orders: "Orders", storefronts: "Storefronts", calendar: "Calendar", inbox: "Inbox" };
     return labels[labelKey] || labelKey;
   };
 

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Store, Users, ShoppingCart,
-  Settings, Package
+  Settings, Package, CalendarDays, Inbox
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -19,6 +19,8 @@ const primaryItems = [
 ];
 
 const secondaryItems = [
+  { icon: CalendarDays, labelEn: "Calendar", labelEs: "Calendario", path: "/calendar" },
+  { icon: Inbox, labelEn: "Inbox", labelEs: "Bandeja", path: "/inbox" },
   { icon: Package, labelEn: "Products", labelEs: "Productos", path: "/products" },
 ];
 
