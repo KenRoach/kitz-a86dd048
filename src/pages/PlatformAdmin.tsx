@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -126,10 +126,6 @@ interface DailyMetric {
   revenue: number;
 }
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
 
 interface AlertLog {
   id: string;
@@ -171,11 +167,6 @@ export default function PlatformAdmin() {
   const [storefrontFilter, setStorefrontFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   
-  // AI Chat state
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
   
   // Alerts state
   const [alertLogs, setAlertLogs] = useState<AlertLog[]>([]);
@@ -190,9 +181,6 @@ export default function PlatformAdmin() {
     checkAdminAndLoadData();
   }, [user]);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
 
   const checkAdminAndLoadData = async () => {
     if (!user) return;
@@ -517,72 +505,6 @@ export default function PlatformAdmin() {
     loadStats();
   };
 
-  const handleSendChat = async () => {
-    if (!chatInput.trim() || chatLoading) return;
-    
-    const userMessage = chatInput.trim();
-    setChatInput("");
-    setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
-    setChatLoading(true);
-
-    try {
-      const response = await supabase.functions.invoke("admin-advisor", {
-        body: {
-          messages: [...chatMessages, { role: "user", content: userMessage }],
-          language,
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      // Handle streaming response
-      const reader = response.data.getReader();
-      const decoder = new TextDecoder();
-      let fullContent = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter(line => line.trim());
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || "";
-              fullContent += content;
-              setChatMessages(prev => {
-                const newMessages = [...prev];
-                const lastMessage = newMessages[newMessages.length - 1];
-                if (lastMessage?.role === "assistant") {
-                  lastMessage.content = fullContent;
-                } else {
-                  newMessages.push({ role: "assistant", content: fullContent });
-                }
-                return newMessages;
-              });
-            } catch {}
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Chat error:", error);
-      setChatMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: language === "es" 
-          ? "Error al procesar tu solicitud. Intenta de nuevo." 
-          : "Error processing your request. Please try again."
-      }]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
 
   const filteredUsers = users.filter(u => 
     u.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -745,10 +667,6 @@ export default function PlatformAdmin() {
             <TabsTrigger value="alerts" className="gap-1 text-xs">
               <Bell className="w-3 h-3" />
               Alerts
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="gap-1 text-xs">
-              <Sparkles className="w-3 h-3" />
-              AI
             </TabsTrigger>
           </TabsList>
 
@@ -1198,88 +1116,6 @@ export default function PlatformAdmin() {
             </Card>
           </TabsContent>
 
-          {/* AI Control Tab */}
-          <TabsContent value="ai" className="space-y-4">
-            <Card className="h-[600px] flex flex-col">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  AI Platform Control
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  Ask questions, get insights, and control the platform with AI
-                </p>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-4 pt-0">
-                <ScrollArea className="flex-1 pr-4">
-                  <div className="space-y-4">
-                    {chatMessages.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">Start a conversation with the AI</p>
-                        <p className="text-xs mt-1">Ask about users, revenue, trends, or request actions</p>
-                        <div className="flex flex-wrap gap-2 justify-center mt-4">
-                          {[
-                            "Show me top users by revenue",
-                            "What's our growth this week?",
-                            "Which users need attention?",
-                            "Revenue forecast"
-                          ].map((prompt) => (
-                            <Button
-                              key={prompt}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              onClick={() => {
-                                setChatInput(prompt);
-                              }}
-                            >
-                              {prompt}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {chatMessages.map((msg, i) => (
-                      <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[80%] rounded-xl px-4 py-2 ${
-                          msg.role === "user" 
-                            ? "bg-primary text-primary-foreground" 
-                            : "bg-muted"
-                        }`}>
-                          <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {chatLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-muted rounded-xl px-4 py-2">
-                          <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <div ref={chatEndRef} />
-                  </div>
-                </ScrollArea>
-                <div className="flex gap-2 pt-4 border-t mt-4">
-                  <Input
-                    placeholder="Ask anything about the platform..."
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendChat()}
-                    disabled={chatLoading}
-                  />
-                  <Button onClick={handleSendChat} disabled={chatLoading || !chatInput.trim()}>
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
 
