@@ -15,6 +15,7 @@ import {
   User, MapPin, Bell, Shield, Globe, Image, Save, Loader2, 
   RotateCcw, Languages, Clock
 } from "lucide-react";
+import { ApiKeySection } from "@/components/settings/ApiKeySection";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -399,6 +400,9 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* API Keys */}
+        <ApiKeySection language={language} />
 
         {/* App Preferences */}
         <Card>
