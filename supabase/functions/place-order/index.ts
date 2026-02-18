@@ -8,6 +8,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const MAX_ORDER_VALUE = 50000; // Flag orders above $50k as suspicious
+
 const validatePhone = (phone: string): boolean => {
   const cleaned = phone.replace(/[\s\-\(\)\.]/g, "");
   return /^\+?[1-9]\d{6,14}$/.test(cleaned);
@@ -15,6 +17,9 @@ const validatePhone = (phone: string): boolean => {
 
 const validateEmail = (email: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const validateSlug = (slug: unknown): slug is string =>
+  typeof slug === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(slug);
 
 const sanitizeInput = (input: string, maxLength: number): string =>
   input.trim().slice(0, maxLength);
@@ -37,21 +42,17 @@ serve(async (req) => {
     const ip = getClientIp(req);
     const { slug, buyerName, buyerPhone, buyerEmail, buyerNote } = await req.json();
 
-    if (typeof slug === "string") {
-      if (isRateLimited(`place-order:${ip}:${slug}`, 5, 5 * 60_000)) {
-        return new Response(
-          JSON.stringify({ error: "Too many requests. Please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    if (!validateSlug(slug)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid storefront identifier" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log("Place order request received for slug:", slug);
-
-    if (!slug) {
+    if (isRateLimited(`place-order:${ip}:${slug}`, 5, 5 * 60_000)) {
       return new Response(
-        JSON.stringify({ error: "Storefront slug is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -110,6 +111,15 @@ serve(async (req) => {
     if (storefront.status !== "sent") {
       return new Response(
         JSON.stringify({ error: "This storefront is not available for ordering" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate price is reasonable (server-side authoritative price from DB, not client)
+    if (typeof storefront.price !== "number" || storefront.price <= 0 || storefront.price > MAX_ORDER_VALUE) {
+      console.error("Suspicious order value:", storefront.price, "for slug:", slug);
+      return new Response(
+        JSON.stringify({ error: "Order value is outside acceptable range" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -242,86 +252,94 @@ serve(async (req) => {
       console.error("Error updating storefront:", updateError);
     }
 
-    // ── 6. Contact timeline entry ────────────────────────────────────
-    if (contactId) {
-      await supabase.from("contact_timeline").insert({
+    // ── 6-10. Parallel non-critical writes ─────────────────────────
+    const paymentReminder = new Date();
+    paymentReminder.setHours(paymentReminder.getHours() + 24);
+
+    const parallelWrites: Promise<any>[] = [
+      // Activity log
+      supabase.from("activity_log").insert({
         user_id: storefront.user_id,
-        contact_id: contactId,
-        event_type: "order",
-        content: `Placed order: ${storefront.title} — $${storefront.price.toFixed(2)}`,
-        metadata: {
-          order_id: newOrder.id,
-          storefront_id: storefront.id,
-          order_key: orderKey,
-        },
-      });
+        type: "order",
+        message: `New order: ${storefront.title} — $${storefront.price.toFixed(2)}`,
+        related_id: newOrder.id,
+      }),
+    ];
+
+    if (contactId) {
+      // Contact timeline
+      parallelWrites.push(
+        supabase.from("contact_timeline").insert({
+          user_id: storefront.user_id,
+          contact_id: contactId,
+          event_type: "order",
+          content: `Placed order: ${storefront.title} — $${storefront.price.toFixed(2)}`,
+          metadata: { order_id: newOrder.id, storefront_id: storefront.id, order_key: orderKey },
+        })
+      );
+      // Follow-ups (batch insert)
+      parallelWrites.push(
+        supabase.from("follow_ups").insert([
+          {
+            user_id: storefront.user_id,
+            contact_id: contactId,
+            order_id: newOrder.id,
+            reason: `New order #${orderKey} from ${sanitizedName} — confirm receipt`,
+            due_at: new Date().toISOString(),
+            status: "pending",
+            channel: "whatsapp",
+          },
+          {
+            user_id: storefront.user_id,
+            contact_id: contactId,
+            order_id: newOrder.id,
+            reason: `Payment pending for order #${orderKey} — send reminder`,
+            due_at: paymentReminder.toISOString(),
+            status: "pending",
+            channel: "whatsapp",
+          },
+        ])
+      );
     }
 
-    // ── 7. Activity log ──────────────────────────────────────────────
-    await supabase.from("activity_log").insert({
-      user_id: storefront.user_id,
-      type: "order",
-      message: `New order: ${storefront.title} — $${storefront.price.toFixed(2)}`,
-      related_id: newOrder.id,
-    });
+    // Legacy customers upsert
+    parallelWrites.push(
+      supabase
+        .from("customers")
+        .select("id")
+        .eq("user_id", storefront.user_id)
+        .eq("phone", sanitizedPhone)
+        .maybeSingle()
+        .then(({ data: existingLegacy }) => {
+          if (!existingLegacy) {
+            return supabase.from("customers").insert({
+              user_id: storefront.user_id,
+              name: sanitizedName,
+              phone: sanitizedPhone,
+              email: sanitizedEmail,
+              lifecycle: "lead",
+              tags: ["New", "Online Order"],
+            });
+          }
+        })
+    );
 
-    // ── 8. Create auto follow-ups ───────────────────────────────────
-    if (contactId) {
-      // Trigger 1: Instant — "Order received" (for seller to contact buyer)
-      await supabase.from("follow_ups").insert({
-        user_id: storefront.user_id,
-        contact_id: contactId,
-        order_id: newOrder.id,
-        reason: `New order #${orderKey} from ${sanitizedName} — confirm receipt`,
-        due_at: new Date().toISOString(),
-        status: "pending",
-        channel: "whatsapp",
-      });
-
-      // Trigger 2: Payment pending reminder (24h)
-      const paymentReminder = new Date();
-      paymentReminder.setHours(paymentReminder.getHours() + 24);
-      await supabase.from("follow_ups").insert({
-        user_id: storefront.user_id,
-        contact_id: contactId,
-        order_id: newOrder.id,
-        reason: `Payment pending for order #${orderKey} — send reminder`,
-        due_at: paymentReminder.toISOString(),
-        status: "pending",
-        channel: "whatsapp",
-      });
-    }
-
-    // ── 9. Notifications (WhatsApp + Email) ──────────────────────────
-    // WhatsApp
+    // Notifications (fire-and-forget, non-blocking)
     const whatsappToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
     const whatsappPhoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
 
     if (whatsappToken && whatsappPhoneId && storefront.seller_phone) {
-      try {
-        const sellerPhone = storefront.seller_phone.replace(/\D/g, "");
-        const message = `🛒 *New Order #${orderKey}!*\n\n*${storefront.title}*\n💰 $${storefront.price.toFixed(2)}\n\n👤 ${sanitizedName}\n📱 ${sanitizedPhone}${sanitizedEmail ? `\n✉️ ${sanitizedEmail}` : ""}${sanitizedNote ? `\n📝 ${sanitizedNote}` : ""}`;
-
-        await fetch(`https://graph.facebook.com/v18.0/${whatsappPhoneId}/messages`, {
+      const sellerPhone = storefront.seller_phone.replace(/\D/g, "");
+      const message = `🛒 *New Order #${orderKey}!*\n\n*${storefront.title}*\n💰 $${storefront.price.toFixed(2)}\n\n👤 ${sanitizedName}\n📱 ${sanitizedPhone}${sanitizedEmail ? `\n✉️ ${sanitizedEmail}` : ""}${sanitizedNote ? `\n📝 ${sanitizedNote}` : ""}`;
+      parallelWrites.push(
+        fetch(`https://graph.facebook.com/v18.0/${whatsappPhoneId}/messages`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${whatsappToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messaging_product: "whatsapp",
-            to: sellerPhone,
-            type: "text",
-            text: { body: message },
-          }),
-        });
-        console.log("WhatsApp notification sent");
-      } catch (waError) {
-        console.error("WhatsApp notification failed:", waError);
-      }
+          headers: { Authorization: `Bearer ${whatsappToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ messaging_product: "whatsapp", to: sellerPhone, type: "text", text: { body: message } }),
+        }).catch((e) => console.error("WhatsApp notification failed:", e))
+      );
     }
 
-    // Email
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const { data: sellerProfile } = await supabase
       .from("profiles")
@@ -333,13 +351,10 @@ serve(async (req) => {
     const sellerEmail = sellerUser?.email;
 
     if (resendApiKey && sellerEmail) {
-      try {
-        await fetch("https://api.resend.com/emails", {
+      parallelWrites.push(
+        fetch("https://api.resend.com/emails", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: "Orders <onboarding@resend.dev>",
             to: [sellerEmail],
@@ -364,31 +379,12 @@ serve(async (req) => {
               </div>
             `,
           }),
-        });
-        console.log("Email notification sent");
-      } catch (emailError) {
-        console.error("Email notification failed:", emailError);
-      }
+        }).catch((e) => console.error("Email notification failed:", e))
+      );
     }
 
-    // ── 10. Also update legacy customers table ──────────────────────
-    const { data: existingLegacy } = await supabase
-      .from("customers")
-      .select("id")
-      .eq("user_id", storefront.user_id)
-      .eq("phone", sanitizedPhone)
-      .maybeSingle();
-
-    if (!existingLegacy) {
-      await supabase.from("customers").insert({
-        user_id: storefront.user_id,
-        name: sanitizedName,
-        phone: sanitizedPhone,
-        email: sanitizedEmail,
-        lifecycle: "lead",
-        tags: ["New", "Online Order"],
-      });
-    }
+    // Execute all non-critical writes in parallel
+    await Promise.allSettled(parallelWrites);
 
     // ── 11. Track usage ─────────────────────────────────────────────
     console.log("Order placed successfully:", newOrder.id, "key:", orderKey);

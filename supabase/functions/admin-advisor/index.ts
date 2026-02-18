@@ -56,16 +56,32 @@ serve(async (req) => {
       });
     }
 
-    const { messages, action, payload, language = 'en' } = await req.json();
+    const body = await req.json();
+    const { messages, action, payload, language = 'en' } = body;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Handle admin actions
+    // Handle admin actions with validated inputs
     if (action) {
-      const result = await handleAdminAction(adminClient, action, payload);
+      if (typeof action !== "string") {
+        return new Response(JSON.stringify({ error: "Invalid action type" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const result = await handleAdminAction(adminClient, action, payload || {});
       return new Response(JSON.stringify(result), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate messages array
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid messages format" }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -287,44 +303,102 @@ STYLE:
   }
 });
 
+const ALLOWED_ACTIONS = new Set(["GRANT_ROLE", "REVOKE_ROLE", "MARK_PAID", "GET_USER_DETAILS"]);
+const ALLOWED_ROLES = new Set(["admin", "moderator", "user", "consultant", "barbershop"]);
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function handleAdminAction(adminClient: any, action: string, payload: any) {
+  // Whitelist actions
+  if (!ALLOWED_ACTIONS.has(action)) {
+    return { error: `Unknown action: ${action}. Allowed: ${[...ALLOWED_ACTIONS].join(", ")}` };
+  }
+
   switch (action) {
     case 'GRANT_ROLE': {
-      const { userId, role } = payload;
+      const { userId, role } = payload || {};
+      if (!userId || !UUID_REGEX.test(userId)) {
+        return { error: "Invalid or missing userId (must be UUID)" };
+      }
+      if (!role || !ALLOWED_ROLES.has(role)) {
+        return { error: `Invalid role. Allowed: ${[...ALLOWED_ROLES].join(", ")}` };
+      }
+      // Verify user exists
+      const { data: targetUser } = await adminClient.auth.admin.getUserById(userId);
+      if (!targetUser?.user) {
+        return { error: "Target user not found" };
+      }
       const { error } = await adminClient
         .from('user_roles')
         .insert({ user_id: userId, role })
         .select();
-      
       if (error) throw error;
+
+      // Audit log
+      await adminClient.from("activity_log").insert({
+        user_id: userId,
+        type: "admin_action",
+        message: `Role "${role}" granted by admin`,
+      });
       return { success: true, message: `Role ${role} granted successfully` };
     }
     
     case 'REVOKE_ROLE': {
-      const { userId, role } = payload;
+      const { userId, role } = payload || {};
+      if (!userId || !UUID_REGEX.test(userId)) {
+        return { error: "Invalid or missing userId (must be UUID)" };
+      }
+      if (!role || !ALLOWED_ROLES.has(role)) {
+        return { error: `Invalid role. Allowed: ${[...ALLOWED_ROLES].join(", ")}` };
+      }
       const { error } = await adminClient
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
         .eq('role', role);
-      
       if (error) throw error;
+
+      await adminClient.from("activity_log").insert({
+        user_id: userId,
+        type: "admin_action",
+        message: `Role "${role}" revoked by admin`,
+      });
       return { success: true, message: `Role ${role} revoked successfully` };
     }
     
     case 'MARK_PAID': {
-      const { storefrontId } = payload;
+      const { storefrontId } = payload || {};
+      if (!storefrontId || !UUID_REGEX.test(storefrontId)) {
+        return { error: "Invalid or missing storefrontId (must be UUID)" };
+      }
+      // Verify storefront exists
+      const { data: sf } = await adminClient
+        .from('storefronts')
+        .select('id, user_id, title')
+        .eq('id', storefrontId)
+        .maybeSingle();
+      if (!sf) {
+        return { error: "Storefront not found" };
+      }
       const { error } = await adminClient
         .from('storefronts')
         .update({ status: 'paid', paid_at: new Date().toISOString() })
         .eq('id', storefrontId);
-      
       if (error) throw error;
+
+      await adminClient.from("activity_log").insert({
+        user_id: sf.user_id,
+        type: "admin_action",
+        message: `Storefront "${sf.title}" marked as paid by admin`,
+        related_id: storefrontId,
+      });
       return { success: true, message: 'Storefront marked as paid' };
     }
     
     case 'GET_USER_DETAILS': {
-      const { userId } = payload;
+      const { userId } = payload || {};
+      if (!userId || !UUID_REGEX.test(userId)) {
+        return { error: "Invalid or missing userId (must be UUID)" };
+      }
       const [profileRes, storefrontsRes, rolesRes] = await Promise.all([
         adminClient.from('profiles').select('*').eq('user_id', userId).single(),
         adminClient.from('storefronts').select('*').eq('user_id', userId),
