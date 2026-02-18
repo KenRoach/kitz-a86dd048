@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
-  Plus, Search, Phone, User, Users, Clock, ArrowRight, MessageCircle, Bell
+  Plus, Search, Phone, User, Users, Clock, ArrowRight, MessageCircle, Bell,
+  Bot, Send, Mail, Copy
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ interface Contact {
   id: string;
   name: string;
   phone: string | null;
+  email: string | null;
   notes: string | null;
   lifetime_value: number;
   last_interaction_at: string | null;
@@ -31,6 +33,10 @@ interface FollowUp {
   reason: string;
   due_at: string;
   status: string;
+  suggested_message?: string | null;
+  channel?: string | null;
+  step?: number;
+  sequence_type?: string;
 }
 
 export default function CRM() {
@@ -52,7 +58,7 @@ export default function CRM() {
     if (!user) return;
     const { data } = await supabase
       .from("crm_contacts")
-      .select("id, name, phone, notes, lifetime_value, last_interaction_at, created_at")
+      .select("id, name, phone, email, notes, lifetime_value, last_interaction_at, created_at")
       .eq("user_id", user.id)
       .order("last_interaction_at", { ascending: false, nullsFirst: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
@@ -170,16 +176,67 @@ export default function CRM() {
               {pendingFollowUps.map(f => (
                 <Card key={f.id} className="p-3 border-orange-200 dark:border-orange-800/30">
                   <div className="flex items-center justify-between gap-2">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm">{f.reason}</p>
                       <p className="text-xs text-muted-foreground">
                         {language === "es" ? "Vence" : "Due"}: {new Date(f.due_at).toLocaleDateString()}
+                        {f.step && <span className="ml-1">• Step {f.step}</span>}
                       </p>
                     </div>
                     <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => completeFollowUp(f.id)}>
                       ✓
                     </Button>
                   </div>
+                  {f.suggested_message && (
+                    <div className="mt-2 p-2.5 rounded-lg bg-muted/60 border border-border/50">
+                      <div className="flex items-start gap-2">
+                        <Bot className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                        <p className="text-xs text-foreground/80 leading-relaxed">{f.suggested_message}</p>
+                      </div>
+                      <div className="flex gap-1.5 mt-2">
+                        {f.channel === "whatsapp" && selectedContact?.phone && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-[10px] h-6 px-2 gap-1"
+                            onClick={() => {
+                              const cleaned = selectedContact.phone!.replace(/\D/g, "");
+                              window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(f.suggested_message!)}`, "_blank");
+                              completeFollowUp(f.id);
+                            }}
+                          >
+                            <Send className="w-3 h-3" />
+                            WhatsApp
+                          </Button>
+                        )}
+                        {f.channel === "email" && selectedContact?.email && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-[10px] h-6 px-2 gap-1"
+                            onClick={() => {
+                              window.open(`mailto:${selectedContact.email}?body=${encodeURIComponent(f.suggested_message!)}`, "_blank");
+                              completeFollowUp(f.id);
+                            }}
+                          >
+                            <Mail className="w-3 h-3" />
+                            Email
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] h-6 px-2 gap-1"
+                          onClick={() => {
+                            navigator.clipboard.writeText(f.suggested_message!);
+                            toast.success(language === "es" ? "Copiado" : "Copied");
+                          }}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               ))}
             </section>
