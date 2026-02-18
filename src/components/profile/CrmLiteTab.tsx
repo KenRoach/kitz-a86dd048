@@ -10,7 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useConsultantRole } from "@/hooks/useConsultantRole";
+
 import { 
   Users, Plus, Search, Phone, Mail, Trash2, 
   UserPlus, DollarSign, ShoppingBag, Clock,
@@ -45,7 +45,7 @@ const LIFECYCLE_OPTIONS = [
 export function CrmLiteTab() {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { isConsultant } = useConsultantRole();
+  const isConsultant = false; // Consultant CRM removed from launch
   const queryClient = useQueryClient();
   
   const [search, setSearch] = useState("");

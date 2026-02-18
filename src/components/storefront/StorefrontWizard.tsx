@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { BundleItemsInput, BundleItem, createEmptyItem } from "./BundleItemsInput";
 import { ProductSelector } from "./ProductSelector";
 import { useLanguage } from "@/hooks/useLanguage";
-import { VoiceInput } from "@/components/ui/VoiceInput";
+
 
 interface ProductData {
   id: string;
@@ -454,15 +454,6 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs sm:text-sm text-muted-foreground">Title</label>
                     <div className="flex items-center gap-1">
-                      <VoiceInput 
-                        onTranscript={(text) => {
-                          setTitle(text);
-                          setSelectedProductId(null);
-                          setSuggestedPriceRange(null);
-                        }}
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                      />
                       <button
                         type="button"
                         onClick={generateAISuggestions}

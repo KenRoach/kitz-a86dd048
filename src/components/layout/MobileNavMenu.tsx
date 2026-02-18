@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Store, Users, ShoppingCart, BarChart3,
-  Settings, Package, Bot, Lightbulb
+  Settings, Package, Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -21,7 +21,6 @@ const primaryItems = [
 
 const secondaryItems = [
   { icon: Package, labelEn: "Products", labelEs: "Productos", path: "/products" },
-  { icon: Bot, labelEn: "AI Agent", labelEs: "Agente IA", path: "/agent" },
   { icon: Lightbulb, labelEn: "Suggestions", labelEs: "Sugerencias", path: "/suggestions" },
 ];
 

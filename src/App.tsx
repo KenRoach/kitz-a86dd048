@@ -31,11 +31,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
-const ConsultantDashboard = lazy(() => import("./pages/ConsultantDashboard"));
-const BarbershopDashboard = lazy(() => import("./pages/BarbershopDashboard"));
-const StudioDashboard = lazy(() => import("./pages/StudioDashboard"));
 const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
-const AgentCommander = lazy(() => import("./pages/AgentCommander"));
 
 // Optimized QueryClient with caching
 const queryClient = new QueryClient({
@@ -111,19 +107,15 @@ function AppRoutes() {
         <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
         <Route path="/insights" element={<ProtectedRoute><InsightsPage /></ProtectedRoute>} />
-        <Route path="/consultant" element={<ProtectedRoute><ConsultantDashboard /></ProtectedRoute>} />
-        <Route path="/barbershop" element={<ProtectedRoute><BarbershopDashboard /></ProtectedRoute>} />
-        <Route path="/studio" element={<ProtectedRoute><StudioDashboard /></ProtectedRoute>} />
         <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
-        <Route path="/agent" element={<ProtectedRoute><AgentCommander /></ProtectedRoute>} />
         <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
-        {/* Redirect old profile route to consultant */}
-        <Route path="/profile" element={<Navigate to="/consultant" replace />} />
+        {/* Redirect old profile route to dashboard */}
+        <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/delete-account" element={<ProtectedRoute><DeleteAccount /></ProtectedRoute>} />
