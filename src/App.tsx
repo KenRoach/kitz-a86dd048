@@ -30,6 +30,8 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
+const CalendarPage = lazy(() => import("./pages/Calendar"));
+const InboxPage = lazy(() => import("./pages/Inbox"));
 
 // Optimized QueryClient with caching
 const queryClient = new QueryClient({
@@ -104,6 +106,8 @@ function AppRoutes() {
         <Route path="/dashboard" element={<ProtectedRoute><BusinessHome /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+        <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
         <Route path="/insights" element={<Navigate to="/dashboard" replace />} />
         <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
         <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />

@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.agent-vault]
 verify_jwt = false
+
+[functions.inbox-webhook]
+verify_jwt = false
+
+[functions.check-followups]
+verify_jwt = false
