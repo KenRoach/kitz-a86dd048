@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, ArrowLeft, Sparkles, Check, Upload, X, Send, Package, ShoppingBag, Library, Wand2, Loader2, FileText } from "lucide-react";
+import { VoiceInputButton } from "@/components/ui/VoiceInputButton";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -377,13 +378,16 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
 
               <div>
                 <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.bundleName}</label>
-                <Input
-                  value={bundleTitle}
-                  onChange={(e) => setBundleTitle(e.target.value)}
-                  placeholder="e.g., Family Meal Deal, Party Pack..."
-                  className="text-base"
-                  autoFocus
-                />
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    value={bundleTitle}
+                    onChange={(e) => setBundleTitle(e.target.value)}
+                    placeholder="e.g., Family Meal Deal, Party Pack..."
+                    className="text-base flex-1"
+                    autoFocus
+                  />
+                  <VoiceInputButton onTranscript={(t) => setBundleTitle(t)} />
+                </div>
               </div>
 
               <BundleItemsInput items={bundleItems} onChange={setBundleItems} />
@@ -469,6 +473,7 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                       </button>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1.5">
                   <Input
                     value={title}
                     onChange={(e) => {
@@ -477,9 +482,11 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                       setSuggestedPriceRange(null);
                     }}
                     placeholder="e.g., Chicken Bowl, Cupcakes..."
-                    className="text-base py-4 sm:py-5"
+                    className="text-base py-4 sm:py-5 flex-1"
                     autoFocus
                   />
+                  <VoiceInputButton onTranscript={(t) => { setTitle(t); setSelectedProductId(null); setSuggestedPriceRange(null); }} />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -524,7 +531,10 @@ export function StorefrontWizard({ open, onClose, onCreated, initialProduct }: S
                 {/* Description from AI */}
                 {description && (
                   <div>
-                    <label className="text-xs sm:text-sm text-muted-foreground mb-1 block">{t.description}</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs sm:text-sm text-muted-foreground">{t.description}</label>
+                      <VoiceInputButton onTranscript={(t) => setDescription(prev => prev ? prev + " " + t : t)} />
+                    </div>
                     <Textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}

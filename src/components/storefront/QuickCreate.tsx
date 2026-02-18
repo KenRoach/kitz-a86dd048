@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Zap } from "lucide-react";
+import { VoiceInputButton } from "@/components/ui/VoiceInputButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -93,15 +94,27 @@ export function QuickCreate({ onCreated }: QuickCreateProps) {
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="relative">
-        <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Quick: Servicio $25"
-          className="pl-10 pr-4 py-5 text-sm bg-muted/50 border-dashed"
-          disabled={loading}
-        />
+      <div className="relative flex items-center gap-1.5">
+        <div className="relative flex-1">
+          <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Quick: Servicio $25"
+            className="pl-10 pr-4 py-5 text-sm bg-muted/50 border-dashed"
+            disabled={loading}
+          />
+          {input && parseInput(input) && (
+            <button
+              type="submit"
+              disabled={loading}
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-medium rounded-lg"
+            >
+              {loading ? "..." : "Create"}
+            </button>
+          )}
+        </div>
+        <VoiceInputButton onTranscript={(t) => setInput(t)} disabled={loading} />
       </div>
       {input && parseInput(input) && (
         <button
