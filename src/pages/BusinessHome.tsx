@@ -299,6 +299,75 @@ export default function BusinessHome() {
             <p className="text-xs text-muted-foreground">{stats.totalContacts}</p>
           </Card>
         </div>
+
+        {/* AI Business Scan Results */}
+        {(summary || actions.length > 0) && (
+          <section className="space-y-4">
+            <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Bot className="w-4 h-4 text-primary" />
+              {language === "es" ? "Resumen de Ejecutar" : "Business Scan Results"}
+            </h2>
+
+            {/* AI Summary Cards */}
+            {summary && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card className="p-3">
+                  <p className="text-xs text-muted-foreground">{language === "es" ? "Ingresos esta semana" : "This week revenue"}</p>
+                  <p className="text-lg font-semibold">${summary.thisWeekRevenue?.toFixed(2) ?? "0.00"}</p>
+                  {summary.lastWeekRevenue != null && summary.lastWeekRevenue > 0 && (
+                    <div className="flex items-center gap-1 mt-1">
+                      {summary.thisWeekRevenue >= summary.lastWeekRevenue ? (
+                        <TrendingUp className="w-3 h-3 text-emerald-500" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3 text-destructive" />
+                      )}
+                      <span className="text-[10px] text-muted-foreground">
+                        vs ${summary.lastWeekRevenue.toFixed(2)} {language === "es" ? "semana pasada" : "last week"}
+                      </span>
+                    </div>
+                  )}
+                </Card>
+                <Card className="p-3">
+                  <p className="text-xs text-muted-foreground">{language === "es" ? "Seguimientos vencidos" : "Overdue follow-ups"}</p>
+                  <p className="text-lg font-semibold">{summary.overdueFollowUps ?? 0}</p>
+                </Card>
+                <Card className="p-3">
+                  <p className="text-xs text-muted-foreground">{language === "es" ? "Leads calientes" : "Hot leads"}</p>
+                  <p className="text-lg font-semibold">{summary.hotLeads ?? 0}</p>
+                </Card>
+                <Card className="p-3">
+                  <p className="text-xs text-muted-foreground">{language === "es" ? "Órdenes riesgosas" : "Risky orders"}</p>
+                  <p className="text-lg font-semibold">{summary.riskyOrders ?? 0}</p>
+                </Card>
+              </div>
+            )}
+
+            {/* AI Actions */}
+            {actions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  {language === "es" ? "Acciones recomendadas" : "Recommended actions"}
+                </p>
+                {actions.map((a, i) => (
+                  <Card key={i} className="p-3">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{a.title}</p>
+                          <Badge className={`text-[10px] ${priorityColor(a.priority)}`}>{a.priority}</Badge>
+                        </div>
+                        {a.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{a.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </AppLayout>
   );
