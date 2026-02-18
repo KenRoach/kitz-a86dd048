@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { WhatsAppQR } from "@/components/inbox/WhatsAppQR";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,7 @@ export default function Inbox() {
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<InboxMessage | null>(null);
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [profile, setProfile] = useState<{ phone: string | null; business_name: string } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -60,7 +62,7 @@ export default function Inbox() {
   const fetchData = useCallback(async () => {
     if (!user) return;
 
-    const [contactsRes, messagesRes] = await Promise.all([
+    const [contactsRes, messagesRes, profileRes] = await Promise.all([
       supabase
         .from("crm_contacts")
         .select("id, name, phone, email, last_interaction_at")
@@ -74,10 +76,16 @@ export default function Inbox() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(100),
+      supabase
+        .from("profiles")
+        .select("phone, business_name")
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
 
     setContacts((contactsRes.data as Contact[]) || []);
     setMessages((messagesRes.data as InboxMessage[]) || []);
+    if (profileRes.data) setProfile(profileRes.data);
     setLoading(false);
   }, [user]);
 
@@ -159,7 +167,14 @@ export default function Inbox() {
           </div>
 
           {/* WhatsApp Tab */}
-          <TabsContent value="whatsapp" className="mt-3 space-y-2">
+          <TabsContent value="whatsapp" className="mt-3 space-y-3">
+            {user && (
+              <WhatsAppQR
+                userId={user.id}
+                businessPhone={profile?.phone ?? null}
+                businessName={profile?.business_name ?? "My Business"}
+              />
+            )}
             {filteredContacts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
