@@ -15,6 +15,7 @@ import {
   Plus, Search, Phone, User, Users, Clock, ArrowRight, MessageCircle, Bell,
   Bot, Send, Mail, Copy
 } from "lucide-react";
+import { VoiceInputButton } from "@/components/ui/VoiceInputButton";
 import { toast } from "sonner";
 
 interface Contact {
@@ -279,6 +280,10 @@ export default function CRM() {
               toast.success(language === "es" ? "Nota agregada" : "Note added");
             }} className="flex gap-2">
               <Input name="note" placeholder={language === "es" ? "Agregar nota..." : "Add note..."} className="flex-1" />
+              <VoiceInputButton onTranscript={(t) => {
+                const input = document.querySelector<HTMLInputElement>('input[name="note"]');
+                if (input) { const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set; nativeSet?.call(input, (input.value ? input.value + " " : "") + t); input.dispatchEvent(new Event('input', { bubbles: true })); }
+              }} />
               <Button type="submit" size="sm">{language === "es" ? "Agregar" : "Add"}</Button>
             </form>
           </Card>
@@ -325,11 +330,17 @@ export default function CRM() {
               </DialogHeader>
               <div className="space-y-3">
                 <div><Label>{language === "es" ? "Nombre" : "Name"} *</Label>
-                  <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
+                  <div className="flex items-center gap-1.5">
+                    <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="flex-1" />
+                    <VoiceInputButton onTranscript={(t) => setForm(p => ({ ...p, name: t }))} />
+                  </div></div>
                 <div><Label>{language === "es" ? "Teléfono" : "Phone"}</Label>
                   <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+507..." /></div>
                 <div><Label>{language === "es" ? "Notas" : "Notes"}</Label>
-                  <Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
+                  <div className="flex items-start gap-1.5">
+                    <Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} className="flex-1" />
+                    <VoiceInputButton onTranscript={(t) => setForm(p => ({ ...p, notes: p.notes ? p.notes + " " + t : t }))} className="mt-1" />
+                  </div></div>
                 <Button onClick={handleAddContact} className="w-full">{language === "es" ? "Agregar" : "Add Customer"}</Button>
               </div>
             </DialogContent>
