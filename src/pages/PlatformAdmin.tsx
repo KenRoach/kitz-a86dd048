@@ -320,80 +320,80 @@ export default function PlatformAdmin() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 max-w-6xl">
+      <div className="space-y-4 md:space-y-6 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <h1 className="text-xl font-semibold text-foreground">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Shield className="w-5 h-5 text-primary shrink-0" />
+            <h1 className="text-lg md:text-xl font-semibold text-foreground truncate">
               {language === "es" ? "Centro de Control" : "Control Center"}
             </h1>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={handleRefresh} disabled={refreshing}>
             <RefreshCw className={`w-4 h-4 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
-            {language === "es" ? "Actualizar" : "Refresh"}
+            <span className="hidden sm:inline">{language === "es" ? "Actualizar" : "Refresh"}</span>
           </Button>
         </div>
 
         {/* Top Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-3.5 h-3.5 text-primary" />
+        <div className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
+          <Card className="p-3 md:p-4">
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+              <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-3 h-3 md:w-3.5 md:h-3.5 text-primary" />
               </div>
               {growthTrend === "up"
-                ? <TrendingUp className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
-                : <TrendingDown className="w-3.5 h-3.5 text-destructive ml-auto" />
+                ? <TrendingUp className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-500 ml-auto" />
+                : <TrendingDown className="w-3 h-3 md:w-3.5 md:h-3.5 text-destructive ml-auto" />
               }
             </div>
-            <p className="text-2xl font-bold">{stats.totalUsers}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xl md:text-2xl font-bold">{stats.totalUsers}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">
               {language === "es" ? "Usuarios" : "Users"}
               {stats.newUsers7d > 0 && <span className="text-emerald-600 ml-1">+{stats.newUsers7d}</span>}
             </p>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+          <Card className="p-3 md:p-4">
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+              <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <DollarSign className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600" />
               </div>
             </div>
-            <p className="text-2xl font-bold">${stats.totalRevenue.toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xl md:text-2xl font-bold">${stats.totalRevenue.toFixed(0)}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">
               {language === "es" ? "Revenue total" : "Total revenue"}
               {stats.revenueToday > 0 && <span className="text-emerald-600 ml-1">+${stats.revenueToday.toFixed(0)}</span>}
             </p>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <Clock className="w-3.5 h-3.5 text-amber-600" />
+          <Card className="p-3 md:p-4">
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+              <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-amber-600" />
               </div>
             </div>
-            <p className="text-2xl font-bold">${stats.pendingRevenue.toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xl md:text-2xl font-bold">${stats.pendingRevenue.toFixed(0)}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">
               {stats.pendingOrders} {language === "es" ? "pendientes" : "pending"}
             </p>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <Activity className="w-3.5 h-3.5 text-purple-600" />
+          <Card className="p-3 md:p-4">
+            <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+              <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-purple-500/10 flex items-center justify-center">
+                <Activity className="w-3 h-3 md:w-3.5 md:h-3.5 text-purple-600" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{activePct}%</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xl md:text-2xl font-bold">{activePct}%</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">
               {stats.activeUsers7d} {language === "es" ? "activos (7d)" : "active (7d)"}
             </p>
           </Card>
         </div>
 
         {/* Growth Charts */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -402,7 +402,7 @@ export default function PlatformAdmin() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-36">
+              <div className="h-32 md:h-36">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dailyMetrics}>
                     <XAxis dataKey="date" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
@@ -423,7 +423,7 @@ export default function PlatformAdmin() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-36">
+              <div className="h-32 md:h-36">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dailyMetrics}>
                     <defs>
@@ -444,7 +444,7 @@ export default function PlatformAdmin() {
         </div>
 
         {/* Churn Alerts + Recent Orders */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* Churn Alerts */}
           <Card>
             <CardHeader className="pb-2">
@@ -506,15 +506,15 @@ export default function PlatformAdmin() {
               ) : (
                 <div className="divide-y divide-border">
                   {recentOrders.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between px-4 py-2.5">
+                    <div key={s.id} className="flex items-center justify-between px-3 md:px-4 py-2.5 gap-2">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{s.title}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-[10px] md:text-[11px] text-muted-foreground truncate">
                           {getUserName(s.user_id)} → {s.customer_name || "—"} • {format(new Date(s.created_at), "MMM dd")}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-medium">${Number(s.price).toFixed(2)}</span>
+                      <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+                        <span className="text-xs md:text-sm font-medium">${Number(s.price).toFixed(0)}</span>
                         {getStatusBadge(s.status)}
                         {s.status === "sent" && (
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleMarkPaid(s.id)}>
@@ -551,25 +551,25 @@ export default function PlatformAdmin() {
                 className="pl-9"
               />
             </div>
-            <ScrollArea className="h-[350px]">
+            <ScrollArea className="h-[280px] md:h-[350px]">
               <div className="divide-y divide-border">
                 {filteredUsers.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between py-2.5 pr-1 hover:bg-muted/40 transition-colors rounded-md px-2">
+                  <div key={u.id} className="flex items-center justify-between py-2.5 pr-1 hover:bg-muted/40 transition-colors rounded-md px-2 gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{u.business_name}</p>
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                        <p className="text-sm font-medium truncate max-w-[180px] md:max-w-none">{u.business_name}</p>
                         {userStorefrontCounts[u.user_id] > 0 && (
                           <Badge variant="outline" className="text-[10px] shrink-0">
-                            {userStorefrontCounts[u.user_id]} {language === "es" ? "vitrinas" : "storefronts"}
+                            {userStorefrontCounts[u.user_id]} {language === "es" ? "vitrinas" : "sf"}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        {u.business_type || "—"} • {u.city || u.country || "—"} • {format(new Date(u.created_at), "MMM dd, yyyy")}
-                        {u.phone && ` • ${u.phone}`}
+                      <p className="text-[10px] md:text-[11px] text-muted-foreground truncate">
+                        {u.business_type || "—"} • {u.city || u.country || "—"} • {format(new Date(u.created_at), "MMM dd")}
+                        <span className="hidden md:inline"> {u.phone && `• ${u.phone}`}</span>
                       </p>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => handleViewUser(u)}>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" onClick={() => handleViewUser(u)}>
                       <Eye className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -589,7 +589,7 @@ export default function PlatformAdmin() {
           <p className="text-xs font-medium text-muted-foreground mb-3">
             {language === "es" ? "Pulso de salud" : "Health Pulse"}
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
             <div className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${stats.newUsers7d > 0 ? "bg-emerald-500" : "bg-amber-500"}`} />
               <span className="text-sm">{language === "es" ? "Crecimiento" : "Growth"}: {stats.newUsers7d > 0 ? "✓" : "—"}</span>
@@ -612,7 +612,7 @@ export default function PlatformAdmin() {
 
       {/* User Detail Dialog */}
       <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-[95vw] md:max-w-lg mx-auto max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserCog className="w-5 h-5" />
