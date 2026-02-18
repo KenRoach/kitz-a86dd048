@@ -1,6 +1,6 @@
 {
   "name": "Kitz",
-  "description": "Simple storefront sales platform for small businesses in Panama. Helps owners create shareable storefronts, manage orders, track customers, and get paid faster.",
+  "description": "AI-native Business Management System for small business owners (creators & local vendors) in Panama. Solves lead/follow-up chaos, order/fulfillment management, and financial clarity.",
   "url": "https://kitz.lovable.app",
   "logo": "https://kitz.lovable.app/favicon.png",
   "contact": {
@@ -10,43 +10,91 @@
     "Small business owners in Panama",
     "Freelancers and service providers",
     "Home bakers, crafters, and artisans",
+    "Consultants and coaches",
     "Anyone selling through WhatsApp or social media"
   ],
   "capabilities": {
     "storefronts": {
       "description": "Create shareable product pages with title, description, price, images, and multiple payment options. Customers can view, order, and pay via shared links.",
-      "features": ["Shareable links", "Product bundles", "Order tracking", "Payment proof upload"]
+      "features": ["Shareable links", "Product bundles", "Order tracking", "Payment proof upload", "AI-suggested storefronts"]
     },
     "payments": {
       "description": "Accept payments through Panama's most popular methods.",
       "methods": ["Yappy (mobile payments)", "Credit/Debit cards (Visa, Mastercard)", "Cash on delivery", "Pluxee (corporate vouchers)"]
     },
-    "customer_management": {
-      "description": "CRM-lite for tracking customer lifecycle, order history, spending, and follow-ups.",
-      "features": ["Lifecycle tracking (new, active, loyal)", "Order history", "Contact management", "Follow-up reminders"]
+    "orders": {
+      "description": "Full order lifecycle management with cost tracking and margin analysis.",
+      "features": ["Order pipeline (draft → paid → fulfilled → delivered)", "Cost and margin tracking", "Risk flagging", "Delivery tracking", "Order history"]
     },
-    "ai_agent": {
-      "description": "Omnichannel AI agent commander for WhatsApp, Email, and Voice. Supports three specialized roles: Support (FAQ/knowledge base), Sales (lead scoring, upsells), and Operations (inventory, tasks).",
-      "features": ["Knowledge base / FAQ management", "Automated customer support", "Rule-based automation", "Pending action approval queue", "Multi-channel conversations"]
+    "crm": {
+      "description": "Customer relationship management with lifecycle tracking and follow-ups.",
+      "features": ["Lifecycle tracking (new, active, loyal)", "Lead scoring", "Order history and lifetime value", "Contact management", "Follow-up reminders", "Tags and segmentation"]
+    },
+    "ai_agent_commander": {
+      "description": "Omnichannel AI agent orchestration hub for WhatsApp, Email, and Voice. Hybrid autonomy mode with human-in-the-loop approval.",
+      "agent_types": {
+        "support": "FAQ/knowledge base driven customer support",
+        "sales": "Lead scoring (1-100), upsells, CRM-integrated selling",
+        "operations": "Inventory monitoring, task management, fulfillment"
+      },
+      "features": [
+        "Multi-channel conversations (WhatsApp, Email, Voice)",
+        "Knowledge base / FAQ management",
+        "Rule-based automation with approval queue",
+        "Pending action approval queue",
+        "AI setup wizard",
+        "Security dashboard with audit logs",
+        "Agent identity management (zero-trust)",
+        "JIT token scoping",
+        "Prompt injection detection",
+        "Kill switch per agent",
+        "Daily action caps (25/agent)"
+      ],
+      "security": {
+        "model": "Zero-trust, least-privilege",
+        "features": ["Agent identity cards", "Session-scoped JIT tokens", "Audit logging", "Breach incident tracking", "Injection detection", "Throttle controls", "Kill switch"]
+      }
     },
     "ai_tools": {
-      "description": "AI-powered business tools for growth.",
-      "features": ["Business advisor with personalized recommendations", "Marketing image generator", "Product description generator", "Instagram post ideas"]
-    },
-    "productivity": {
-      "description": "Built-in productivity suite for business owners.",
-      "features": ["Eisenhower Matrix (task prioritization)", "Habit tracker", "Pomodoro timer", "Weekly review system", "Content calendar", "SWOT analysis"]
+      "description": "AI-powered business tools gated by AI Battery (credit system).",
+      "features": ["Business advisor with personalized recommendations", "Marketing image generator", "Product description generator", "Instagram post ideas", "Content calendar"]
     },
     "consultant_crm": {
       "description": "Kanban-style contact pipeline for consultants and service providers.",
-      "features": ["Funnel stage tracking", "Bulk email", "Calendar invites", "Daily assistant"]
+      "features": ["Funnel stage tracking", "Bulk email", "Calendar invites", "Daily assistant", "Google Calendar integration"]
+    },
+    "productivity": {
+      "description": "Built-in productivity tools for business owners.",
+      "features": ["Pomodoro timer", "Weekly review system", "Content calendar", "SWOT analysis"]
+    },
+    "insights": {
+      "description": "Financial clarity dashboard for revenue, costs, and margins.",
+      "features": ["Revenue tracking", "Cost analysis", "Margin calculations", "Payment method breakdown"]
+    },
+    "notifications": {
+      "description": "Real-time notification system for orders, follow-ups, and agent actions.",
+      "features": ["Order notifications", "Follow-up reminders", "Agent action alerts"]
+    },
+    "onboarding": {
+      "description": "Guided onboarding for new users.",
+      "features": ["Profile setup wizard", "Quick start checklist", "Spotlight tour"]
     }
   },
+  "ai_battery": {
+    "description": "Credit-based AI usage system. Users have a balance that depletes with AI actions and recharges over time.",
+    "gating": "All AI features require sufficient credits. UI shows battery indicator and recharge modal."
+  },
   "tech_stack": {
-    "frontend": "React + TypeScript + Tailwind CSS + Vite",
-    "backend": "Supabase (database, auth, edge functions, storage)",
-    "features": ["Real-time order notifications", "Responsive mobile-first design", "PWA-ready", "Bilingual (English/Spanish)"]
+    "frontend": "React + TypeScript + Tailwind CSS + Vite + shadcn/ui",
+    "backend": "Lovable Cloud (database, auth, edge functions, storage)",
+    "ai": "Lovable AI (multi-model: Gemini, GPT)",
+    "features": ["Real-time order notifications", "Responsive mobile-first design", "PWA-ready", "Bilingual (English/Spanish)", "Zero-trust agent security"]
   },
   "locales": ["en", "es"],
-  "region": "Panama"
+  "region": "Panama",
+  "design_philosophy": {
+    "principles": ["AI-native", "Agent-driven", "Zero-trust by default", "Premium minimal", "Infrastructure-grade"],
+    "anti_patterns": ["Feature-heavy SaaS", "Cluttered dashboards", "Unbounded AI automation"],
+    "mantras": ["Less UI, more clarity", "Less friction, more containment", "Less noise, more signal", "Remove before adding"]
+  }
 }
