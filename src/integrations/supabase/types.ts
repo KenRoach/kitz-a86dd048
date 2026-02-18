@@ -1391,6 +1391,7 @@ export type Database = {
           due_at: string
           id: string
           max_steps: number
+          message_generated_at: string | null
           order_id: string | null
           pause_reason: string | null
           paused_at: string | null
@@ -1398,6 +1399,7 @@ export type Database = {
           sequence_type: string
           status: string
           step: number
+          suggested_message: string | null
           user_id: string
         }
         Insert: {
@@ -1408,6 +1410,7 @@ export type Database = {
           due_at: string
           id?: string
           max_steps?: number
+          message_generated_at?: string | null
           order_id?: string | null
           pause_reason?: string | null
           paused_at?: string | null
@@ -1415,6 +1418,7 @@ export type Database = {
           sequence_type?: string
           status?: string
           step?: number
+          suggested_message?: string | null
           user_id: string
         }
         Update: {
@@ -1425,6 +1429,7 @@ export type Database = {
           due_at?: string
           id?: string
           max_steps?: number
+          message_generated_at?: string | null
           order_id?: string | null
           pause_reason?: string | null
           paused_at?: string | null
@@ -1432,6 +1437,7 @@ export type Database = {
           sequence_type?: string
           status?: string
           step?: number
+          suggested_message?: string | null
           user_id?: string
         }
         Relationships: [

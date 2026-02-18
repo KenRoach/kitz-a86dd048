@@ -14,9 +14,10 @@ import { AIEmptyBanner } from "@/components/ai/AIEmptyBanner";
 import {
   TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Store,
   AlertTriangle, Zap, ArrowRight, Clock, CheckCircle2, Flame, Bot,
-  MessageCircle, Bell
+  MessageCircle, Bell, Send, Mail, Copy, Check
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function BusinessHome() {
   const { user, profile } = useAuth();
@@ -42,7 +43,7 @@ export default function BusinessHome() {
       supabase.from("crm_contacts").select("id, lead_score").eq("user_id", user.id),
       supabase.from("follow_ups").select("id").eq("user_id", user.id).eq("status", "pending").lt("due_at", now.toISOString()),
       supabase.from("ai_actions").select("*").eq("user_id", user.id).eq("status", "pending").order("created_at", { ascending: false }).limit(5),
-      supabase.from("follow_ups").select("id, reason, due_at, status, contact_id, order_id, channel").eq("user_id", user.id).eq("status", "pending").lte("due_at", now.toISOString()).order("due_at", { ascending: true }).limit(5),
+      supabase.from("follow_ups").select("id, reason, due_at, status, contact_id, order_id, channel, suggested_message, sequence_type, step").eq("user_id", user.id).eq("status", "pending").lte("due_at", now.toISOString()).order("due_at", { ascending: true }).limit(5),
     ]);
 
     const orders = ordersRes.data || [];
@@ -190,14 +191,87 @@ export default function BusinessHome() {
                   <div className="flex items-start gap-3">
                     <MessageCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm">{f.reason}</p>
+                      <p className="text-sm font-medium">{f.reason}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {new Date(f.due_at).toLocaleDateString()}
+                        {f.sequence_type && f.step && (
+                          <span className="ml-2">• Step {f.step}</span>
+                        )}
                       </p>
+                      {f.suggested_message && (
+                        <div className="mt-2 p-2.5 rounded-lg bg-muted/60 border border-border/50">
+                          <div className="flex items-start gap-2">
+                            <Bot className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                            <p className="text-xs text-foreground/80 leading-relaxed">{f.suggested_message}</p>
+                          </div>
+                          <div className="flex gap-1.5 mt-2">
+                            {f.channel === "whatsapp" && f.contact_id && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-[10px] h-6 px-2 gap-1"
+                                onClick={async () => {
+                                  const { data: contact } = await supabase
+                                    .from("crm_contacts")
+                                    .select("phone")
+                                    .eq("id", f.contact_id)
+                                    .maybeSingle();
+                                  if (contact?.phone) {
+                                    const cleaned = contact.phone.replace(/\D/g, "");
+                                    window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(f.suggested_message)}`, "_blank");
+                                    await supabase.from("follow_ups").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", f.id);
+                                    setDueFollowUps(prev => prev.filter(fu => fu.id !== f.id));
+                                    setStats(prev => ({ ...prev, pendingFollowUps: Math.max(0, prev.pendingFollowUps - 1) }));
+                                  }
+                                }}
+                              >
+                                <Send className="w-3 h-3" />
+                                WhatsApp
+                              </Button>
+                            )}
+                            {f.channel === "email" && f.contact_id && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-[10px] h-6 px-2 gap-1"
+                                onClick={async () => {
+                                  const { data: contact } = await supabase
+                                    .from("crm_contacts")
+                                    .select("email")
+                                    .eq("id", f.contact_id)
+                                    .maybeSingle();
+                                  if (contact?.email) {
+                                    window.open(`mailto:${contact.email}?body=${encodeURIComponent(f.suggested_message)}`, "_blank");
+                                    await supabase.from("follow_ups").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", f.id);
+                                    setDueFollowUps(prev => prev.filter(fu => fu.id !== f.id));
+                                  }
+                                }}
+                              >
+                                <Mail className="w-3 h-3" />
+                                Email
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-[10px] h-6 px-2 gap-1"
+                              onClick={() => {
+                                navigator.clipboard.writeText(f.suggested_message);
+                                toast.success(language === "es" ? "Mensaje copiado" : "Message copied");
+                              }}
+                            >
+                              <Copy className="w-3 h-3" />
+                              {language === "es" ? "Copiar" : "Copy"}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <Button size="sm" variant="outline" className="text-xs h-7 shrink-0" onClick={() => navigate("/crm")}>
-                      {language === "es" ? "Ver" : "View"}
-                    </Button>
+                    {!f.suggested_message && (
+                      <Button size="sm" variant="outline" className="text-xs h-7 shrink-0" onClick={() => navigate("/crm")}>
+                        {language === "es" ? "Ver" : "View"}
+                      </Button>
+                    )}
                   </div>
                 </Card>
               ))}
