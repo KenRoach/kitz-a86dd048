@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Check, MessageCircle, Store, Sparkles, Users } from "lucide-react";
+import PricingSection from "@/components/landing/PricingSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { PublicLayout } from "@/components/layout/PublicLayout";
@@ -312,6 +313,8 @@ export default function Landing() {
           )}
         </div>
       </section>
+
+      {formState === "idle" && <PricingSection language={language} />}
 
       {/* How it works section - only show when idle */}
       {formState === "idle" && (
