@@ -178,23 +178,97 @@ export default function Storefronts() {
   };
 
   const handleMarkPaid = async (sf: Storefront) => {
+    if (!user) return;
+
+    // 1. Update storefront status
     await supabase.from("storefronts").update({ 
       status: "paid",
       paid_at: new Date().toISOString(),
       fulfillment_status: "pending"
     }).eq("id", sf.id);
 
+    // 2. Find or create CRM contact
+    let contactId: string | null = null;
+    const contactPhone = sf.customer_phone || sf.buyer_name; // buyer_phone stored on storefront
+    const contactName = sf.customer_name || sf.buyer_name || sf.title;
+
+    if (contactPhone || sf.customer_name) {
+      // Try to find existing contact by phone
+      if (sf.customer_phone) {
+        const { data: existing } = await supabase
+          .from("crm_contacts")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("phone", sf.customer_phone)
+          .maybeSingle();
+        contactId = existing?.id || null;
+      }
+
+      // If no contact found, create one
+      if (!contactId && contactName) {
+        const { data: newContact } = await supabase
+          .from("crm_contacts")
+          .insert({
+            user_id: user.id,
+            name: contactName,
+            phone: sf.customer_phone || null,
+            source_channel: "storefront",
+            tags: ["Storefront"],
+            lead_score: "HOT",
+            status: "active",
+            lifetime_value: sf.price,
+          })
+          .select("id")
+          .single();
+        contactId = newContact?.id || null;
+      }
+    }
+
+    // 3. Create order from storefront
+    const { data: newOrder } = await supabase
+      .from("orders")
+      .insert({
+        user_id: user.id,
+        contact_id: contactId,
+        subtotal: sf.price,
+        total: sf.price,
+        cost: 0,
+        payment_status: "PAID",
+        fulfillment_status: "PENDING",
+        channel: "storefront",
+        notes: sf.title,
+        paid_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    // 4. Create order item
+    if (newOrder) {
+      await supabase.from("order_items").insert({
+        order_id: newOrder.id,
+        title: sf.title,
+        description: sf.description,
+        image_url: sf.image_url,
+        quantity: sf.quantity || 1,
+        unit_price: sf.price / (sf.quantity || 1),
+        unit_cost: 0,
+      });
+    }
+
+    // 5. Activity log
     await supabase.from("activity_log").insert({
-      user_id: user?.id,
+      user_id: user.id,
       type: "payment",
       message: `Payment received: ${sf.title} — $${sf.price.toFixed(2)}`,
+      related_id: newOrder?.id || null,
     });
 
+    // 6. Update legacy customers table
     if (sf.customer_name) {
       const { data: customer } = await supabase
         .from("customers")
         .select("*")
-        .eq("user_id", user?.id)
+        .eq("user_id", user.id)
         .eq("name", sf.customer_name)
         .maybeSingle();
 
@@ -215,7 +289,7 @@ export default function Storefronts() {
       }
     }
 
-    toast.success("Marked as paid!");
+    toast.success(language === "es" ? "¡Pagado! Orden creada" : "Marked as paid! Order created");
     fetchStorefronts();
   };
 
