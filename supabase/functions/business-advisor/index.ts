@@ -184,7 +184,7 @@ SPECIAL CONSULTANT INSTRUCTIONS:
 - Offer advice on follow-up and retention`) : '';
 
     const systemPrompt = isSpanish 
-      ? `Eres un asesor de negocios estratégico para pequeños empresarios que usan kitz.io. Tu rol es ayudarlos a AUMENTAR INGRESOS y MEJORAR MÁRGENES.
+      ? `Eres un asesor de negocios estratégico para pequeños empresarios que usan KITZ. Tu rol es ayudarlos a AUMENTAR INGRESOS y MEJORAR MÁRGENES.
 
 ${businessContext}
 
@@ -211,7 +211,7 @@ SIEMPRE:
 - Sugiere pasos concretos que pueden tomar HOY
 - Enfócate en victorias rápidas que aumenten ingresos
 - Ayúdales a entender en qué productos/clientes enfocarse${consultantInstructions}`
-      : `You are a strategic business advisor for small business owners using kitz.io. Your role is to help them INCREASE REVENUE and IMPROVE MARGINS.
+      : `You are a strategic business advisor for small business owners using KITZ. Your role is to help them INCREASE REVENUE and IMPROVE MARGINS.
 
 ${businessContext}
 

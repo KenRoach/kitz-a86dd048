@@ -100,8 +100,8 @@ export function ApiKeySection({ language }: ApiKeySectionProps) {
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">
           {es
-            ? "Genera una llave para que xyz88.io envíe datos a tu cuenta (contactos, órdenes, vitrinas)."
-            : "Generate a key so xyz88.io can push data to your account (contacts, orders, storefronts)."}
+            ? "Genera una llave para que workspace.kitz.services envíe datos a tu cuenta (contactos, órdenes, vitrinas)."
+            : "Generate a key so workspace.kitz.services can push data to your account (contacts, orders, storefronts)."}
         </p>
 
         {/* API Endpoint */}
@@ -145,7 +145,7 @@ export function ApiKeySection({ language }: ApiKeySectionProps) {
           <Input
             value={keyName}
             onChange={(e) => setKeyName(e.target.value)}
-            placeholder={es ? "Nombre (ej: xyz88)" : "Name (e.g., xyz88)"}
+            placeholder={es ? "Nombre (ej: KITZ)" : "Name (e.g., KITZ)"}
             className="text-sm"
           />
           <Button size="sm" onClick={handleGenerate} disabled={generating} className="shrink-0 gap-1.5">
