@@ -1,154 +1,67 @@
-import { lazy, Suspense } from "react";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { LanguageProvider } from "@/hooks/useLanguage";
-import { AICreditsProvider } from "@/hooks/useAICredits";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { useAuthStore } from '@/stores/authStore'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { LoginPage } from '@/pages/LoginPage'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { ToastContainer } from '@/components/ui/ToastContainer'
 
-// Eager load critical routes
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
+// Code-split heavy pages (audit finding 6f)
+const DashboardPage = lazy(() => import('@/pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
+const WhatsAppPage = lazy(() => import('@/pages/WhatsAppPage').then(m => ({ default: m.WhatsAppPage })))
+const LearnPage = lazy(() => import('@/pages/LearnPage').then(m => ({ default: m.LearnPage })))
+const GamePage = lazy(() => import('@/pages/GamePage').then(m => ({ default: m.GamePage })))
 
-// Lazy load protected routes for code splitting
-const BusinessHome = lazy(() => import("./pages/BusinessHome"));
-const CRM = lazy(() => import("./pages/CRM"));
-const OrdersPage = lazy(() => import("./pages/Orders"));
-const Storefronts = lazy(() => import("./pages/Storefronts"));
-const Products = lazy(() => import("./pages/Products"));
-const OrderHistory = lazy(() => import("./pages/OrderHistory"));
-const Admin = lazy(() => import("./pages/Admin"));
-const Settings = lazy(() => import("./pages/Settings"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const PublicStorefront = lazy(() => import("./pages/PublicStorefront"));
-const PublicProfile = lazy(() => import("./pages/PublicProfile"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Privacy = lazy(() => import("./pages/Privacy"));
-const Terms = lazy(() => import("./pages/Terms"));
-const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
-const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
-const CalendarPage = lazy(() => import("./pages/Calendar"));
-const InboxPage = lazy(() => import("./pages/Inbox"));
+export default function App() {
+  const hydrate = useAuthStore((s) => s.hydrate)
 
-// Optimized QueryClient with caching
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
+  useEffect(() => {
+    hydrate()
+  }, [hydrate])
 
-// Lightweight loading fallback
-function PageLoader() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-gray-400">Loading...</p></div>}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/connect-whatsapp"
+              element={
+                <ProtectedRoute>
+                  <WhatsAppPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/learn"
+              element={
+                <ProtectedRoute>
+                  <LearnPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/game"
+              element={
+                <ProtectedRoute>
+                  <GamePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+        <ToastContainer />
+      </BrowserRouter>
+    </ErrorBoundary>
+  )
 }
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
-}
-
-function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
-}
-
-function LandingRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-}
-
-function AppRoutes() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
-        <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/dashboard" element={<ProtectedRoute><BusinessHome /></ProtectedRoute>} />
-        <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-        <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-        <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
-        <Route path="/insights" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
-        <Route path="/storefronts" element={<ProtectedRoute><Storefronts /></ProtectedRoute>} />
-        <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-        <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/suggestions" element={<Navigate to="/dashboard" replace />} />
-        {/* Redirect old profile route to dashboard */}
-        <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/delete-account" element={<ProtectedRoute><DeleteAccount /></ProtectedRoute>} />
-        <Route path="/s/:slug" element={<PublicStorefront />} />
-        <Route path="/p/:profileId" element={<PublicProfile />} />
-        <Route path="/p/:username/:storefrontSlug" element={<PublicStorefront />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
-  );
-}
-
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <LanguageProvider>
-          <TooltipProvider delayDuration={300}>
-            <Sonner position="top-center" />
-            <BrowserRouter>
-              <AuthProvider>
-                <AICreditsProvider>
-                  <AppRoutes />
-                </AICreditsProvider>
-              </AuthProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
-
-export default App;

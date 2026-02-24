@@ -1,0 +1,352 @@
+import { useState } from 'react'
+import {
+  Users,
+  Bot,
+  Brain,
+  Shield,
+  Zap,
+  Code,
+  ExternalLink,
+  Network,
+  Play,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from 'lucide-react'
+import { PageHeader } from '@/components/home/PageHeader'
+import { KITZ_MANIFEST } from '@/content/kitz-manifest'
+import { useSimulationStore } from '@/stores/simulationStore'
+import { cn } from '@/lib/utils'
+
+/* ── Agent architecture tiers ── */
+const tiers = [
+  {
+    title: 'The Bosses',
+    count: 12,
+    description: 'The top dogs — The Boss, Money Manager, Megaphone, Operator, Closer, Architect. Each one owns a domain and tells the specialist teams what to do.',
+    color: 'bg-purple-500',
+  },
+  {
+    title: 'The Advisors',
+    count: 9,
+    description: 'Risk checkers, ethics watchers, growth visionaries. They review big decisions before anything gets executed.',
+    color: 'bg-blue-500',
+  },
+  {
+    title: 'The Guardrails',
+    count: 9,
+    description: 'Budget control, focus management, accountability. These agents keep the whole operation running clean.',
+    color: 'bg-emerald-500',
+  },
+  {
+    title: 'The Specialists',
+    count: KITZ_MANIFEST.capabilities.totalAgents,
+    description: `${KITZ_MANIFEST.capabilities.agentTeams} teams covering every business function — from sales and marketing to engineering and compliance.`,
+    color: 'bg-amber-500',
+  },
+] as const
+
+/* ── How agents think ── */
+const phases = [
+  {
+    number: '01',
+    title: 'Read',
+    description: 'Understand intent from your message — what do you need?',
+    model: 'Claude Haiku',
+    color: 'bg-purple-100 text-purple-600',
+  },
+  {
+    number: '02',
+    title: 'Comprehend',
+    description: 'Classify the request, extract entities, identify urgency.',
+    model: 'Claude Haiku',
+    color: 'bg-blue-100 text-blue-600',
+  },
+  {
+    number: '03',
+    title: 'Brainstorm',
+    description: 'Pick the right tools and agents. Plan the execution strategy.',
+    model: 'Claude Sonnet',
+    color: 'bg-emerald-100 text-emerald-600',
+  },
+  {
+    number: '04',
+    title: 'Execute',
+    description: 'Run tool-use loops — CRM writes, messages drafted, orders tracked.',
+    model: 'GPT-4o-mini',
+    color: 'bg-amber-100 text-amber-600',
+  },
+  {
+    number: '05',
+    title: 'Voice',
+    description: 'Format the response for your channel — WhatsApp, web, or email.',
+    model: 'Claude Haiku',
+    color: 'bg-pink-100 text-pink-600',
+  },
+] as const
+
+export function AgentsPage() {
+  const [showAll, setShowAll] = useState(false)
+  const { running, lastResult, error: simError, startSimulation } = useSimulationStore()
+
+  const teams = showAll
+    ? KITZ_MANIFEST.agentTeams
+    : KITZ_MANIFEST.agentTeams.filter((t) => t.customerFacing)
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-8 pb-12">
+      <PageHeader
+        title="AI Agents"
+        description={`${KITZ_MANIFEST.capabilities.totalAgents}+ agents organized like a real company — leadership, governance, and ${KITZ_MANIFEST.capabilities.agentTeams} specialist teams`}
+      />
+
+      {/* ── Agent Architecture ── */}
+      <section className="mt-2">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {tiers.map((tier) => (
+            <div key={tier.title} className="rounded-2xl border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <Network className="h-5 w-5 text-purple-500" />
+                <div>
+                  <h4 className="text-sm font-semibold text-black">{tier.title}</h4>
+                  <span className="text-xs text-gray-400">{tier.count} agents</span>
+                </div>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-gray-500">{tier.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 5-Phase Semantic Router ── */}
+      <section className="mt-12">
+        <h3 className="text-lg font-bold text-black">How Agents Think</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Every request passes through a 5-phase semantic router — the AI brain
+        </p>
+
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
+          {phases.map((phase) => (
+            <div key={phase.number} className="rounded-2xl border border-gray-200 bg-white p-5">
+              <span className="text-xs font-bold text-gray-300">{phase.number}</span>
+              <Brain className="mt-2 h-5 w-5 text-purple-500" />
+              <h4 className="mt-2 text-sm font-semibold text-black">{phase.title}</h4>
+              <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{phase.description}</p>
+              <span className="mt-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                {phase.model}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Team Directory ── */}
+      <section className="mt-12 rounded-3xl bg-gray-50 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-black">Team Directory</h3>
+            <p className="mt-0.5 text-sm text-gray-500">
+              {KITZ_MANIFEST.capabilities.agentTeams} specialist teams,{' '}
+              {KITZ_MANIFEST.capabilities.totalAgents}+ agents
+            </p>
+          </div>
+
+          <div className="flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-0.5">
+            <button
+              onClick={() => setShowAll(false)}
+              className={cn(
+                'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                !showAll ? 'bg-purple-50 text-purple-600' : 'text-gray-500 hover:text-gray-700',
+              )}
+            >
+              Customer Teams
+            </button>
+            <button
+              onClick={() => setShowAll(true)}
+              className={cn(
+                'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                showAll ? 'bg-purple-50 text-purple-600' : 'text-gray-500 hover:text-gray-700',
+              )}
+            >
+              All Teams
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {teams.map((team) => (
+            <div
+              key={team.name}
+              className="flex flex-col items-start rounded-2xl border border-gray-200 bg-white p-5"
+            >
+              <div className="flex w-full items-center justify-between">
+                <span className="text-sm font-semibold text-black">{team.name}</span>
+                <span className="flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600">
+                  <Users className="h-3 w-3" />
+                  {team.agents.length}
+                </span>
+              </div>
+
+              <span className="mt-1 text-xs text-gray-400">Led by {team.agents[0]}</span>
+
+              {/* Agent roster */}
+              <div className="mt-3 w-full space-y-1.5">
+                {team.agents.map((agent) => (
+                  <div key={agent} className="flex items-start gap-2 rounded-lg bg-gray-50 px-3 py-2">
+                    <code className="shrink-0 rounded-md bg-gray-900 px-1.5 py-0.5 font-mono text-[10px] text-gray-300">
+                      {agent}
+                    </code>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Swarm Simulation ── */}
+      <section className="mt-12">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-black">Swarm Simulation</h3>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Run all {KITZ_MANIFEST.capabilities.totalAgents} agents across {KITZ_MANIFEST.capabilities.agentTeams} teams — findings flow to brain
+            </p>
+          </div>
+          <button
+            onClick={() => startSimulation()}
+            disabled={running}
+            className={cn(
+              'flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition',
+              running
+                ? 'cursor-not-allowed bg-gray-400'
+                : 'bg-purple-600 hover:bg-purple-700',
+            )}
+          >
+            {running ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Running…
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Run Swarm
+              </>
+            )}
+          </button>
+        </div>
+
+        {simError && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {simError}
+          </div>
+        )}
+
+        {lastResult && (
+          <div className="mt-4 space-y-4">
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+                <div className={cn(
+                  'text-xs font-bold uppercase',
+                  lastResult.status === 'completed' ? 'text-emerald-600' : lastResult.status === 'partial' ? 'text-amber-600' : 'text-red-600',
+                )}>
+                  {lastResult.status}
+                </div>
+                <div className="mt-1 text-lg font-bold text-black">{lastResult.teamsCompleted}/{lastResult.teamsTotal}</div>
+                <div className="text-[10px] text-gray-400">teams</div>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+                <Clock className="mx-auto h-4 w-4 text-gray-400" />
+                <div className="mt-1 text-lg font-bold text-black">{(lastResult.durationMs / 1000).toFixed(1)}s</div>
+                <div className="text-[10px] text-gray-400">duration</div>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+                <Zap className="mx-auto h-4 w-4 text-amber-500" />
+                <div className="mt-1 text-lg font-bold text-black">{lastResult.agentResults.length}</div>
+                <div className="text-[10px] text-gray-400">agents run</div>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+                <Network className="mx-auto h-4 w-4 text-purple-500" />
+                <div className="mt-1 text-lg font-bold text-black">{lastResult.handoffCount}</div>
+                <div className="text-[10px] text-gray-400">handoffs</div>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+                <Brain className="mx-auto h-4 w-4 text-blue-500" />
+                <div className="mt-1 text-lg font-bold text-black">{lastResult.knowledgeWritten}</div>
+                <div className="text-[10px] text-gray-400">knowledge</div>
+              </div>
+            </div>
+
+            {/* Per-team results */}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {lastResult.teamResults.map((tr) => (
+                <div key={tr.team} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {tr.status === 'completed' ? (
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-xs font-medium text-black">{tr.team}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                    <span>{tr.agentResults.filter(a => a.success).length}/{tr.agentResults.length} agents</span>
+                    <span>{(tr.durationMs / 1000).toFixed(1)}s</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ── Tools + Integration ── */}
+      <section className="mt-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
+        <div className="flex items-center gap-2">
+          <Code className="h-5 w-5 text-white/80" />
+          <h3 className="text-lg font-bold">Agent Integration</h3>
+        </div>
+        <p className="mt-1 text-sm text-white/70">
+          External AI agents can discover and interact with KITZ agents through the manifest
+        </p>
+
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl bg-white/10 p-4">
+            <Zap className="h-5 w-5 text-white/80" />
+            <h4 className="mt-2 text-sm font-semibold">{KITZ_MANIFEST.capabilities.tools}+ Tools</h4>
+            <p className="mt-1 text-xs text-white/60">
+              CRM operations, payment processing, message drafting, order management, and more — all callable by agents.
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-4">
+            <Shield className="h-5 w-5 text-white/80" />
+            <h4 className="mt-2 text-sm font-semibold">Draft-First Governance</h4>
+            <p className="mt-1 text-xs text-white/60">
+              Every agent action is a draft until approved. Audit trail on every operation. Kill-switch available.
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/10 p-4">
+            <Bot className="h-5 w-5 text-white/80" />
+            <h4 className="mt-2 text-sm font-semibold">Agent-to-Agent OS</h4>
+            <p className="mt-1 text-xs text-white/60">
+              Event bus, ledger persistence, approval policies. Agents collaborate via structured artifacts: Task → Proposal → Decision → Outcome.
+            </p>
+          </div>
+        </div>
+
+        <a
+          href={`${window.location.origin}/.well-known/kitz.json`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-white/80 transition hover:text-white"
+        >
+          <span className="font-mono">View full agent manifest</span>
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </section>
+    </div>
+  )
+}

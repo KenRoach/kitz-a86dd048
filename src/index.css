@@ -1,327 +1,392 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Fonts loaded via index.html for performance */
-
-@layer base {
-  :root {
-    /* Kitz Design System - Calm, Minimal, Gen-Z Native */
-    
-    /* App background: #F7F7FA */
-    --background: 240 14% 97%;
-    /* Primary text: #111111 */
-    --foreground: 0 0% 7%;
-
-    /* Card background: #FFFFFF */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-
-    /* Primary Purple: #8B5CF6 → HSL(262, 83%, 58%) - Vibrant Purple */
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
-    
-    /* Primary Soft: #A78BFA → HSL(262, 83%, 68%) */
-    --primary-soft: 262 83% 68%;
-    
-    /* Primary Tint/Background: #EDE9FE → HSL(262, 83% 96%) */
-    --primary-tint: 262 83% 96%;
-
-    /* Secondary (muted cards) */
-    --secondary: 240 14% 97%;
-    /* Secondary text: #6B7280 */
-    --secondary-foreground: 220 9% 46%;
-
-    /* Muted: dividers #E5E7EB */
-    --muted: 220 13% 91%;
-    /* Muted text: #9CA3AF */
-    --muted-foreground: 218 11% 65%;
-
-    /* Accent uses primary tint */
-    --accent: 262 83% 96%;
-    --accent-foreground: 262 83% 50%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Dividers: #E5E7EB */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
-
-    --radius: 1rem;
-
-    /* Action uses Primary Purple for landing */
-    --action: 262 83% 58%;
-    --action-foreground: 0 0% 100%;
-
-    /* Status colors */
-    --success: 152 60% 42%;
-    --success-foreground: 0 0% 100%;
-    --warning: 27 88% 57%;
-    --warning-foreground: 0 0% 100%;
-    --attention: 27 88% 57%;
-    --attention-foreground: 0 0% 100%;
-    
-    /* Momentum colors */
-    --momentum-low: 0 72% 51%;
-    --momentum-mid: 27 88% 57%;
-    --momentum-high: 152 60% 42%;
-    
-    /* Soft shadows for calm UI */
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.04);
-    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.06);
-    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.08);
-    --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.04);
-    --shadow-glow: 0 0 20px hsl(262 83% 58% / 0.25);
-    --shadow-pressed: inset 0 1px 3px hsl(0 0% 0% / 0.06);
-
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 7%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 83% 96%;
-    --sidebar-accent-foreground: 262 83% 50%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 262 83% 58%;
-
-    /* Consultant Theme - Myrja Palette */
-    --consultant-header: 233 38% 17%;
-    --consultant-section: 0 0% 100%;
-    --consultant-section-alt: 0 0% 96%;
-    --consultant-cta: 41 65% 55%;
-    --consultant-cta-foreground: 0 0% 100%;
-    --consultant-accent: 16 51% 52%;
-    --consultant-muted: 0 0% 42%;
-
-    /* Barbershop Theme - Classic masculine palette */
-    --barbershop-header: 220 20% 15%;
-    --barbershop-section: 0 0% 100%;
-    --barbershop-section-alt: 30 10% 96%;
-    --barbershop-cta: 25 80% 45%;
-    --barbershop-cta-foreground: 0 0% 100%;
-    --barbershop-accent: 35 60% 50%;
-    --barbershop-muted: 30 5% 45%;
-
-    /* Studio CEO Theme - Creative professional palette */
-    --studio-header: 240 20% 12%;
-    --studio-section: 0 0% 100%;
-    --studio-section-alt: 240 10% 97%;
-    --studio-cta: 262 83% 58%;
-    --studio-cta-foreground: 0 0% 100%;
-    --studio-accent: 172 66% 50%;
-    --studio-muted: 240 5% 46%;
-  }
-
-  .dark {
-    /* Dark mode - subtle adjustments */
-    --background: 240 10% 8%;
-    --foreground: 0 0% 95%;
-
-    --card: 240 10% 12%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 240 10% 12%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 262 83% 65%;
-    --primary-foreground: 0 0% 100%;
-    
-    --primary-soft: 262 83% 72%;
-    --primary-tint: 262 50% 20%;
-
-    --secondary: 240 10% 16%;
-    --secondary-foreground: 218 11% 75%;
-
-    --muted: 240 10% 18%;
-    --muted-foreground: 218 11% 55%;
-
-    --accent: 262 50% 20%;
-    --accent-foreground: 262 83% 75%;
-
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 240 10% 18%;
-    --input: 240 10% 18%;
-    --ring: 262 83% 65%;
-
-    --action: 262 83% 65%;
-    --action-foreground: 0 0% 100%;
-
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.4);
-    --shadow-inset: inset 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-glow: 0 0 24px hsl(262 83% 65% / 0.3);
-
-    --sidebar-background: 240 10% 10%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 262 83% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 50% 18%;
-    --sidebar-accent-foreground: 262 83% 75%;
-    --sidebar-border: 240 10% 16%;
-    --sidebar-ring: 262 83% 65%;
-  }
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-body antialiased;
-    font-feature-settings: "cv11", "ss01";
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-semibold tracking-tight;
-  }
-
-  /* Subfont for data-dense content */
-  table, .font-body, pre, code, [data-ai-content] {
-    font-family: 'DM Sans', system-ui, sans-serif;
-  }
-
-  /* Better touch targets for mobile */
-  @media (max-width: 768px) {
-    button, a, [role="button"] {
-      min-height: 44px;
-      min-width: 44px;
-    }
-    
-    input, textarea, select {
-      font-size: 16px !important;
-    }
-  }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #000000;
 }
 
-@layer components {
-  /* Card system — single consistent pattern */
-  .neu-card {
-    @apply bg-card rounded-2xl transition-all duration-150;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .neu-card:hover {
-    box-shadow: var(--shadow-md);
-  }
-
-  .neu-card-flat {
-    @apply bg-card rounded-2xl;
-  }
-
-  .neu-inset {
-    @apply rounded-xl;
-    box-shadow: var(--shadow-inset);
-  }
-
-  /* Status badges */
-  .status-badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-  }
-
-  .status-draft { @apply bg-muted text-muted-foreground; }
-  .status-shared { @apply bg-primary/10 text-primary; }
-  .status-paid { @apply bg-success/10 text-success; }
-  .status-pending { @apply bg-warning/10 text-warning; }
-
-  /* Nav items */
-  .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-colors duration-150;
-  }
-
-  .nav-item:hover { @apply bg-muted text-foreground; }
-  .nav-item-active { @apply bg-primary/10 text-primary font-medium; }
-
-  /* Tab pills */
-  .tab-pills { @apply inline-flex gap-1 p-1 rounded-full bg-muted; }
-  .tab-pill { @apply px-4 py-2 rounded-full text-sm font-medium text-muted-foreground transition-colors duration-150; }
-  .tab-pill-active { @apply bg-card text-foreground shadow-sm; }
-
-  /* Balance display */
-  .balance-display { @apply text-4xl font-bold tracking-tight font-body; }
-  .balance-change-positive { @apply text-success font-medium; }
-  .balance-change-negative { @apply text-destructive font-medium; }
-
-  /* Calm empty state */
-  .calm-state { @apply text-center py-12 px-6; }
-
-  /* Legacy compat — used across pages */
-  .card-hover { @apply transition-all duration-150; }
-  .card-hover:hover { box-shadow: var(--shadow-md); }
-
-  .hover-calm { @apply transition-colors duration-150; }
-  .hover-calm:hover { @apply bg-muted/50; }
-
-  .suggestion-pill {
-    @apply inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer;
-  }
-  .suggestion-pill:hover { @apply bg-primary text-primary-foreground; }
-
-  .momentum-ring { @apply relative inline-flex items-center justify-center; }
-
-  .action-card { @apply bg-card rounded-2xl p-5 cursor-pointer neu-card; }
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 212, 170, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 212, 170, 0.6); }
 }
 
-@layer utilities {
-  .text-balance { text-wrap: balance; }
-
-  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-  .safe-area-top { padding-top: env(safe-area-inset-top); }
-
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-
-  .overscroll-contain { overscroll-behavior: contain; }
-
-  .bg-primary-tint { background-color: hsl(var(--primary-tint)); }
-  .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
-
-  /* Touch feedback */
-  .touch-feedback {
-    @apply transition-all duration-150 active:scale-[0.98] active:opacity-90;
-  }
-
-  /* Glassmorphism */
-  .glass {
-    @apply bg-background/80 backdrop-blur-lg border border-border/30;
-  }
-
-  /* Focus ring */
-  .focus-ring {
-    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none;
-  }
+@keyframes orb-breathe {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.92); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
 }
 
-/* Calm keyframes */
-@keyframes calm-fade-in {
-  from { opacity: 0; transform: translateY(3px); }
+@keyframes talk-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168,85,247,0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(168,85,247,0); }
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes calm-slide {
-  from { opacity: 0; transform: translateX(-3px); }
+/* Agent thinking step fade-in */
+.animate-fade-in {
+  animation: agent-step-appear 0.3s ease-out forwards;
+}
+@keyframes agent-step-appear {
+  from { opacity: 0; transform: translateX(-8px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* Powered-by badge */
-.powered-by {
-  @apply text-xs text-muted-foreground/60 tracking-wide;
+@keyframes orb-bounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(-4px); }
+  75% { transform: translateY(-2px); }
 }
 
-.trust-badge {
-  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-success/10 text-success;
+@keyframes talk-mouth {
+  0%, 100% { transform: translateX(-50%) scaleY(0.3); }
+  50% { transform: translateX(-50%) scaleY(1); }
+}
+
+@keyframes sleep-float {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  15%  { opacity: 0.8; transform: translateY(-3px) scale(0.8); }
+  50%  { opacity: 1; transform: translateY(-10px) scale(1); }
+  80%  { opacity: 0.4; transform: translateY(-18px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-24px) scale(1.1); }
+}
+
+@keyframes kitz-navigate {
+  0%       { top: 8%;  left: 75%; }
+  14%      { top: 60%; left: 45%; }
+  28%      { top: 10%; left: 55%; }
+  42%      { top: 55%; left: 80%; }
+  57%      { top: 15%; left: 65%; }
+  71%      { top: 50%; left: 50%; }
+  85%      { top: 8%;  left: 85%; }
+  100%     { top: 8%;  left: 75%; }
+}
+
+/* Kitz PUFF — cartoon teleport smoke cloud */
+@keyframes kitz-puff-out {
+  0%   { transform: scale(1); opacity: 1; filter: blur(0); }
+  30%  { transform: scale(1.3) rotate(8deg); opacity: 0.8; filter: blur(1px); }
+  60%  { transform: scale(0.4) rotate(-12deg); opacity: 0.4; filter: blur(4px); }
+  100% { transform: scale(0) rotate(20deg); opacity: 0; filter: blur(8px); }
+}
+@keyframes kitz-puff-in {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; filter: blur(8px); }
+  40%  { transform: scale(1.4) rotate(6deg); opacity: 0.6; filter: blur(2px); }
+  70%  { transform: scale(0.9) rotate(-3deg); opacity: 0.9; filter: blur(0); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0); }
+}
+@keyframes kitz-smoke {
+  0%   { transform: scale(0.3); opacity: 0.8; }
+  50%  { transform: scale(2.5); opacity: 0.4; }
+  100% { transform: scale(4); opacity: 0; }
+}
+.kitz-puff-out {
+  animation: kitz-puff-out 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.kitz-puff-in {
+  animation: kitz-puff-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.kitz-smoke {
+  animation: kitz-smoke 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Kitz new puff effects — smoke particles, sparkles, flash, PUFF text */
+@keyframes kitz-smokePuff {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+    filter: blur(2px);
+  }
+  40% {
+    transform: scale(1.3);
+    opacity: 0.6;
+    filter: blur(6px);
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+    filter: blur(12px);
+  }
+}
+@keyframes kitz-sparkleFloat {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1.5) rotate(90deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotate(180deg) translateY(-30px);
+    opacity: 0;
+  }
+}
+@keyframes kitz-centralFlash {
+  0% { transform: scale(0.3); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes kitz-arrivalFlash {
+  0% { transform: scale(2); opacity: 0; }
+  30% { transform: scale(0.8); opacity: 0.9; }
+  100% { transform: scale(0); opacity: 0; }
+}
+@keyframes kitz-puffWordBurst {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  40% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -70%) scale(1.3); }
+}
+@keyframes kitz-puffLetterPop {
+  0% { opacity: 0; transform: scale(0) rotate(-20deg) translateY(20px); }
+  50% { opacity: 1; transform: scale(1.3) rotate(5deg) translateY(-10px); }
+  70% { opacity: 1; transform: scale(0.95) rotate(-2deg) translateY(-5px); }
+  100% { opacity: 0; transform: scale(1.1) rotate(0deg) translateY(-30px); }
+}
+@keyframes kitz-halo-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+}
+@keyframes kitz-trail-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+  50% { transform: translateY(6px) scale(0.6); opacity: 0.15; }
+}
+
+/* Kitz highlight — glows purple when Orb points at a nav item */
+.kitz-highlight {
+  animation: kitz-glow 0.6s ease-in-out 3;
+  position: relative;
+  z-index: 10;
+}
+@keyframes kitz-glow {
+  0%, 100% { box-shadow: 0 0 0 rgba(168, 85, 247, 0); }
+  50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); border-radius: 8px; }
+}
+
+/* Kitz ghost merge — Kitz shrinks, blurs, and fades as it dissolves into the chatbox */
+.kitz-ghost-merge {
+  animation: kitz-ghost-merge 600ms ease-in forwards;
+}
+@keyframes kitz-ghost-merge {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5)) blur(0px);
+  }
+  30% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(0.6);
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.6)) blur(2px);
+  }
+  60% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.25);
+    filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.8)) blur(4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+    filter: drop-shadow(0 0 0 rgba(168, 85, 247, 0)) blur(8px);
+  }
+}
+
+/* Kitz chatbox glow — purple pulse when Kitz puff-teleports to chatbox */
+.kitz-chatbox-glow {
+  animation: kitz-chatbox-glow 1.8s ease-out forwards;
+}
+@keyframes kitz-chatbox-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0), 0 0 0 0 rgba(192, 132, 252, 0);
+    border-color: rgba(168, 85, 247, 0.9);
+  }
+  15% {
+    box-shadow: 0 0 20px 4px rgba(168, 85, 247, 0.6), 0 0 40px 8px rgba(192, 132, 252, 0.3);
+    border-color: rgba(168, 85, 247, 1);
+  }
+  35% {
+    box-shadow: 0 0 16px 3px rgba(168, 85, 247, 0.5), 0 0 32px 6px rgba(192, 132, 252, 0.2);
+    border-color: rgba(168, 85, 247, 0.8);
+  }
+  60% {
+    box-shadow: 0 0 10px 2px rgba(168, 85, 247, 0.3), 0 0 20px 4px rgba(192, 132, 252, 0.1);
+    border-color: rgba(168, 85, 247, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0), 0 0 0 0 rgba(192, 132, 252, 0);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ── Kitz chatbox shake — phone vibration rattle on puff arrival ── */
+.kitz-chatbox-shake {
+  animation: kitz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes kitz-shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-4px); }
+  20% { transform: translateX(4px); }
+  30% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  50% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  70% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+  90% { transform: translateX(0); }
+}
+
+/* ── Kitz meditation aura — enlightened orb in hero card while in chatbox ── */
+.kitz-meditation {
+  animation: kitz-meditation-breathe 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes kitz-meditation-breathe {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3)) grayscale(0.3) brightness(0.7);
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(192, 132, 252, 0.5)) grayscale(0.15) brightness(0.85);
+    transform: translate(-50%, -50%) scale(0.85);
+  }
+}
+.kitz-meditation-text {
+  animation: kitz-meditation-text-pulse 2.5s ease-in-out infinite;
+}
+@keyframes kitz-meditation-text-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.65; }
+}
+
+/* ── Kitz chatbox loading bar — exaggerated fill effect on double-click ── */
+
+/* Border pulses bright purple while loading */
+.kitz-chatbox-loading-border {
+  border-color: rgba(168, 85, 247, 0.9) !important;
+  box-shadow: 0 0 20px 4px rgba(168, 85, 247, 0.5), 0 0 40px 8px rgba(192, 132, 252, 0.2), inset 0 0 12px rgba(168, 85, 247, 0.15) !important;
+  animation: kitz-loading-border-pulse 0.6s ease-in-out infinite !important;
+}
+@keyframes kitz-loading-border-pulse {
+  0%, 100% {
+    border-color: rgba(168, 85, 247, 0.9);
+    box-shadow: 0 0 20px 4px rgba(168, 85, 247, 0.5), 0 0 40px 8px rgba(192, 132, 252, 0.2), inset 0 0 12px rgba(168, 85, 247, 0.15);
+  }
+  50% {
+    border-color: rgba(192, 132, 252, 1);
+    box-shadow: 0 0 30px 8px rgba(168, 85, 247, 0.7), 0 0 60px 12px rgba(192, 132, 252, 0.35), inset 0 0 20px rgba(168, 85, 247, 0.25);
+  }
+}
+
+/* The loading bar container */
+.kitz-chatbox-loading-bar {
+  z-index: 5;
+}
+
+/* Purple gradient sweeps left→right like a progress bar */
+.kitz-chatbox-loading-fill {
+  background: linear-gradient(90deg,
+    rgba(168, 85, 247, 0.35) 0%,
+    rgba(192, 132, 252, 0.25) 40%,
+    rgba(124, 58, 237, 0.4) 60%,
+    rgba(168, 85, 247, 0.3) 100%
+  );
+  transform-origin: left;
+  animation: kitz-loading-fill-sweep 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes kitz-loading-fill-sweep {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  /* Fast start */
+  15% {
+    transform: scaleX(0.3);
+  }
+  /* Slow crawl through the middle */
+  40% {
+    transform: scaleX(0.55);
+  }
+  60% {
+    transform: scaleX(0.7);
+  }
+  /* Accelerate to finish */
+  80% {
+    transform: scaleX(0.92);
+  }
+  90% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  /* Flash bright then fade */
+  95% {
+    transform: scaleX(1);
+    opacity: 0.8;
+    background: linear-gradient(90deg,
+      rgba(192, 132, 252, 0.5) 0%,
+      rgba(221, 214, 254, 0.4) 50%,
+      rgba(168, 85, 247, 0.5) 100%
+    );
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* Shimmer highlight that races across during fill */
+.kitz-chatbox-loading-shimmer {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: kitz-loading-shimmer 1s linear infinite;
+}
+@keyframes kitz-loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Loading text fades in and pulses */
+.kitz-chatbox-loading-text {
+  color: rgba(221, 214, 254, 0.9);
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.8), 0 0 24px rgba(192, 132, 252, 0.4);
+  animation: kitz-loading-text-pulse 0.8s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+@keyframes kitz-loading-text-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
